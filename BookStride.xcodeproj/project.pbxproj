@@ -1,0 +1,594 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A1000001 /* BookStrideApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000001 /* BookStrideApp.swift */; };
+		A1000002 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000002 /* Book.swift */; };
+		A1000003 /* ReadingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000003 /* ReadingSession.swift */; };
+		A1000004 /* ReadingGoal.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000004 /* ReadingGoal.swift */; };
+		A1000005 /* JournalEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000005 /* JournalEntry.swift */; };
+		A1000006 /* ModelEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000006 /* ModelEnums.swift */; };
+		A1000007 /* SchemaExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000007 /* SchemaExport.swift */; };
+		A1000008 /* ReadingTimerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000008 /* ReadingTimerService.swift */; };
+		A1000009 /* ReadingStatisticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000009 /* ReadingStatisticsService.swift */; };
+		A1000010 /* StreakCalculationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000010 /* StreakCalculationService.swift */; };
+		A1000011 /* DataExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000011 /* DataExportService.swift */; };
+		A1000012 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000012 /* NotificationService.swift */; };
+		A1000013 /* SampleDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000013 /* SampleDataService.swift */; };
+		A1000014 /* AppleBooksService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000014 /* AppleBooksService.swift */; };
+		A1000015 /* ColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000015 /* ColorTheme.swift */; };
+		A1000016 /* DateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000016 /* DateUtilities.swift */; };
+		A1000017 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000017 /* Formatters.swift */; };
+		A1000018 /* LayoutConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000018 /* LayoutConstants.swift */; };
+		A1000019 /* AppNavigationSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000019 /* AppNavigationSplitView.swift */; };
+		A1000020 /* TodayDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000020 /* TodayDashboardView.swift */; };
+		A1000021 /* ActiveSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000021 /* ActiveSessionView.swift */; };
+		A1000022 /* SessionRecoveryAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000022 /* SessionRecoveryAlertView.swift */; };
+		A1000023 /* DailyProgressCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000023 /* DailyProgressCard.swift */; };
+		A1000024 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000024 /* LibraryView.swift */; };
+		A1000025 /* BookCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000025 /* BookCardView.swift */; };
+		A1000026 /* AddEditBookSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000026 /* AddEditBookSheet.swift */; };
+		A1000027 /* BookDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000027 /* BookDetailView.swift */; };
+		A1000028 /* UpdateProgressSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000028 /* UpdateProgressSheet.swift */; };
+		A1000029 /* SessionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000029 /* SessionHistoryView.swift */; };
+		A1000030 /* ManualSessionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000030 /* ManualSessionSheet.swift */; };
+		A1000031 /* SessionRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000031 /* SessionRowView.swift */; };
+		A1000032 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000032 /* InsightsView.swift */; };
+		A1000033 /* DailyReadingBarChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000033 /* DailyReadingBarChart.swift */; };
+		A1000034 /* WeeklyTrendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000034 /* WeeklyTrendChart.swift */; };
+		A1000035 /* MonthlyActivityChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000035 /* MonthlyActivityChart.swift */; };
+		A1000036 /* ReadingCalendarHeatmap.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000036 /* ReadingCalendarHeatmap.swift */; };
+		A1000037 /* BookTimeDistributionChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000037 /* BookTimeDistributionChart.swift */; };
+		A1000038 /* JournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000038 /* JournalView.swift */; };
+		A1000039 /* AddEditJournalEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000039 /* AddEditJournalEntrySheet.swift */; };
+		A1000040 /* JournalCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000040 /* JournalCardView.swift */; };
+		A1000041 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000041 /* SettingsView.swift */; };
+		A1000042 /* CircularProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000042 /* CircularProgressRing.swift */; };
+		A1000043 /* BookCoverThumbnail.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000043 /* BookCoverThumbnail.swift */; };
+		A1000044 /* EmptyStateCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000044 /* EmptyStateCard.swift */; };
+		A1000045 /* MetricCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000045 /* MetricCard.swift */; };
+		A1000046 /* SectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000046 /* SectionHeaderView.swift */; };
+		A1000047 /* BookPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000047 /* BookPickerSheet.swift */; };
+		A1000048 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000048 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B1000001 /* BookStrideApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideApp.swift; sourceTree = "<group>"; };
+		B1000002 /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
+		B1000003 /* ReadingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingSession.swift; sourceTree = "<group>"; };
+		B1000004 /* ReadingGoal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingGoal.swift; sourceTree = "<group>"; };
+		B1000005 /* JournalEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntry.swift; sourceTree = "<group>"; };
+		B1000006 /* ModelEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelEnums.swift; sourceTree = "<group>"; };
+		B1000007 /* SchemaExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaExport.swift; sourceTree = "<group>"; };
+		B1000008 /* ReadingTimerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingTimerService.swift; sourceTree = "<group>"; };
+		B1000009 /* ReadingStatisticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingStatisticsService.swift; sourceTree = "<group>"; };
+		B1000010 /* StreakCalculationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakCalculationService.swift; sourceTree = "<group>"; };
+		B1000011 /* DataExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExportService.swift; sourceTree = "<group>"; };
+		B1000012 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		B1000013 /* SampleDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleDataService.swift; sourceTree = "<group>"; };
+		B1000014 /* AppleBooksService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleBooksService.swift; sourceTree = "<group>"; };
+		B1000015 /* ColorTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTheme.swift; sourceTree = "<group>"; };
+		B1000016 /* DateUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateUtilities.swift; sourceTree = "<group>"; };
+		B1000017 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
+		B1000018 /* LayoutConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutConstants.swift; sourceTree = "<group>"; };
+		B1000019 /* AppNavigationSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNavigationSplitView.swift; sourceTree = "<group>"; };
+		B1000020 /* TodayDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayDashboardView.swift; sourceTree = "<group>"; };
+		B1000021 /* ActiveSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSessionView.swift; sourceTree = "<group>"; };
+		B1000022 /* SessionRecoveryAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecoveryAlertView.swift; sourceTree = "<group>"; };
+		B1000023 /* DailyProgressCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyProgressCard.swift; sourceTree = "<group>"; };
+		B1000024 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
+		B1000025 /* BookCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCardView.swift; sourceTree = "<group>"; };
+		B1000026 /* AddEditBookSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditBookSheet.swift; sourceTree = "<group>"; };
+		B1000027 /* BookDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookDetailView.swift; sourceTree = "<group>"; };
+		B1000028 /* UpdateProgressSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateProgressSheet.swift; sourceTree = "<group>"; };
+		B1000029 /* SessionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionHistoryView.swift; sourceTree = "<group>"; };
+		B1000030 /* ManualSessionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualSessionSheet.swift; sourceTree = "<group>"; };
+		B1000031 /* SessionRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRowView.swift; sourceTree = "<group>"; };
+		B1000032 /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
+		B1000033 /* DailyReadingBarChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyReadingBarChart.swift; sourceTree = "<group>"; };
+		B1000034 /* WeeklyTrendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyTrendChart.swift; sourceTree = "<group>"; };
+		B1000035 /* MonthlyActivityChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyActivityChart.swift; sourceTree = "<group>"; };
+		B1000036 /* ReadingCalendarHeatmap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingCalendarHeatmap.swift; sourceTree = "<group>"; };
+		B1000037 /* BookTimeDistributionChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookTimeDistributionChart.swift; sourceTree = "<group>"; };
+		B1000038 /* JournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalView.swift; sourceTree = "<group>"; };
+		B1000039 /* AddEditJournalEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEditJournalEntrySheet.swift; sourceTree = "<group>"; };
+		B1000040 /* JournalCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalCardView.swift; sourceTree = "<group>"; };
+		B1000041 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B1000042 /* CircularProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressRing.swift; sourceTree = "<group>"; };
+		B1000043 /* BookCoverThumbnail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCoverThumbnail.swift; sourceTree = "<group>"; };
+		B1000044 /* EmptyStateCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateCard.swift; sourceTree = "<group>"; };
+		B1000045 /* MetricCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricCard.swift; sourceTree = "<group>"; };
+		B1000046 /* SectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeaderView.swift; sourceTree = "<group>"; };
+		B1000047 /* BookPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookPickerSheet.swift; sourceTree = "<group>"; };
+		B1000048 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B1000049 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C1000001 /* BookStride.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookStride.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D1000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E1000001 = {
+			isa = PBXGroup;
+			children = (
+				E1000002 /* BookStride */,
+				E1000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E1000002 /* BookStride */ = {
+			isa = PBXGroup;
+			children = (
+				E1000004 /* App */,
+				E1000005 /* Models */,
+				E1000006 /* Services */,
+				E1000007 /* Utilities */,
+				E1000008 /* Views */,
+				E1000009 /* Resources */,
+			);
+			path = BookStride;
+			sourceTree = "<group>";
+		};
+		E1000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C1000001 /* BookStride.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E1000004 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				B1000001 /* BookStrideApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		E1000005 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B1000002 /* Book.swift */,
+				B1000003 /* ReadingSession.swift */,
+				B1000004 /* ReadingGoal.swift */,
+				B1000005 /* JournalEntry.swift */,
+				B1000006 /* ModelEnums.swift */,
+				B1000007 /* SchemaExport.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		E1000006 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B1000008 /* ReadingTimerService.swift */,
+				B1000009 /* ReadingStatisticsService.swift */,
+				B1000010 /* StreakCalculationService.swift */,
+				B1000011 /* DataExportService.swift */,
+				B1000012 /* NotificationService.swift */,
+				B1000013 /* SampleDataService.swift */,
+				B1000014 /* AppleBooksService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		E1000007 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				B1000015 /* ColorTheme.swift */,
+				B1000016 /* DateUtilities.swift */,
+				B1000017 /* Formatters.swift */,
+				B1000018 /* LayoutConstants.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		E1000008 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E1000010 /* Navigation */,
+				E1000011 /* Today */,
+				E1000012 /* Library */,
+				E1000013 /* BookDetail */,
+				E1000014 /* SessionHistory */,
+				E1000015 /* Insights */,
+				E1000016 /* Journal */,
+				E1000017 /* Settings */,
+				E1000018 /* Components */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		E1000009 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B1000048 /* Assets.xcassets */,
+				B1000049 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		E1000010 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				B1000019 /* AppNavigationSplitView.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		E1000011 /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				B1000020 /* TodayDashboardView.swift */,
+				B1000021 /* ActiveSessionView.swift */,
+				B1000022 /* SessionRecoveryAlertView.swift */,
+				B1000023 /* DailyProgressCard.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		E1000012 /* Library */ = {
+			isa = PBXGroup;
+			children = (
+				B1000024 /* LibraryView.swift */,
+				B1000025 /* BookCardView.swift */,
+				B1000026 /* AddEditBookSheet.swift */,
+			);
+			path = Library;
+			sourceTree = "<group>";
+		};
+		E1000013 /* BookDetail */ = {
+			isa = PBXGroup;
+			children = (
+				B1000027 /* BookDetailView.swift */,
+				B1000028 /* UpdateProgressSheet.swift */,
+			);
+			path = BookDetail;
+			sourceTree = "<group>";
+		};
+		E1000014 /* SessionHistory */ = {
+			isa = PBXGroup;
+			children = (
+				B1000029 /* SessionHistoryView.swift */,
+				B1000030 /* ManualSessionSheet.swift */,
+				B1000031 /* SessionRowView.swift */,
+			);
+			path = SessionHistory;
+			sourceTree = "<group>";
+		};
+		E1000015 /* Insights */ = {
+			isa = PBXGroup;
+			children = (
+				B1000032 /* InsightsView.swift */,
+				B1000033 /* DailyReadingBarChart.swift */,
+				B1000034 /* WeeklyTrendChart.swift */,
+				B1000035 /* MonthlyActivityChart.swift */,
+				B1000036 /* ReadingCalendarHeatmap.swift */,
+				B1000037 /* BookTimeDistributionChart.swift */,
+			);
+			path = Insights;
+			sourceTree = "<group>";
+		};
+		E1000016 /* Journal */ = {
+			isa = PBXGroup;
+			children = (
+				B1000038 /* JournalView.swift */,
+				B1000039 /* AddEditJournalEntrySheet.swift */,
+				B1000040 /* JournalCardView.swift */,
+			);
+			path = Journal;
+			sourceTree = "<group>";
+		};
+		E1000017 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				B1000041 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		E1000018 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				B1000042 /* CircularProgressRing.swift */,
+				B1000043 /* BookCoverThumbnail.swift */,
+				B1000044 /* EmptyStateCard.swift */,
+				B1000045 /* MetricCard.swift */,
+				B1000046 /* SectionHeaderView.swift */,
+				B1000047 /* BookPickerSheet.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F1000001 /* BookStride */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = G1000001 /* Build configuration list for PBXNativeTarget "BookStride" */;
+			buildPhases = (
+				D1000001 /* Frameworks */,
+				H1000001 /* Sources */,
+				H1000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BookStride;
+			productName = BookStride;
+			productReference = C1000001 /* BookStride.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		I1000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					F1000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = G1000002 /* Build configuration list for PBXProject "BookStride" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E1000001;
+			productRefGroup = E1000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F1000001 /* BookStride */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		H1000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000048 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		H1000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000001 /* BookStrideApp.swift in Sources */,
+				A1000002 /* Book.swift in Sources */,
+				A1000003 /* ReadingSession.swift in Sources */,
+				A1000004 /* ReadingGoal.swift in Sources */,
+				A1000005 /* JournalEntry.swift in Sources */,
+				A1000006 /* ModelEnums.swift in Sources */,
+				A1000007 /* SchemaExport.swift in Sources */,
+				A1000008 /* ReadingTimerService.swift in Sources */,
+				A1000009 /* ReadingStatisticsService.swift in Sources */,
+				A1000010 /* StreakCalculationService.swift in Sources */,
+				A1000011 /* DataExportService.swift in Sources */,
+				A1000012 /* NotificationService.swift in Sources */,
+				A1000013 /* SampleDataService.swift in Sources */,
+				A1000014 /* AppleBooksService.swift in Sources */,
+				A1000015 /* ColorTheme.swift in Sources */,
+				A1000016 /* DateUtilities.swift in Sources */,
+				A1000017 /* Formatters.swift in Sources */,
+				A1000018 /* LayoutConstants.swift in Sources */,
+				A1000019 /* AppNavigationSplitView.swift in Sources */,
+				A1000020 /* TodayDashboardView.swift in Sources */,
+				A1000021 /* ActiveSessionView.swift in Sources */,
+				A1000022 /* SessionRecoveryAlertView.swift in Sources */,
+				A1000023 /* DailyProgressCard.swift in Sources */,
+				A1000024 /* LibraryView.swift in Sources */,
+				A1000025 /* BookCardView.swift in Sources */,
+				A1000026 /* AddEditBookSheet.swift in Sources */,
+				A1000027 /* BookDetailView.swift in Sources */,
+				A1000028 /* UpdateProgressSheet.swift in Sources */,
+				A1000029 /* SessionHistoryView.swift in Sources */,
+				A1000030 /* ManualSessionSheet.swift in Sources */,
+				A1000031 /* SessionRowView.swift in Sources */,
+				A1000032 /* InsightsView.swift in Sources */,
+				A1000033 /* DailyReadingBarChart.swift in Sources */,
+				A1000034 /* WeeklyTrendChart.swift in Sources */,
+				A1000035 /* MonthlyActivityChart.swift in Sources */,
+				A1000036 /* ReadingCalendarHeatmap.swift in Sources */,
+				A1000037 /* BookTimeDistributionChart.swift in Sources */,
+				A1000038 /* JournalView.swift in Sources */,
+				A1000039 /* AddEditJournalEntrySheet.swift in Sources */,
+				A1000040 /* JournalCardView.swift in Sources */,
+				A1000041 /* SettingsView.swift in Sources */,
+				A1000042 /* CircularProgressRing.swift in Sources */,
+				A1000043 /* BookCoverThumbnail.swift in Sources */,
+				A1000044 /* EmptyStateCard.swift in Sources */,
+				A1000045 /* MetricCard.swift in Sources */,
+				A1000046 /* SectionHeaderView.swift in Sources */,
+				A1000047 /* BookPickerSheet.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		J1000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7GCZYFC62V;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BookStride/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		J1000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7GCZYFC62V;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BookStride/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		J1000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDEFINED_VARIABLES = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		J1000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDEFINED_VARIABLES = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		G1000001 /* Build configuration list for PBXNativeTarget "BookStride" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				J1000001 /* Debug */,
+				J1000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		G1000002 /* Build configuration list for PBXProject "BookStride" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				J1000003 /* Debug */,
+				J1000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = I1000001 /* Project object */;
+}

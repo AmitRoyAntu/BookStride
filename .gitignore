@@ -1,0 +1,89 @@
+# ==========================================
+# Xcode & Apple Developer Tools
+# ==========================================
+
+# User-specific settings & workspace state
+xcuserdata/
+*.xcuserdatad
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Build artifacts & DerivedData
+build/
+DerivedData/
+build_temp/
+*.build/
+
+# Compilation outputs & debug symbols
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.app.dSYM.zip
+*.xcarchive
+*.xcresult
+
+# Xcode Project legacy & temporary files
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xccheckout
+*.moved-aside
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# ==========================================
+# Swift Package Manager (SPM)
+# ==========================================
+.build/
+.swiftpm/xcode/
+
+# ==========================================
+# Compiled Binaries & Test Outputs
+# ==========================================
+run_tests
+*.o
+*.a
+*.dylib
+
+# ==========================================
+# macOS System Files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+# ==========================================
+# Local Secrets, Certificates & Profiles
+# ==========================================
+*.mobileprovision
+*.cer
+*.cert
+*.p12
+*.p8
+*.key
+.env
+.env.local
+.env.*.local
+
+# ==========================================
+# Editor & OS Artifacts
+# ==========================================
+*~
+*.swp
+*.swo
+.vscode/
+.idea/
+
