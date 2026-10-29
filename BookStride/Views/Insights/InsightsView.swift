@@ -11,6 +11,7 @@ import SwiftData
 public struct InsightsView: View {
     @Query private var allSessions: [ReadingSession]
     @Query private var allBooks: [Book]
+    @Query private var allJournalEntries: [JournalEntry]
     @Query private var goals: [ReadingGoal]
     
     @State private var selectedFilter: TimeFilter = .last30Days
@@ -48,6 +49,18 @@ public struct InsightsView: View {
                 totalPages: b.totalPages,
                 currentPage: b.currentPage,
                 status: b.statusRawValue
+            )
+        }
+        
+        let journalDTOs = allJournalEntries.map { j in
+            JournalEntryDTO(
+                id: j.id,
+                bookId: j.book?.id,
+                createdAt: j.createdAt,
+                type: j.entryTypeRawValue,
+                title: "",
+                content: j.content,
+                pageNumber: j.pageNumber
             )
         }
         
@@ -173,6 +186,8 @@ public struct InsightsView: View {
                 // 5. GitHub-style Reading Consistency Heatmap (Full Year with Year Nav)
                 ReadingCalendarHeatmap(
                     sessions: sessionDTOs,
+                    books: bookDTOs,
+                    journalEntries: journalDTOs,
                     dailyGoalMinutes: dailyGoalMinutes
                 )
                 .padding(.horizontal, 24)

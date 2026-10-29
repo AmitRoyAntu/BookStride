@@ -12,6 +12,7 @@ swiftc -module-cache-path /tmp/clang-cache \
   BookStride/Services/ReadingTimerService.swift \
   BookStride/Services/StreakCalculationService.swift \
   BookStride/Services/ReadingStatisticsService.swift \
+  BookStride/Services/ReadingForecastService.swift \
   BookStride/Services/DataExportService.swift \
   BookStrideTests/ReadingTimerServiceTests.swift \
   BookStrideTests/StreakCalculationServiceTests.swift \
@@ -19,6 +20,7 @@ swiftc -module-cache-path /tmp/clang-cache \
   BookStrideTests/DataExportServiceTests.swift \
   BookStrideTests/ValidationTests.swift \
   BookStrideTests/Phase2FeatureTests.swift \
+  BookStrideTests/PolishReleaseTests.swift \
   BookStrideTests/TestRunner.swift \
   -o /tmp/BookStride_runner
 

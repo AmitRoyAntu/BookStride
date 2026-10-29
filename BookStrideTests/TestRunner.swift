@@ -22,6 +22,7 @@ struct TestRunner {
         DataExportServiceTests.runAllTests()
         ValidationTests.runAllTests()
         Phase2FeatureTests.runAllTests()
+        PolishReleaseTests.runAllTests()
         
         let elapsed = Date().timeIntervalSince(startTime)
         let formattedTime = String(format: "%.3f", elapsed)

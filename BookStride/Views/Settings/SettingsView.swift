@@ -34,7 +34,7 @@ public struct SettingsView: View {
     @State private var showingPermissionDeniedAlert: Bool = false
     
     // Backup & Export
-    @State private var exportedFileURL: URL?
+    @State private var exportActivityItems: [Any] = []
     @State private var showingShareSheet: Bool = false
     @State private var showingFileImporter: Bool = false
     @State private var importErrorMessage: String?
@@ -143,13 +143,40 @@ public struct SettingsView: View {
             
             // Section 4: Data Management (Export & Import)
             Section(header: Text("Data Management & Backup")) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Local Data Scope")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
+                    Text("\(allBooks.count) Books • \(allSessions.count) Sessions • \(allJournalEntries.count) Journal Notes")
+                        .font(.caption)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                }
+                .padding(.vertical, 4)
+                
                 Button {
-                    exportData()
+                    exportJSONBackup()
                 } label: {
                     HStack {
-                        Image(systemName: "square.and.arrow.up")
-                        Text("Export Backup (JSON)")
+                        Image(systemName: "archivebox.fill")
+                        Text("Export Full Backup (JSON)")
                         Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                    }
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
+                }
+                
+                Button {
+                    exportCSVSpreadsheets()
+                } label: {
+                    HStack {
+                        Image(systemName: "tablecells.fill")
+                        Text("Export Spreadsheets (CSV)")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
                     }
                     .foregroundColor(BookStrideTheme.deepCharcoal)
                 }
@@ -245,8 +272,8 @@ public struct SettingsView: View {
             loadGoalValues()
         }
         .sheet(isPresented: $showingShareSheet) {
-            if let url = exportedFileURL {
-                ShareSheet(activityItems: [url])
+            if !exportActivityItems.isEmpty {
+                ShareSheet(activityItems: exportActivityItems)
             }
         }
         .fileImporter(
@@ -335,6 +362,10 @@ public struct SettingsView: View {
     }
     
     private func exportData() {
+        exportJSONBackup()
+    }
+    
+    private func exportJSONBackup() {
         let bookDTOs = allBooks.map { b in
             BookDTO(
                 id: b.id,
@@ -402,10 +433,74 @@ public struct SettingsView: View {
         
         do {
             let fileURL = try DataExportService.writeToTemporaryExportFile(package)
-            self.exportedFileURL = fileURL
+            self.exportActivityItems = [fileURL]
             self.showingShareSheet = true
         } catch {
             importErrorMessage = "Failed to export backup: \(error.localizedDescription)"
+            showingAlert = true
+        }
+    }
+    
+    private func exportCSVSpreadsheets() {
+        let bookDTOs = allBooks.map { b in
+            BookDTO(
+                id: b.id,
+                title: b.title,
+                author: b.author,
+                coverColorHex: b.coverColorHex,
+                coverIcon: b.coverIcon,
+                totalPages: b.totalPages,
+                currentPage: b.currentPage,
+                status: b.statusRawValue,
+                startDate: b.startDate,
+                finishDate: b.finishDate,
+                rating: b.rating,
+                bookDescription: b.bookDescription,
+                createdAt: b.createdAt,
+                updatedAt: b.updatedAt
+            )
+        }
+        
+        let sessionDTOs = allSessions.map { s in
+            ReadingSessionDTO(
+                id: s.id,
+                bookId: s.book?.id,
+                startedAt: s.startedAt,
+                endedAt: s.endedAt,
+                status: s.statusRawValue,
+                accumulatedActiveSeconds: s.accumulatedActiveSeconds,
+                pausedDurationSeconds: s.pausedDurationSeconds,
+                startPage: s.startPage,
+                endPage: s.endPage,
+                notes: s.notes,
+                createdAt: s.createdAt,
+                updatedAt: s.updatedAt
+            )
+        }
+        
+        let journalDTOs = allJournalEntries.map { j in
+            JournalEntryDTO(
+                id: j.id,
+                bookId: j.book?.id,
+                content: j.content,
+                entryType: j.entryTypeRawValue,
+                pageNumber: j.pageNumber,
+                isFavorite: j.isFavorite,
+                createdAt: j.createdAt,
+                updatedAt: j.updatedAt
+            )
+        }
+        
+        do {
+            let urls = try DataExportService.writeCSVExportFiles(
+                bookDTOs: bookDTOs,
+                sessionDTOs: sessionDTOs,
+                journalDTOs: journalDTOs
+            )
+            self.exportActivityItems = urls
+            self.showingShareSheet = true
+        } catch {
+            importErrorMessage = "Failed to export CSV: \(error.localizedDescription)"
             showingAlert = true
         }
     }

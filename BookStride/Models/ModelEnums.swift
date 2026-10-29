@@ -38,6 +38,7 @@ public enum JournalEntryType: String, Codable, CaseIterable, Identifiable {
     case note = "Note"
     case quote = "Quote"
     case reflection = "Reflection"
+    case keyTakeaway = "Key Takeaway"
     
     public var id: String { rawValue }
     
@@ -46,6 +47,7 @@ public enum JournalEntryType: String, Codable, CaseIterable, Identifiable {
         case .note: return "note.text"
         case .quote: return "quote.opening"
         case .reflection: return "sparkles"
+        case .keyTakeaway: return "lightbulb"
         }
     }
 }

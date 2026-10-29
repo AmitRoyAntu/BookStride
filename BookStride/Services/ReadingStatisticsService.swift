@@ -102,6 +102,7 @@ public struct HeatmapDayPoint: Identifiable, Equatable {
     public let sessionCount: Int
     public let metGoal: Bool
     public let isToday: Bool
+    public let isFuture: Bool
     
     public init(
         date: Date,
@@ -110,7 +111,8 @@ public struct HeatmapDayPoint: Identifiable, Equatable {
         isCurrentMonth: Bool = true,
         sessionCount: Int = 0,
         metGoal: Bool = false,
-        isToday: Bool = false
+        isToday: Bool = false,
+        isFuture: Bool = false
     ) {
         self.date = date
         self.minutes = minutes
@@ -119,6 +121,7 @@ public struct HeatmapDayPoint: Identifiable, Equatable {
         self.sessionCount = sessionCount
         self.metGoal = metGoal
         self.isToday = isToday
+        self.isFuture = isFuture
     }
 }
 
@@ -542,12 +545,13 @@ public enum ReadingStatisticsService {
             let sCount = dailySessionCounts[dayDate] ?? 0
             let met = seconds >= goalSeconds
             let isToday = (dayDate == normalizedToday)
+            let isFuture = (dayDate > normalizedToday)
             
             let dayMonthComps = calendar.dateComponents([.year, .month], from: dayDate)
             let isCurrentMonth = (dayMonthComps == currentMonthComps)
             
             let intensity: Int
-            if seconds == 0 {
+            if isFuture || seconds == 0 {
                 intensity = 0
             } else if seconds >= goalSeconds {
                 intensity = 4
@@ -567,7 +571,8 @@ public enum ReadingStatisticsService {
                     isCurrentMonth: isCurrentMonth,
                     sessionCount: sCount,
                     metGoal: met,
-                    isToday: isToday
+                    isToday: isToday,
+                    isFuture: isFuture
                 )
             )
         }

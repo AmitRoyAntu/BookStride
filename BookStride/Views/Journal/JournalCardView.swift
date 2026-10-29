@@ -25,6 +25,8 @@ public struct JournalCardView: View {
         switch entry.entryType {
         case .quote:
             return BookStrideTheme.streakAmber
+        case .keyTakeaway:
+            return BookStrideTheme.streakAmber
         case .reflection:
             return BookStrideTheme.forestGreen
         case .note:
@@ -87,6 +89,22 @@ public struct JournalCardView: View {
                         .lineSpacing(4)
                 }
                 .padding(.horizontal, 4)
+            } else if entry.entryType == .keyTakeaway {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "lightbulb")
+                            .font(.caption2)
+                            .foregroundColor(BookStrideTheme.streakAmber)
+                        Text("Takeaway")
+                            .font(.caption2.weight(.bold))
+                            .foregroundColor(BookStrideTheme.streakAmber)
+                            .textCase(.uppercase)
+                    }
+                    Text(entry.content)
+                        .font(.body)
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
+                        .lineSpacing(3)
+                }
             } else if entry.entryType == .reflection {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 4) {

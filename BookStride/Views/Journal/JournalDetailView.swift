@@ -144,6 +144,26 @@ public struct JournalDetailView: View {
                             RoundedRectangle(cornerRadius: 14)
                                 .stroke(BookStrideTheme.streakAmber.opacity(0.3), lineWidth: 1.5)
                         )
+                    } else if entry.entryType == .keyTakeaway {
+                        // Key Takeaway styling
+                        VStack(alignment: .leading, spacing: 10) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "lightbulb.fill")
+                                    .foregroundColor(BookStrideTheme.streakAmber)
+                                Text("Key Takeaway")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundColor(BookStrideTheme.streakAmber)
+                                    .textCase(.uppercase)
+                            }
+                            
+                            Text(entry.content)
+                                .font(.body)
+                                .foregroundColor(BookStrideTheme.deepCharcoal)
+                                .lineSpacing(5)
+                        }
+                        .padding(24)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .BookStrideCardStyle()
                     } else if entry.entryType == .reflection {
                         // Reflection styling: Distinct thought card
                         VStack(alignment: .leading, spacing: 10) {
@@ -262,6 +282,7 @@ public struct JournalDetailView: View {
     private var typeColor: Color {
         switch entry.entryType {
         case .quote: return BookStrideTheme.streakAmber
+        case .keyTakeaway: return BookStrideTheme.streakAmber
         case .reflection: return BookStrideTheme.forestGreen
         case .note: return BookStrideTheme.forestGreen
         }

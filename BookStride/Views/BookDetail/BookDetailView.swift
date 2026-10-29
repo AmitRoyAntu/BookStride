@@ -38,8 +38,12 @@ public struct BookDetailView: View {
         completedSessions.reduce(0) { $0 + $1.activeDurationSeconds }
     }
     
+    private var bookForecast: ReadingForecast {
+        book.forecast()
+    }
+    
     private var estimatedCompletionString: String? {
-        guard let date = book.estimatedCompletionDate() else { return nil }
+        guard let date = bookForecast.estimatedCompletionDate else { return nil }
         return Formatters.formatDate(date, style: .mediumDate)
     }
     
@@ -354,7 +358,7 @@ public struct BookDetailView: View {
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 
-                // Add Entry Menu (Note, Quote, Reflection)
+                // Add Entry Menu (Note, Quote, Reflection, Takeaway)
                 Menu {
                     Button {
                         defaultJournalType = .note
@@ -375,6 +379,20 @@ public struct BookDetailView: View {
                         showingAddJournalSheet = true
                     } label: {
                         Label("Add Reflection", systemImage: "sparkles")
+                    }
+                    
+                    Button {
+                        defaultJournalType = .keyTakeaway
+                        showingAddJournalSheet = true
+                    } label: {
+                        Label("Add Key Takeaway", systemImage: "lightbulb")
+                    }
+                    
+                    Button {
+                        defaultJournalType = .keyTakeaway
+                        showingAddJournalSheet = true
+                    } label: {
+                        Label("Add Key Takeaway", systemImage: "lightbulb")
                     }
                 } label: {
                     HStack(spacing: 6) {
@@ -424,19 +442,20 @@ public struct BookDetailView: View {
                 
                 Divider()
                 
-                // Estimated Completion Card / Empty State
-                HStack(spacing: 12) {
-                    Image(systemName: "calendar.badge.clock")
-                        .font(.title3)
+                // Estimated Completion Forecast Card
+                let forecast = bookForecast
+                HStack(alignment: .top, spacing: 14) {
+                    Image(systemName: forecast.status == .completed ? "checkmark.circle.fill" : "calendar.badge.clock")
+                        .font(.title2)
                         .foregroundColor(BookStrideTheme.forestGreen)
                     
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 6) {
-                            Text("Estimated Completion")
-                                .font(.caption.weight(.medium))
+                            Text("Reading Forecast")
+                                .font(.caption.weight(.semibold))
                                 .foregroundColor(BookStrideTheme.mutedSlate)
                             
-                            if estimatedCompletionString != nil {
+                            if forecast.status == .accurate {
                                 Text("Approximate")
                                     .font(.caption2.weight(.bold))
                                     .foregroundColor(BookStrideTheme.forestGreen)
@@ -447,17 +466,17 @@ public struct BookDetailView: View {
                             }
                         }
                         
-                        if let est = estimatedCompletionString {
-                            Text(est)
-                                .font(.subheadline.weight(.semibold))
+                        if let est = forecast.estimatedCompletionDate {
+                            Text(Formatters.formatDate(est, style: .mediumDate))
+                                .font(.headline.weight(.bold))
                                 .foregroundColor(BookStrideTheme.deepCharcoal)
-                        } else if book.status == .finished {
-                            Text("Book finished")
-                                .font(.subheadline.weight(.medium))
-                                .foregroundColor(BookStrideTheme.forestGreen)
-                        } else {
-                            Text("Log ≥5 pages over 10m to estimate completion date")
+                            
+                            Text(forecast.explanation)
                                 .font(.caption)
+                                .foregroundColor(BookStrideTheme.mutedSlate)
+                        } else {
+                            Text(forecast.explanation)
+                                .font(.subheadline)
                                 .foregroundColor(BookStrideTheme.mutedSlate)
                         }
                     }
@@ -623,6 +642,13 @@ public struct BookDetailView: View {
                         showingAddJournalSheet = true
                     } label: {
                         Label("Add Reflection", systemImage: "sparkles")
+                    }
+                    
+                    Button {
+                        defaultJournalType = .keyTakeaway
+                        showingAddJournalSheet = true
+                    } label: {
+                        Label("Add Key Takeaway", systemImage: "lightbulb")
                     }
                 } label: {
                     HStack(spacing: 4) {
