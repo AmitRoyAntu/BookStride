@@ -34,7 +34,11 @@ public struct SettingsView: View {
     @State private var showingPermissionDeniedAlert: Bool = false
     
     // Backup & Export
-    @State private var exportActivityItems: [Any] = []
+    @State private var showingJSONExportDialog: Bool = false
+    @State private var showingCSVExportDialog: Bool = false
+    @State private var exportedURLs: [URL] = []
+    @State private var showingDocumentPicker: Bool = false
+    @State private var showingShareSheet: Bool = false
     @State private var showingFileImporter: Bool = false
     @State private var importErrorMessage: String?
     @State private var importSuccessMessage: String?
@@ -157,7 +161,7 @@ public struct SettingsView: View {
                 .padding(.vertical, 4)
                 
                 Button {
-                    exportJSONBackup()
+                    prepareJSONBackupExport()
                 } label: {
                     HStack {
                         Image(systemName: "archivebox.fill")
@@ -173,7 +177,7 @@ public struct SettingsView: View {
                 .buttonStyle(.plain)
                 
                 Button {
-                    exportCSVSpreadsheets()
+                    prepareCSVSpreadsheetsExport()
                 } label: {
                     HStack {
                         Image(systemName: "tablecells.fill")
@@ -212,6 +216,40 @@ public struct SettingsView: View {
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
             }
+            .confirmationDialog("Export Full Backup", isPresented: $showingJSONExportDialog, titleVisibility: .visible) {
+                Button("Save to Files (iCloud / Local)") {
+                    showingDocumentPicker = true
+                }
+                Button("Share via AirDrop or Apps...") {
+                    showingShareSheet = true
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Save your complete Bookstride library, reading history, and journal notes to a JSON file.")
+            }
+            .confirmationDialog("Export Spreadsheets", isPresented: $showingCSVExportDialog, titleVisibility: .visible) {
+                Button("Save to Files (iCloud / Local)") {
+                    showingDocumentPicker = true
+                }
+                Button("Share via AirDrop or Apps...") {
+                    showingShareSheet = true
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Export books, reading sessions, and journal entries as RFC 4180 CSV spreadsheets.")
+            }
+            .sheet(isPresented: $showingDocumentPicker) {
+                DocumentExportPickerSheet(urls: exportedURLs) { success in
+                    if success {
+                        importSuccessMessage = "Files saved successfully to the selected folder."
+                        importErrorMessage = nil
+                        showingAlert = true
+                    }
+                }
+            }
+            .sheet(isPresented: $showingShareSheet) {
+                ActivityViewSheet(activityItems: exportedURLs)
+            }
             .fileImporter(
                 isPresented: $showingFileImporter,
                 allowedContentTypes: [.json],
@@ -219,7 +257,7 @@ public struct SettingsView: View {
             ) { result in
                 handleFileImport(result)
             }
-            .alert(importErrorMessage != nil ? "Import Failed" : "Data Management", isPresented: $showingAlert) {
+            .alert(importErrorMessage != nil ? "Data Management Notice" : "Data Management", isPresented: $showingAlert) {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(importErrorMessage ?? importSuccessMessage ?? "")
@@ -368,10 +406,10 @@ public struct SettingsView: View {
     }
     
     private func exportData() {
-        exportJSONBackup()
+        prepareJSONBackupExport()
     }
     
-    private func exportJSONBackup() {
+    private func prepareJSONBackupExport() {
         let bookDTOs = allBooks.map { b in
             BookDTO(
                 id: b.id,
@@ -386,6 +424,9 @@ public struct SettingsView: View {
                 finishDate: b.finishDate,
                 rating: b.rating,
                 bookDescription: b.bookDescription,
+                appleBooksURL: b.appleBooksURL,
+                importedFileName: b.importedFileName,
+                sourceFormat: b.sourceFormatRawValue,
                 createdAt: b.createdAt,
                 updatedAt: b.updatedAt
             )
@@ -439,15 +480,15 @@ public struct SettingsView: View {
         
         do {
             let fileURL = try DataExportService.writeToTemporaryExportFile(package)
-            self.exportActivityItems = [fileURL]
-            presentShareSheet(items: [fileURL])
+            self.exportedURLs = [fileURL]
+            self.showingJSONExportDialog = true
         } catch {
             importErrorMessage = "Failed to export backup: \(error.localizedDescription)"
             showingAlert = true
         }
     }
     
-    private func exportCSVSpreadsheets() {
+    private func prepareCSVSpreadsheetsExport() {
         let bookDTOs = allBooks.map { b in
             BookDTO(
                 id: b.id,
@@ -462,6 +503,9 @@ public struct SettingsView: View {
                 finishDate: b.finishDate,
                 rating: b.rating,
                 bookDescription: b.bookDescription,
+                appleBooksURL: b.appleBooksURL,
+                importedFileName: b.importedFileName,
+                sourceFormat: b.sourceFormatRawValue,
                 createdAt: b.createdAt,
                 updatedAt: b.updatedAt
             )
@@ -503,46 +547,12 @@ public struct SettingsView: View {
                 sessionDTOs: sessionDTOs,
                 journalDTOs: journalDTOs
             )
-            self.exportActivityItems = urls
-            presentShareSheet(items: urls)
+            self.exportedURLs = urls
+            self.showingCSVExportDialog = true
         } catch {
             importErrorMessage = "Failed to export CSV: \(error.localizedDescription)"
             showingAlert = true
         }
-    }
-    
-    /// Presents native iPadOS Share Sheet (UIActivityViewController) with properly anchored popover.
-    private func presentShareSheet(items: [Any]) {
-        guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene ?? UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController ?? windowScene.windows.first?.rootViewController else {
-            return
-        }
-        
-        var topVC = rootVC
-        while let presented = topVC.presentedViewController, !presented.isBeingDismissed {
-            topVC = presented
-        }
-        
-        let preparedItems = items.map { item -> Any in
-            if let url = item as? URL {
-                return ShareActivityItemSource(fileURL: url, itemTitle: url.lastPathComponent)
-            }
-            return item
-        }
-        
-        let activityVC = UIActivityViewController(activityItems: preparedItems, applicationActivities: nil)
-        if let popover = activityVC.popoverPresentationController {
-            let anchorSize: CGFloat = 32
-            popover.sourceView = topVC.view
-            popover.sourceRect = CGRect(
-                x: max(0, topVC.view.bounds.midX - (anchorSize / 2)),
-                y: max(0, topVC.view.bounds.midY - (anchorSize / 2)),
-                width: anchorSize,
-                height: anchorSize
-            )
-            popover.permittedArrowDirections = []
-        }
-        topVC.present(activityVC, animated: true)
     }
     
     @MainActor
@@ -564,11 +574,16 @@ public struct SettingsView: View {
             }
             
             try modelContext.save()
+            
+            // Sync empty session to widget
+            ReadingTimerService.shared.updateWidgetSnapshot()
+            
             importSuccessMessage = "All library books, sessions, and journal notes have been cleared."
             importErrorMessage = nil
             showingAlert = true
         } catch {
             SampleDataService.clearAllData(in: modelContext)
+            ReadingTimerService.shared.updateWidgetSnapshot()
             importErrorMessage = "Failed to clear data: \(error.localizedDescription)"
             showingAlert = true
         }
@@ -578,6 +593,7 @@ public struct SettingsView: View {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
+            
             let isSecurityScoped = url.startAccessingSecurityScopedResource()
             defer {
                 if isSecurityScoped {
@@ -585,11 +601,39 @@ public struct SettingsView: View {
                 }
             }
             
+            var fileData: Data?
+            var coordinatorError: NSError?
+            var fileReadError: Error?
+            
+            let coordinator = NSFileCoordinator()
+            coordinator.coordinate(readingItemAt: url, options: .withoutChanges, error: &coordinatorError) { coordinatedURL in
+                do {
+                    fileData = try Data(contentsOf: coordinatedURL)
+                } catch {
+                    fileReadError = error
+                }
+            }
+            
+            if let err = coordinatorError {
+                importErrorMessage = "Access error: \(err.localizedDescription)"
+                showingAlert = true
+                return
+            }
+            if let err = fileReadError {
+                importErrorMessage = "File read error: \(err.localizedDescription)"
+                showingAlert = true
+                return
+            }
+            guard let data = fileData else {
+                importErrorMessage = "The selected file could not be read."
+                showingAlert = true
+                return
+            }
+            
             do {
-                let data = try Data(contentsOf: url)
                 let package = try DataExportService.parseAndValidateJSON(data)
                 
-                // Import into SwiftData with duplicate avoidance
+                // Import into SwiftData with duplicate avoidance by ID
                 var bookMap: [UUID: Book] = [:]
                 let existingBooks = try modelContext.fetch(FetchDescriptor<Book>())
                 for b in existingBooks {
@@ -609,6 +653,10 @@ public struct SettingsView: View {
                         existing.finishDate = bDTO.finishDate
                         existing.rating = bDTO.rating
                         existing.bookDescription = bDTO.bookDescription
+                        existing.appleBooksURL = bDTO.appleBooksURL
+                        existing.importedFileName = bDTO.importedFileName
+                        existing.sourceFormatRawValue = bDTO.sourceFormat
+                        existing.updatedAt = bDTO.updatedAt
                     } else {
                         let newBook = Book(
                             id: bDTO.id,
@@ -622,7 +670,12 @@ public struct SettingsView: View {
                             startDate: bDTO.startDate,
                             finishDate: bDTO.finishDate,
                             rating: bDTO.rating,
-                            bookDescription: bDTO.bookDescription
+                            bookDescription: bDTO.bookDescription,
+                            appleBooksURL: bDTO.appleBooksURL,
+                            importedFileName: bDTO.importedFileName,
+                            sourceFormat: BookSourceFormat(rawValue: bDTO.sourceFormat ?? "Manual") ?? .manual,
+                            createdAt: bDTO.createdAt,
+                            updatedAt: bDTO.updatedAt
                         )
                         modelContext.insert(newBook)
                         bookMap[newBook.id] = newBook
@@ -648,6 +701,7 @@ public struct SettingsView: View {
                         existing.startPage = sDTO.startPage
                         existing.endPage = sDTO.endPage
                         existing.notes = sDTO.notes
+                        existing.updatedAt = sDTO.updatedAt
                     } else {
                         let newSession = ReadingSession(
                             id: sDTO.id,
@@ -659,7 +713,9 @@ public struct SettingsView: View {
                             pausedDurationSeconds: sDTO.pausedDurationSeconds,
                             startPage: sDTO.startPage,
                             endPage: sDTO.endPage,
-                            notes: sDTO.notes
+                            notes: sDTO.notes,
+                            createdAt: sDTO.createdAt,
+                            updatedAt: sDTO.updatedAt
                         )
                         modelContext.insert(newSession)
                         sessionMap[newSession.id] = newSession
@@ -681,6 +737,7 @@ public struct SettingsView: View {
                         existing.entryTypeRawValue = jDTO.entryType
                         existing.pageNumber = jDTO.pageNumber
                         existing.isFavorite = jDTO.isFavorite
+                        existing.updatedAt = jDTO.updatedAt
                     } else {
                         let newEntry = JournalEntry(
                             id: jDTO.id,
@@ -688,7 +745,9 @@ public struct SettingsView: View {
                             content: jDTO.content,
                             entryType: JournalEntryType(rawValue: jDTO.entryType) ?? .note,
                             pageNumber: jDTO.pageNumber,
-                            isFavorite: jDTO.isFavorite
+                            isFavorite: jDTO.isFavorite,
+                            createdAt: jDTO.createdAt,
+                            updatedAt: jDTO.updatedAt
                         )
                         modelContext.insert(newEntry)
                         journalMap[newEntry.id] = newEntry
@@ -705,6 +764,9 @@ public struct SettingsView: View {
                 try modelContext.save()
                 loadGoalValues()
                 
+                // Sync updated reading progress to Widget
+                ReadingTimerService.shared.updateWidgetSnapshot()
+                
                 importSuccessMessage = "Successfully imported \(package.books.count) books, \(package.sessions.count) sessions, and \(package.journalEntries.count) journal notes."
                 importErrorMessage = nil
                 showingAlert = true
@@ -718,34 +780,4 @@ public struct SettingsView: View {
             showingAlert = true
         }
     }
-}
-
-// iPadOS ShareSheet representation (fallback)
-public struct ShareSheet: UIViewControllerRepresentable {
-    public var activityItems: [Any]
-    public var applicationActivities: [UIActivity]? = nil
-    
-    public func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(
-            activityItems: activityItems,
-            applicationActivities: applicationActivities
-        )
-        if let popover = controller.popoverPresentationController {
-            popover.permittedArrowDirections = []
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let rootVC = windowScene.windows.first?.rootViewController {
-                let anchorSize: CGFloat = 32
-                popover.sourceView = rootVC.view
-                popover.sourceRect = CGRect(
-                    x: max(0, rootVC.view.bounds.midX - (anchorSize / 2)),
-                    y: max(0, rootVC.view.bounds.midY - (anchorSize / 2)),
-                    width: anchorSize,
-                    height: anchorSize
-                )
-            }
-        }
-        return controller
-    }
-    
-    public func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

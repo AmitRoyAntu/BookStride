@@ -65,6 +65,8 @@
 		A1000057 /* ReadingWrappedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000057 /* ReadingWrappedView.swift */; };
 		A1000058 /* BookStrideWidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000058 /* BookStrideWidgetIntents.swift */; };
 		A1000059 /* BookStrideTimerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000059 /* BookStrideTimerWidget.swift */; };
+		A1000060 /* BookImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000060 /* BookImportService.swift */; };
+		A1000061 /* ImportBookReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000061 /* ImportBookReviewSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -128,6 +130,8 @@
 		B1000057 /* ReadingWrappedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingWrappedView.swift; sourceTree = "<group>"; };
 		B1000058 /* BookStrideWidgetIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideWidgetIntents.swift; sourceTree = "<group>"; };
 		B1000059 /* BookStrideTimerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideTimerWidget.swift; sourceTree = "<group>"; };
+		B1000060 /* BookImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImportService.swift; sourceTree = "<group>"; };
+		B1000061 /* ImportBookReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportBookReviewSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -205,6 +209,7 @@
 				B1000052 /* ReadingForecastService.swift */,
 				B1000053 /* WidgetSharedModels.swift */,
 				B1000054 /* ReadingWrappedService.swift */,
+				B1000060 /* BookImportService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -271,6 +276,7 @@
 				B1000024 /* LibraryView.swift */,
 				B1000025 /* BookCardView.swift */,
 				B1000026 /* AddEditBookSheet.swift */,
+				B1000061 /* ImportBookReviewSheet.swift */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -477,6 +483,8 @@
 				A1000057 /* ReadingWrappedView.swift in Sources */,
 				A1000058 /* BookStrideWidgetIntents.swift in Sources */,
 				A1000059 /* BookStrideTimerWidget.swift in Sources */,
+				A1000060 /* BookImportService.swift in Sources */,
+				A1000061 /* ImportBookReviewSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

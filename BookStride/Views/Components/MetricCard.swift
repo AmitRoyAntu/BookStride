@@ -28,6 +28,23 @@ public struct MetricCard: View {
         self.accentColor = accentColor
     }
     
+    public init(
+        title: String,
+        value: String,
+        iconName: String,
+        accentColor: Color = BookStrideTheme.forestGreen
+    ) {
+        self.init(title: title, value: value, subtitle: nil, iconName: iconName, accentColor: accentColor)
+    }
+    
+    public init(
+        title: String,
+        value: String,
+        subtitle: String? = nil
+    ) {
+        self.init(title: title, value: value, subtitle: subtitle, iconName: "chart.bar.fill", accentColor: BookStrideTheme.forestGreen)
+    }
+    
     public var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {

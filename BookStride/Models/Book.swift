@@ -23,6 +23,9 @@ public final class Book {
     public var finishDate: Date?
     public var rating: Int? // 1 to 5
     public var bookDescription: String?
+    public var appleBooksURL: String?
+    public var importedFileName: String?
+    public var sourceFormatRawValue: String? = BookSourceFormat.manual.rawValue
     public var createdAt: Date = Date()
     public var updatedAt: Date = Date()
     
@@ -46,6 +49,9 @@ public final class Book {
         finishDate: Date? = nil,
         rating: Int? = nil,
         bookDescription: String? = nil,
+        appleBooksURL: String? = nil,
+        importedFileName: String? = nil,
+        sourceFormat: BookSourceFormat = .manual,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -62,8 +68,23 @@ public final class Book {
         self.finishDate = finishDate
         self.rating = rating
         self.bookDescription = bookDescription
+        self.appleBooksURL = appleBooksURL
+        self.importedFileName = importedFileName
+        self.sourceFormatRawValue = sourceFormat.rawValue
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+    
+    public var sourceFormat: BookSourceFormat {
+        get { BookSourceFormat(rawValue: sourceFormatRawValue ?? "Manual") ?? .manual }
+        set { sourceFormatRawValue = newValue.rawValue }
+    }
+    
+    public var hasAppleBooksLink: Bool {
+        guard let urlStr = appleBooksURL, !urlStr.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return false
+        }
+        return true
     }
     
     public var status: ReadingStatus {

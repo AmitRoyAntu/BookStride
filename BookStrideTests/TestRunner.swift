@@ -25,6 +25,7 @@ struct TestRunner {
         PolishReleaseTests.runAllTests()
         ReadingWrappedServiceTests.runAll()
         WidgetTimerServiceTests.runAll()
+        AppleBooksAndImportTests.runAllTests()
         
         let elapsed = Date().timeIntervalSince(startTime)
         let formattedTime = String(format: "%.3f", elapsed)

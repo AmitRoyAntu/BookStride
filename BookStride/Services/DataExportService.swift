@@ -41,7 +41,49 @@ public enum DataExportService {
     
     public static func createJSONDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        
+        let formatterFractional = ISO8601DateFormatter()
+        formatterFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let formatterStandard = ISO8601DateFormatter()
+        
+        let dfPosix1 = DateFormatter()
+        dfPosix1.locale = Locale(identifier: "en_US_POSIX")
+        dfPosix1.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX"
+        
+        let dfPosix2 = DateFormatter()
+        dfPosix2.locale = Locale(identifier: "en_US_POSIX")
+        dfPosix2.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXXXX"
+        
+        let dfDateOnly = DateFormatter()
+        dfDateOnly.locale = Locale(identifier: "en_US_POSIX")
+        dfDateOnly.dateFormat = "yyyy-MM-dd"
+        
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            
+            if let dateStr = try? container.decode(String.self) {
+                if let date = formatterFractional.date(from: dateStr) ??
+                              formatterStandard.date(from: dateStr) ??
+                              dfPosix1.date(from: dateStr) ??
+                              dfPosix2.date(from: dateStr) ??
+                              dfDateOnly.date(from: dateStr) {
+                    return date
+                }
+                throw DecodingError.dataCorruptedError(
+                    in: container,
+                    debugDescription: "Cannot decode date from string '\(dateStr)'"
+                )
+            }
+            
+            if let epochSeconds = try? container.decode(Double.self) {
+                return Date(timeIntervalSince1970: epochSeconds)
+            }
+            
+            throw DecodingError.dataCorruptedError(
+                in: container,
+                debugDescription: "Expected ISO8601 string or numeric timestamp for date"
+            )
+        }
         return decoder
     }
     
@@ -54,8 +96,24 @@ public enum DataExportService {
     /// Parses and strictly validates a JSON backup payload.
     public static func parseAndValidateJSON(_ data: Data) throws -> BookStrideBackupPackage {
         let decoder = createJSONDecoder()
-        guard let package = try? decoder.decode(BookStrideBackupPackage.self, from: data) else {
-            throw DataTransferError.invalidJSON
+        let package: BookStrideBackupPackage
+        do {
+            package = try decoder.decode(BookStrideBackupPackage.self, from: data)
+        } catch let decodingError as DecodingError {
+            switch decodingError {
+            case .keyNotFound(let key, let context):
+                throw DataTransferError.missingRequiredFields("Missing field '\(key.stringValue)': \(context.debugDescription)")
+            case .typeMismatch(let type, let context):
+                throw DataTransferError.missingRequiredFields("Type mismatch for \(type): \(context.debugDescription)")
+            case .valueNotFound(let type, let context):
+                throw DataTransferError.missingRequiredFields("Value not found for \(type): \(context.debugDescription)")
+            case .dataCorrupted(let context):
+                throw DataTransferError.importFailed("Data corrupted: \(context.debugDescription)")
+            @unknown default:
+                throw DataTransferError.invalidJSON
+            }
+        } catch {
+            throw DataTransferError.importFailed(error.localizedDescription)
         }
         
         guard package.schemaVersion <= currentSchemaVersion else {

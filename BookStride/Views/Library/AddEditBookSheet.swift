@@ -24,6 +24,7 @@ public struct AddEditBookSheet: View {
     @State private var coverIcon: String = "book.closed"
     @State private var rating: Int = 0
     @State private var bookDescription: String = ""
+    @State private var appleBooksLink: String = ""
     @State private var startDate: Date = Date()
     @State private var finishDate: Date = Date()
     @State private var hasStartDate: Bool = true
@@ -172,6 +173,17 @@ public struct AddEditBookSheet: View {
                     TextField("Description or Thoughts", text: $bookDescription, axis: .vertical)
                         .lineLimit(3...5)
                 }
+                
+                // Section: Apple Books Link
+                Section(
+                    header: Text("Apple Books Link (Optional)"),
+                    footer: Text("Store link (https://books.apple.com/...) or scheme (ibooks://...) to launch directly from Bookstride.")
+                ) {
+                    TextField("https://books.apple.com/...", text: $appleBooksLink)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled(true)
+                }
             }
             .navigationTitle(bookToEdit == nil ? "Add Book" : "Edit Book")
             .navigationBarTitleDisplayMode(.inline)
@@ -220,6 +232,7 @@ public struct AddEditBookSheet: View {
         coverImageData = book.coverImageData
         rating = book.rating ?? 0
         bookDescription = book.bookDescription ?? ""
+        appleBooksLink = book.appleBooksURL ?? ""
         
         if let start = book.startDate {
             startDate = start
@@ -268,6 +281,8 @@ public struct AddEditBookSheet: View {
         
         let sDate = hasStartDate ? startDate : nil
         let fDate = hasFinishDate ? finishDate : (status == .finished ? Date() : nil)
+        let cleanLink = appleBooksLink.trimmingCharacters(in: .whitespacesAndNewlines)
+        let finalLink = cleanLink.isEmpty ? nil : cleanLink
         
         if let existing = bookToEdit {
             existing.title = trimmedTitle
@@ -280,6 +295,7 @@ public struct AddEditBookSheet: View {
             existing.coverImageData = coverImageData
             existing.rating = rating > 0 ? rating : nil
             existing.bookDescription = bookDescription.isEmpty ? nil : bookDescription
+            existing.appleBooksURL = finalLink
             existing.startDate = sDate
             existing.finishDate = fDate
             existing.updatedAt = Date()
@@ -296,7 +312,8 @@ public struct AddEditBookSheet: View {
                 startDate: sDate,
                 finishDate: fDate,
                 rating: rating > 0 ? rating : nil,
-                bookDescription: bookDescription.isEmpty ? nil : bookDescription
+                bookDescription: bookDescription.isEmpty ? nil : bookDescription,
+                appleBooksURL: finalLink
             )
             modelContext.insert(newBook)
         }

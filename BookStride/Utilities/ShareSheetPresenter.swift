@@ -113,9 +113,25 @@ public final class ShareActivityItemSource: NSObject, UIActivityItemSource {
     public func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
         let metadata = LPLinkMetadata()
         metadata.title = itemTitle
-        metadata.originalURL = fileURL
+        // Do NOT assign metadata.originalURL to a local sandbox file URL!
+        // When originalURL is set to a local file URL in /tmp or sandbox,
+        // LaunchServices triggers LSBindingEvaluator to inspect CloudKit / SWY collaboration,
+        // which emits OSStatus error -10814 and LaunchServices permission denials on iPadOS.
         if let image = previewImage {
             metadata.imageProvider = NSItemProvider(object: image)
+        } else {
+            let iconName: String
+            switch fileURL.pathExtension.lowercased() {
+            case "json":
+                iconName = "doc.badge.gearshape"
+            case "csv":
+                iconName = "tablecells"
+            default:
+                iconName = "doc.text"
+            }
+            if let img = UIImage(systemName: iconName) {
+                metadata.iconProvider = NSItemProvider(object: img)
+            }
         }
         return metadata
     }
@@ -144,18 +160,22 @@ public struct ActivityViewSheet: UIViewControllerRepresentable {
             applicationActivities: applicationActivities
         )
         // iPadOS popover presentation safeguard
-        controller.popoverPresentationController?.permittedArrowDirections = []
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let root = windowScene.windows.first?.rootViewController {
-            let safeBounds = root.view.bounds
-            let anchorSize: CGFloat = 32
-            controller.popoverPresentationController?.sourceView = root.view
-            controller.popoverPresentationController?.sourceRect = CGRect(
-                x: max(0, safeBounds.midX - (anchorSize / 2)),
-                y: max(0, safeBounds.midY - (anchorSize / 2)),
-                width: anchorSize,
-                height: anchorSize
-            )
+        if let popover = controller.popoverPresentationController {
+            popover.permittedArrowDirections = []
+            if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene ?? UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let root = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController ?? windowScene.windows.first?.rootViewController {
+                let safeBounds = root.view.bounds
+                let width = max(safeBounds.width, 320)
+                let height = max(safeBounds.height, 320)
+                let anchorSize: CGFloat = 32
+                popover.sourceView = root.view
+                popover.sourceRect = CGRect(
+                    x: max(0, (width - anchorSize) / 2),
+                    y: max(0, (height - anchorSize) / 2),
+                    width: anchorSize,
+                    height: anchorSize
+                )
+            }
         }
         return controller
     }
@@ -166,11 +186,16 @@ public struct ActivityViewSheet: UIViewControllerRepresentable {
 // MARK: - iPadOS Document Picker (Save to Files)
 
 public struct DocumentExportPickerSheet: UIViewControllerRepresentable {
-    public let fileURL: URL
+    public let urls: [URL]
     public var onCompletion: ((Bool) -> Void)?
     
+    public init(urls: [URL], onCompletion: ((Bool) -> Void)? = nil) {
+        self.urls = urls
+        self.onCompletion = onCompletion
+    }
+    
     public init(fileURL: URL, onCompletion: ((Bool) -> Void)? = nil) {
-        self.fileURL = fileURL
+        self.urls = [fileURL]
         self.onCompletion = onCompletion
     }
     
@@ -179,7 +204,7 @@ public struct DocumentExportPickerSheet: UIViewControllerRepresentable {
     }
     
     public func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forExporting: [fileURL], asCopy: true)
+        let picker = UIDocumentPickerViewController(forExporting: urls, asCopy: true)
         picker.delegate = context.coordinator
         return picker
     }

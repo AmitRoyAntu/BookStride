@@ -52,3 +52,19 @@ public enum JournalEntryType: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+public enum BookSourceFormat: String, Codable, CaseIterable, Identifiable {
+    case manual = "Manual"
+    case epub = "EPUB"
+    case pdf = "PDF"
+    
+    public var id: String { rawValue }
+    
+    public var iconName: String {
+        switch self {
+        case .manual: return "book.closed"
+        case .epub: return "doc.richtext"
+        case .pdf: return "doc.text.fill"
+        }
+    }
+}
+

@@ -23,6 +23,8 @@ public struct BookDetailView: View {
     @State private var showingActiveSession: Bool = false
     @State private var showingDeleteAlert: Bool = false
     @State private var showingConflictAlert: Bool = false
+    @State private var showingAppleBooksLinkSheet: Bool = false
+    @State private var editedAppleBooksURL: String = ""
     
     public init(book: Book) {
         self.book = book
@@ -164,6 +166,41 @@ public struct BookDetailView: View {
                     saveFinishedSession(endPage: endPage, notes: notes)
                 }
             )
+        }
+        .sheet(isPresented: $showingAppleBooksLinkSheet) {
+            NavigationStack {
+                Form {
+                    Section {
+                        TextField("https://books.apple.com/... or ibooks://", text: $editedAppleBooksURL)
+                            .keyboardType(.URL)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+                    } header: {
+                        Text("Apple Books URL")
+                    } footer: {
+                        Text("Enter a valid Apple Books Store URL or ibooks:// scheme. Bookstride tracks your reading sessions, journal notes, and progress independently on your device.")
+                    }
+                }
+                .navigationTitle(book.hasAppleBooksLink ? "Edit Apple Books Link" : "Link Apple Books")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            showingAppleBooksLinkSheet = false
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            let trimmed = editedAppleBooksURL.trimmingCharacters(in: .whitespacesAndNewlines)
+                            book.appleBooksURL = trimmed.isEmpty ? nil : trimmed
+                            try? modelContext.save()
+                            showingAppleBooksLinkSheet = false
+                        }
+                        .fontWeight(.semibold)
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                    }
+                }
+            }
         }
         .alert("Session in Progress", isPresented: $showingConflictAlert) {
             Button("OK", role: .cancel) {}
@@ -335,15 +372,56 @@ public struct BookDetailView: View {
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 
-                // Open in Apple Books
-                Button {
-                    AppleBooksService.openAppleBooks()
+                // Apple Books Action Menu
+                Menu {
+                    if book.hasAppleBooksLink {
+                        Button {
+                            AppleBooksService.openBook(urlString: book.appleBooksURL, fallbackToApp: true)
+                        } label: {
+                            Label("Open in Apple Books", systemImage: "arrow.up.forward.app")
+                        }
+                        
+                        Button {
+                            editedAppleBooksURL = book.appleBooksURL ?? ""
+                            showingAppleBooksLinkSheet = true
+                        } label: {
+                            Label("Edit Apple Books Link", systemImage: "link.badge.plus")
+                        }
+                        
+                        Button(role: .destructive) {
+                            book.appleBooksURL = nil
+                            try? modelContext.save()
+                        } label: {
+                            Label("Remove Link", systemImage: "link.slash")
+                        }
+                    } else {
+                        Button {
+                            AppleBooksService.openAppleBooks()
+                        } label: {
+                            Label("Open Apple Books App", systemImage: "book.pages")
+                        }
+                        
+                        if let searchURL = AppleBooksService.searchStoreURL(title: book.title, author: book.author) {
+                            Link(destination: searchURL) {
+                                Label("Search in Apple Books", systemImage: "magnifyingglass")
+                            }
+                        }
+                        
+                        Button {
+                            editedAppleBooksURL = ""
+                            showingAppleBooksLinkSheet = true
+                        } label: {
+                            Label("Add Apple Books Link…", systemImage: "link.badge.plus")
+                        }
+                    }
                 } label: {
                     HStack(spacing: 6) {
-                        Image(systemName: "book.pages")
+                        Image(systemName: book.hasAppleBooksLink ? "arrow.up.forward.app.fill" : "book.pages")
                         Text("Apple Books")
                             .lineLimit(1)
                             .fixedSize(horizontal: true, vertical: false)
+                        Image(systemName: "chevron.down")
+                            .font(.caption2.weight(.bold))
                     }
                     .font(.callout.weight(.medium))
                     .foregroundColor(BookStrideTheme.forestGreen)
@@ -379,13 +457,6 @@ public struct BookDetailView: View {
                         showingAddJournalSheet = true
                     } label: {
                         Label("Add Reflection", systemImage: "sparkles")
-                    }
-                    
-                    Button {
-                        defaultJournalType = .keyTakeaway
-                        showingAddJournalSheet = true
-                    } label: {
-                        Label("Add Key Takeaway", systemImage: "lightbulb")
                     }
                     
                     Button {

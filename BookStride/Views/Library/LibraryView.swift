@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 public enum LibrarySortOption: String, CaseIterable, Identifiable {
     case recentlyAdded = "Recently Added"
@@ -25,6 +26,10 @@ public struct LibraryView: View {
     @State private var sortOption: LibrarySortOption = .recentlyAdded
     @State private var searchText: String = ""
     @State private var showingAddBookSheet: Bool = false
+    @State private var showingImportPicker: Bool = false
+    @State private var importedMetadataToReview: ExtractedBookMetadata?
+    @State private var importErrorMessage: String?
+    @State private var showingImportErrorAlert: Bool = false
     @State private var bookToDelete: Book?
     @State private var showingDeleteConfirmation: Bool = false
     
@@ -126,16 +131,62 @@ public struct LibraryView: View {
         .searchable(text: $searchText, prompt: "Search by title or author")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingAddBookSheet = true
+                Menu {
+                    Button {
+                        showingAddBookSheet = true
+                    } label: {
+                        Label("Add Book Manually", systemImage: "plus")
+                    }
+                    
+                    Button {
+                        showingImportPicker = true
+                    } label: {
+                        Label("Import Book (EPUB, PDF)…", systemImage: "square.and.arrow.down")
+                    }
                 } label: {
-                    Label("Add Book", systemImage: "plus")
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
                         .foregroundColor(BookStrideTheme.forestGreen)
                 }
             }
         }
         .sheet(isPresented: $showingAddBookSheet) {
             AddEditBookSheet()
+        }
+        .fileImporter(
+            isPresented: $showingImportPicker,
+            allowedContentTypes: [.pdf, .epub],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                guard let selectedURL = urls.first else { return }
+                guard selectedURL.startAccessingSecurityScopedResource() else {
+                    importErrorMessage = "Access to the selected file was denied by iPadOS security."
+                    showingImportErrorAlert = true
+                    return
+                }
+                defer { selectedURL.stopAccessingSecurityScopedResource() }
+                
+                do {
+                    let metadata = try BookImportService.extractMetadata(from: selectedURL)
+                    importedMetadataToReview = metadata
+                } catch {
+                    importErrorMessage = error.localizedDescription
+                    showingImportErrorAlert = true
+                }
+            case .failure(let error):
+                importErrorMessage = error.localizedDescription
+                showingImportErrorAlert = true
+            }
+        }
+        .sheet(item: $importedMetadataToReview) { metadata in
+            ImportBookReviewSheet(metadata: metadata)
+        }
+        .alert("Import Failed", isPresented: $showingImportErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(importErrorMessage ?? "An unknown error occurred while importing.")
         }
         .confirmationDialog(
             "Delete Book?",

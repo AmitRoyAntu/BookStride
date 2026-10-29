@@ -16,6 +16,8 @@ swiftc -module-cache-path /tmp/clang-cache \
   BookStride/Services/ReadingForecastService.swift \
   BookStride/Services/ReadingWrappedService.swift \
   BookStride/Services/DataExportService.swift \
+  BookStride/Services/AppleBooksService.swift \
+  BookStride/Services/BookImportService.swift \
   BookStrideTests/ReadingTimerServiceTests.swift \
   BookStrideTests/StreakCalculationServiceTests.swift \
   BookStrideTests/ReadingStatisticsServiceTests.swift \
@@ -25,6 +27,7 @@ swiftc -module-cache-path /tmp/clang-cache \
   BookStrideTests/PolishReleaseTests.swift \
   BookStrideTests/ReadingWrappedServiceTests.swift \
   BookStrideTests/WidgetTimerServiceTests.swift \
+  BookStrideTests/AppleBooksAndImportTests.swift \
   BookStrideTests/TestRunner.swift \
   -o /tmp/BookStride_runner
 

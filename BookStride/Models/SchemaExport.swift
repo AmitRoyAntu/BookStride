@@ -20,6 +20,9 @@ public struct BookDTO: Codable, Identifiable, Equatable {
     public var finishDate: Date?
     public var rating: Int?
     public var bookDescription: String?
+    public var appleBooksURL: String?
+    public var importedFileName: String?
+    public var sourceFormat: String?
     public var createdAt: Date
     public var updatedAt: Date
     
@@ -36,6 +39,9 @@ public struct BookDTO: Codable, Identifiable, Equatable {
         finishDate: Date? = nil,
         rating: Int? = nil,
         bookDescription: String? = nil,
+        appleBooksURL: String? = nil,
+        importedFileName: String? = nil,
+        sourceFormat: String? = "manual",
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -51,8 +57,32 @@ public struct BookDTO: Codable, Identifiable, Equatable {
         self.finishDate = finishDate
         self.rating = rating
         self.bookDescription = bookDescription
+        self.appleBooksURL = appleBooksURL
+        self.importedFileName = importedFileName
+        self.sourceFormat = sourceFormat
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        self.title = try container.decode(String.self, forKey: .title)
+        self.author = try container.decodeIfPresent(String.self, forKey: .author) ?? ""
+        self.coverColorHex = try container.decodeIfPresent(String.self, forKey: .coverColorHex) ?? "forest"
+        self.coverIcon = try container.decodeIfPresent(String.self, forKey: .coverIcon) ?? "book.closed"
+        self.totalPages = try container.decodeIfPresent(Int.self, forKey: .totalPages)
+        self.currentPage = try container.decodeIfPresent(Int.self, forKey: .currentPage)
+        self.status = try container.decodeIfPresent(String.self, forKey: .status) ?? ReadingStatus.currentlyReading.rawValue
+        self.startDate = try container.decodeIfPresent(Date.self, forKey: .startDate)
+        self.finishDate = try container.decodeIfPresent(Date.self, forKey: .finishDate)
+        self.rating = try container.decodeIfPresent(Int.self, forKey: .rating)
+        self.bookDescription = try container.decodeIfPresent(String.self, forKey: .bookDescription)
+        self.appleBooksURL = try container.decodeIfPresent(String.self, forKey: .appleBooksURL)
+        self.importedFileName = try container.decodeIfPresent(String.self, forKey: .importedFileName)
+        self.sourceFormat = try container.decodeIfPresent(String.self, forKey: .sourceFormat) ?? "manual"
+        self.createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+        self.updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date()
     }
 }
 
@@ -98,6 +128,22 @@ public struct ReadingSessionDTO: Codable, Identifiable, Equatable {
         self.updatedAt = updatedAt
     }
     
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        self.bookId = try container.decodeIfPresent(UUID.self, forKey: .bookId)
+        self.startedAt = try container.decode(Date.self, forKey: .startedAt)
+        self.endedAt = try container.decodeIfPresent(Date.self, forKey: .endedAt)
+        self.status = try container.decodeIfPresent(String.self, forKey: .status) ?? SessionStatus.completed.rawValue
+        self.accumulatedActiveSeconds = try container.decodeIfPresent(Int.self, forKey: .accumulatedActiveSeconds) ?? 0
+        self.pausedDurationSeconds = try container.decodeIfPresent(Int.self, forKey: .pausedDurationSeconds) ?? 0
+        self.startPage = try container.decodeIfPresent(Int.self, forKey: .startPage)
+        self.endPage = try container.decodeIfPresent(Int.self, forKey: .endPage)
+        self.notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        self.createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? startedAt
+        self.updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? endedAt ?? startedAt
+    }
+    
     public var activeSeconds: Int {
         if accumulatedActiveSeconds > 0 {
             return accumulatedActiveSeconds
@@ -118,6 +164,13 @@ public struct ReadingGoalDTO: Codable, Equatable {
         self.dailyMinutes = dailyMinutes
         self.dailyPages = dailyPages
         self.yearlyBookTarget = yearlyBookTarget
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.dailyMinutes = try container.decodeIfPresent(Int.self, forKey: .dailyMinutes) ?? 30
+        self.dailyPages = try container.decodeIfPresent(Int.self, forKey: .dailyPages)
+        self.yearlyBookTarget = try container.decodeIfPresent(Int.self, forKey: .yearlyBookTarget)
     }
 }
 
@@ -150,6 +203,40 @@ public struct JournalEntryDTO: Codable, Identifiable, Equatable {
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
+    
+    // Backwards compatibility initializer for legacy argument ordering
+    public init(
+        id: UUID = UUID(),
+        bookId: UUID? = nil,
+        createdAt: Date = Date(),
+        type: String = JournalEntryType.note.rawValue,
+        title: String = "",
+        content: String,
+        pageNumber: Int? = nil,
+        isFavorite: Bool = false,
+        updatedAt: Date = Date()
+    ) {
+        self.id = id
+        self.bookId = bookId
+        self.content = content.isEmpty ? title : content
+        self.entryType = type
+        self.pageNumber = pageNumber
+        self.isFavorite = isFavorite
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        self.bookId = try container.decodeIfPresent(UUID.self, forKey: .bookId)
+        self.content = try container.decode(String.self, forKey: .content)
+        self.entryType = try container.decodeIfPresent(String.self, forKey: .entryType) ?? JournalEntryType.note.rawValue
+        self.pageNumber = try container.decodeIfPresent(Int.self, forKey: .pageNumber)
+        self.isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+        self.createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+        self.updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date()
+    }
 }
 
 public struct BookStrideBackupPackage: Codable, Equatable {
@@ -177,6 +264,17 @@ public struct BookStrideBackupPackage: Codable, Equatable {
         self.sessions = sessions
         self.goals = goals
         self.journalEntries = journalEntries
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.schemaVersion = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
+        self.appVersion = try container.decodeIfPresent(String.self, forKey: .appVersion) ?? "1.0.0"
+        self.exportedAt = try container.decodeIfPresent(Date.self, forKey: .exportedAt) ?? Date()
+        self.books = try container.decodeIfPresent([BookDTO].self, forKey: .books) ?? []
+        self.sessions = try container.decodeIfPresent([ReadingSessionDTO].self, forKey: .sessions) ?? []
+        self.goals = try container.decodeIfPresent(ReadingGoalDTO.self, forKey: .goals)
+        self.journalEntries = try container.decodeIfPresent([JournalEntryDTO].self, forKey: .journalEntries) ?? []
     }
 }
 
