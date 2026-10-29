@@ -125,7 +125,7 @@ public struct BookPickerSheet: View {
                             }
                         }
                         
-                        if let book = selectedBook {
+                        if selectedBook != nil {
                             Section(header: Text("Starting Page")) {
                                 HStack {
                                     Text("Current page:")

@@ -109,6 +109,8 @@
 		B1000047 /* BookPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookPickerSheet.swift; sourceTree = "<group>"; };
 		B1000048 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1000049 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B1000050 /* GoalConsistencyCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalConsistencyCard.swift; sourceTree = "<group>"; };
+		B1000051 /* JournalDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalDetailView.swift; sourceTree = "<group>"; };
 		C1000001 /* BookStride.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookStride.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -280,6 +282,7 @@
 				B1000035 /* MonthlyActivityChart.swift */,
 				B1000036 /* ReadingCalendarHeatmap.swift */,
 				B1000037 /* BookTimeDistributionChart.swift */,
+				B1000050 /* GoalConsistencyCard.swift */,
 			);
 			path = Insights;
 			sourceTree = "<group>";
@@ -290,6 +293,7 @@
 				B1000038 /* JournalView.swift */,
 				B1000039 /* AddEditJournalEntrySheet.swift */,
 				B1000040 /* JournalCardView.swift */,
+				B1000051 /* JournalDetailView.swift */,
 			);
 			path = Journal;
 			sourceTree = "<group>";
@@ -421,9 +425,11 @@
 				A1000035 /* MonthlyActivityChart.swift in Sources */,
 				A1000036 /* ReadingCalendarHeatmap.swift in Sources */,
 				A1000037 /* BookTimeDistributionChart.swift in Sources */,
+				A1000050 /* GoalConsistencyCard.swift in Sources */,
 				A1000038 /* JournalView.swift in Sources */,
 				A1000039 /* AddEditJournalEntrySheet.swift in Sources */,
 				A1000040 /* JournalCardView.swift in Sources */,
+				A1000051 /* JournalDetailView.swift in Sources */,
 				A1000041 /* SettingsView.swift in Sources */,
 				A1000042 /* CircularProgressRing.swift in Sources */,
 				A1000043 /* BookCoverThumbnail.swift in Sources */,
