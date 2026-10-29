@@ -7,6 +7,9 @@
 
 import Foundation
 import Combine
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 public struct ActiveSessionState: Codable, Equatable {
     public var sessionId: UUID
@@ -59,10 +62,17 @@ public final class ReadingTimerService: ObservableObject {
     @Published public var showStaleSessionAlert: Bool = false
     @Published public var unmonitoredElapsedSeconds: Int = 0
     
+    // Deep-link triggers to navigate seamlessly to the timer or book picker
+    @Published public var shouldOpenTimerModal: Bool = false
+    @Published public var shouldTriggerBookPicker: Bool = false
+    
+    // Last action timestamp for debouncing widget taps and preventing duplicates
+    private var lastWidgetActionTimestamp: Date = .distantPast
+    
     private var ticker: AnyCancellable?
     private let userDefaults: UserDefaults
     
-    public init(userDefaults: UserDefaults = .standard) {
+    public init(userDefaults: UserDefaults = AppGroupConfig.sharedDefaults) {
         self.userDefaults = userDefaults
         restoreActiveSession()
     }
@@ -70,8 +80,8 @@ public final class ReadingTimerService: ObservableObject {
     // MARK: - Lifecycle & State Restoration
     
     public func restoreActiveSession() {
-        guard let data = userDefaults.data(forKey: Self.storageKey) ?? userDefaults.data(forKey: "ReadFlow_ActiveSessionState_v1"),
-              let state = try? JSONDecoder().decode(ActiveSessionState.self, from: data) else {
+        guard let validData = userDefaults.data(forKey: Self.storageKey) ?? userDefaults.data(forKey: "ReadFlow_ActiveSessionState_v1"),
+              let state = try? JSONDecoder().decode(ActiveSessionState.self, from: validData) else {
             return
         }
         
@@ -103,9 +113,102 @@ public final class ReadingTimerService: ObservableObject {
         if let state = activeState {
             if let data = try? JSONEncoder().encode(state) {
                 userDefaults.set(data, forKey: Self.storageKey)
+                if userDefaults == AppGroupConfig.sharedDefaults && userDefaults != .standard {
+                    UserDefaults.standard.set(data, forKey: Self.storageKey)
+                }
             }
         } else {
             userDefaults.removeObject(forKey: Self.storageKey)
+            if userDefaults == AppGroupConfig.sharedDefaults && userDefaults != .standard {
+                UserDefaults.standard.removeObject(forKey: Self.storageKey)
+            }
+        }
+        updateWidgetSnapshot()
+    }
+    
+    /// Updates today's cached progress in shared storage so the widget Medium layout stays fresh.
+    public func updateTodayProgress(
+        todaySeconds: Int,
+        dailyGoalSeconds: Int,
+        sessionCountToday: Int,
+        currentStreakDays: Int
+    ) {
+        let snapshot = TodayProgressSnapshot(
+            date: Date(),
+            todaySeconds: todaySeconds,
+            dailyGoalSeconds: dailyGoalSeconds,
+            sessionCountToday: sessionCountToday,
+            currentStreakDays: currentStreakDays,
+            lastUpdated: Date()
+        )
+        if let data = try? JSONEncoder().encode(snapshot) {
+            userDefaults.set(data, forKey: AppGroupConfig.todayProgressKey)
+            if userDefaults == AppGroupConfig.sharedDefaults && userDefaults != .standard {
+                UserDefaults.standard.set(data, forKey: AppGroupConfig.todayProgressKey)
+            }
+        }
+        updateWidgetSnapshot()
+    }
+    
+    /// Updates widget snapshot and notifies WidgetCenter.
+    public func updateWidgetSnapshot() {
+        var todayData = userDefaults.data(forKey: AppGroupConfig.todayProgressKey)
+        if todayData == nil && userDefaults == AppGroupConfig.sharedDefaults {
+            todayData = UserDefaults.standard.data(forKey: AppGroupConfig.todayProgressKey)
+        }
+        let todayProgress = (todayData != nil) ? (try? JSONDecoder().decode(TodayProgressSnapshot.self, from: todayData!)) : nil
+        
+        let widgetState: WidgetSessionState
+        if let state = activeState {
+            widgetState = state.isPaused ? .paused : .active
+        } else {
+            widgetState = .idle
+        }
+        
+        let widgetSnapshot = WidgetReadingSnapshot(
+            state: widgetState,
+            sessionId: activeState?.sessionId,
+            bookId: activeState?.bookId,
+            bookTitle: activeState?.bookTitle ?? "Ready to Read",
+            bookAuthor: "",
+            startedAt: activeState?.startedAt,
+            lastResumedAt: activeState?.lastResumedAt,
+            lastPausedAt: activeState?.lastPausedAt,
+            accumulatedActiveSeconds: activeState?.accumulatedActiveSeconds ?? 0,
+            todaySeconds: todayProgress?.todaySeconds ?? 0,
+            dailyGoalSeconds: todayProgress?.dailyGoalSeconds ?? 1800,
+            isPaused: activeState?.isPaused ?? false,
+            lastUpdated: Date()
+        )
+        
+        if let data = try? JSONEncoder().encode(widgetSnapshot) {
+            userDefaults.set(data, forKey: AppGroupConfig.widgetSnapshotKey)
+            if userDefaults == AppGroupConfig.sharedDefaults && userDefaults != .standard {
+                UserDefaults.standard.set(data, forKey: AppGroupConfig.widgetSnapshotKey)
+            }
+        }
+        
+        notifyWidgetReload()
+    }
+    
+    public func notifyWidgetReload() {
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadAllTimelines()
+        #endif
+    }
+    
+    /// Safely toggles pause/resume from the WidgetKit action button with debounce protection.
+    public func toggleTimerFromWidget(now: Date = Date()) {
+        guard now.timeIntervalSince(lastWidgetActionTimestamp) > 0.3 else { return }
+        lastWidgetActionTimestamp = now
+        
+        restoreActiveSession()
+        guard let state = activeState else { return }
+        
+        if state.isPaused {
+            resumeSession(now: now)
+        } else {
+            pauseSession(now: now)
         }
     }
     

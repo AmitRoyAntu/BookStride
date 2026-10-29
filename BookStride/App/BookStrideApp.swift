@@ -43,8 +43,23 @@ struct BookStrideApp: App {
                         break
                     }
                 }
+                .onOpenURL { url in
+                    handleIncomingURL(url)
+                }
         }
         .modelContainer(container)
+    }
+    
+    private func handleIncomingURL(_ url: URL) {
+        guard url.scheme == "bookstride" else { return }
+        switch url.host {
+        case "timer", "session":
+            ReadingTimerService.shared.shouldOpenTimerModal = true
+        case "start":
+            ReadingTimerService.shared.shouldTriggerBookPicker = true
+        default:
+            ReadingTimerService.shared.shouldOpenTimerModal = true
+        }
     }
 }
 

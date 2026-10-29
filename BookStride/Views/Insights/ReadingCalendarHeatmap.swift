@@ -382,9 +382,10 @@ public struct ReadingCalendarHeatmap: View {
                     
                     ForEach(daySessions) { s in
                         let book = books.first(where: { $0.id == s.bookId })
+                        let dotColor = BookStrideTheme.bookCoverColors[book?.coverColorHex ?? "forest"] ?? BookStrideTheme.forestGreen
                         HStack(spacing: 10) {
                             Circle()
-                                .fill(book?.coverColor ?? BookStrideTheme.forestGreen)
+                                .fill(dotColor)
                                 .frame(width: 8, height: 8)
                             
                             VStack(alignment: .leading, spacing: 2) {
@@ -421,7 +422,7 @@ public struct ReadingCalendarHeatmap: View {
                     ForEach(dayEntries) { entry in
                         let book = books.first(where: { $0.id == entry.bookId })
                         HStack(spacing: 8) {
-                            Text(entry.type.uppercased())
+                            Text(entry.entryType.uppercased())
                                 .font(.system(size: 9, weight: .bold))
                                 .foregroundColor(BookStrideTheme.forestGreen)
                                 .padding(.horizontal, 6)
@@ -430,7 +431,7 @@ public struct ReadingCalendarHeatmap: View {
                                 .cornerRadius(4)
                             
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(entry.title.isEmpty ? entry.content : entry.title)
+                                Text(entry.content)
                                     .font(.caption.weight(.medium))
                                     .foregroundColor(BookStrideTheme.deepCharcoal)
                                     .lineLimit(1)

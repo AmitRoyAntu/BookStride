@@ -166,6 +166,37 @@ public struct TodayDashboardView: View {
         .sheet(isPresented: $timerService.showStaleSessionAlert) {
             SessionRecoveryAlertView(timerService: timerService)
         }
+        .onAppear {
+            syncTodayProgress()
+        }
+        .onChange(of: todayStats.todaySeconds) { _, _ in
+            syncTodayProgress()
+        }
+        .onChange(of: timerService.shouldOpenTimerModal) { _, open in
+            if open {
+                showingActiveSessionModal = true
+                timerService.shouldOpenTimerModal = false
+            }
+        }
+        .onChange(of: timerService.shouldTriggerBookPicker) { _, trigger in
+            if trigger {
+                if timerService.activeState != nil {
+                    showingActiveSessionModal = true
+                } else {
+                    showingBookPicker = true
+                }
+                timerService.shouldTriggerBookPicker = false
+            }
+        }
+    }
+    
+    private func syncTodayProgress() {
+        timerService.updateTodayProgress(
+            todaySeconds: todayStats.todaySeconds,
+            dailyGoalSeconds: dailyGoalSeconds,
+            sessionCountToday: todayStats.sessionCountToday,
+            currentStreakDays: todayStats.streakDays
+        )
     }
     
     // MARK: - Subviews

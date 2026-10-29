@@ -56,11 +56,12 @@ public struct InsightsView: View {
             JournalEntryDTO(
                 id: j.id,
                 bookId: j.book?.id,
-                createdAt: j.createdAt,
-                type: j.entryTypeRawValue,
-                title: "",
                 content: j.content,
-                pageNumber: j.pageNumber
+                entryType: j.entryTypeRawValue,
+                pageNumber: j.pageNumber,
+                isFavorite: j.isFavorite,
+                createdAt: j.createdAt,
+                updatedAt: j.updatedAt
             )
         }
         
@@ -73,19 +74,27 @@ public struct InsightsView: View {
         
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
-                // Time Filter Picker & Logs Action
+                // Time Filter Picker & Actions
                 ViewThatFits(in: .horizontal) {
                     HStack {
                         timeFilterPicker
                         Spacer()
+                        readingWrappedButton
                         sessionLogsButton
                     }
                     VStack(alignment: .leading, spacing: 14) {
                         timeFilterPicker
-                        sessionLogsButton
+                        HStack(spacing: 12) {
+                            readingWrappedButton
+                            sessionLogsButton
+                        }
                     }
                 }
                 .padding(.horizontal, 24)
+                
+                // Reading Wrapped Showcase Card
+                readingWrappedShowcaseCard
+                    .padding(.horizontal, 24)
                 
                 // 1. Primary Metrics Grid
                 LazyVGrid(columns: LayoutConstants.dashboardColumns, spacing: 16) {
@@ -210,6 +219,65 @@ public struct InsightsView: View {
         }
         .pickerStyle(.segmented)
         .frame(maxWidth: 420)
+    }
+    
+    private var readingWrappedButton: some View {
+        NavigationLink {
+            ReadingWrappedView()
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles.rectangle.stack")
+                Text("Reading Wrapped")
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+            .font(.callout.weight(.medium))
+            .foregroundColor(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(BookStrideTheme.forestGreen)
+            .cornerRadius(20)
+        }
+        .fixedSize(horizontal: true, vertical: false)
+    }
+    
+    private var readingWrappedShowcaseCard: some View {
+        NavigationLink {
+            ReadingWrappedView()
+        } label: {
+            HStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(BookStrideTheme.forestGreen.opacity(0.12))
+                        .frame(width: 44, height: 44)
+                    Image(systemName: "sparkles.rectangle.stack")
+                        .font(.title3)
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                }
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Reading Wrapped Share Cards")
+                        .font(.headline)
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
+                    Text("Generate and share 9:16 story & 1:1 post cards for any month or year")
+                        .font(.caption)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                }
+                
+                Spacer()
+                
+                HStack(spacing: 4) {
+                    Text("Create")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                }
+            }
+            .padding(16)
+            .BookStrideCardStyle()
+        }
     }
     
     private var sessionLogsButton: some View {

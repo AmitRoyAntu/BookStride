@@ -153,6 +153,7 @@ public struct AddEditJournalEntrySheet: View {
         case .quote: return "Quote / Highlighted Passage"
         case .reflection: return "Personal Reflection"
         case .note: return "Reading Note"
+        case .keyTakeaway: return "Key Takeaway"
         }
     }
     
@@ -161,6 +162,7 @@ public struct AddEditJournalEntrySheet: View {
         case .quote: return "Type or paste the memorable quote..."
         case .reflection: return "Reflect on insights, connections, or lessons from this reading..."
         case .note: return "Jot down summary notes, thoughts, or ideas..."
+        case .keyTakeaway: return "Capture core lessons, takeaways, or concepts..."
         }
     }
     

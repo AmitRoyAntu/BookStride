@@ -35,7 +35,6 @@ public struct SettingsView: View {
     
     // Backup & Export
     @State private var exportActivityItems: [Any] = []
-    @State private var showingShareSheet: Bool = false
     @State private var showingFileImporter: Bool = false
     @State private var importErrorMessage: String?
     @State private var importSuccessMessage: String?
@@ -101,22 +100,21 @@ public struct SettingsView: View {
                 .pickerStyle(.menu)
             }
             
-            // Section 3: Streak Rule Explanation
+            // Section 3: Streak Rule Explanation & Reminders
             Section(header: Text("How Streaks Work")) {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("Transparent Habit Counting", systemImage: "info.circle")
                         .font(.subheadline.weight(.semibold))
                         .foregroundColor(BookStrideTheme.deepCharcoal)
                     
-                    Text("• A calendar day qualifies for your streak once your active reading reaches your daily goal (\(dailyMinutes) min).\n• While today is underway, an active streak from yesterday is never prematurely broken.\n• Paused intervals are strictly excluded from reading time.\n• Sessions that cross midnight are apportioned to each day's local calendar total.")
+                    Text("• A calendar day qualifies for your streak once your active reading reaches your daily goal (\(dailyMinutes) min).\n• While today is underway, an active streak from yesterday is never prematurely broken.\n• Paused intervals are strictly deducted from active time.\n• Sessions crossing local midnight credit their active minutes to the respective calendar days.")
                         .font(.caption)
                         .foregroundColor(BookStrideTheme.mutedSlate)
-                        .lineSpacing(3)
+                        .lineSpacing(4)
                 }
                 .padding(.vertical, 4)
             }
             
-            // Section 3: Daily Reading Reminders
             Section(header: Text("Notifications & Habit Reminders")) {
                 Toggle("Daily Reading Reminder", isOn: $enableDailyReminder)
                     .onChange(of: enableDailyReminder) { _, isEnabled in
@@ -140,6 +138,11 @@ public struct SettingsView: View {
                         .foregroundColor(notificationService.isAuthorized ? BookStrideTheme.forestGreen : BookStrideTheme.mutedSlate)
                 }
             }
+            .alert("Notification Permission Denied", isPresented: $showingPermissionDeniedAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please enable notifications for BookStride in iPadOS Settings to receive daily reading reminders.")
+            }
             
             // Section 4: Data Management (Export & Import)
             Section(header: Text("Data Management & Backup")) {
@@ -160,12 +163,14 @@ public struct SettingsView: View {
                         Image(systemName: "archivebox.fill")
                         Text("Export Full Backup (JSON)")
                         Spacer()
-                        Image(systemName: "chevron.right")
+                        Image(systemName: "square.and.arrow.up")
                             .font(.caption2)
                             .foregroundColor(BookStrideTheme.mutedSlate)
                     }
                     .foregroundColor(BookStrideTheme.deepCharcoal)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 
                 Button {
                     exportCSVSpreadsheets()
@@ -174,12 +179,14 @@ public struct SettingsView: View {
                         Image(systemName: "tablecells.fill")
                         Text("Export Spreadsheets (CSV)")
                         Spacer()
-                        Image(systemName: "chevron.right")
+                        Image(systemName: "square.and.arrow.up")
                             .font(.caption2)
                             .foregroundColor(BookStrideTheme.mutedSlate)
                     }
                     .foregroundColor(BookStrideTheme.deepCharcoal)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 
                 Button {
                     showingFileImporter = true
@@ -188,9 +195,14 @@ public struct SettingsView: View {
                         Image(systemName: "square.and.arrow.down")
                         Text("Import Backup (JSON)")
                         Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
                     }
                     .foregroundColor(BookStrideTheme.deepCharcoal)
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
                 
                 HStack {
                     Text("Offline-first:")
@@ -199,6 +211,18 @@ public struct SettingsView: View {
                         .font(.caption)
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
+            }
+            .fileImporter(
+                isPresented: $showingFileImporter,
+                allowedContentTypes: [.json],
+                allowsMultipleSelection: false
+            ) { result in
+                handleFileImport(result)
+            }
+            .alert(importErrorMessage != nil ? "Import Failed" : "Data Management", isPresented: $showingAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(importErrorMessage ?? importSuccessMessage ?? "")
             }
             
             // Section 5: Evaluation & Demo Data
@@ -213,6 +237,13 @@ public struct SettingsView: View {
                         Spacer()
                     }
                     .foregroundColor(BookStrideTheme.forestGreen)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .alert("Sample Data Added", isPresented: $showingSampleDataPopulatedNotice) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    Text("Sample books, reading sessions spanning streaks, and journal notes have been loaded.")
                 }
                 
                 Button(role: .destructive) {
@@ -224,6 +255,16 @@ public struct SettingsView: View {
                         Spacer()
                     }
                     .foregroundColor(.red)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .alert("Clear All App Data?", isPresented: $showingClearConfirmation) {
+                    Button("Erase Everything", role: .destructive) {
+                        clearAllLibraryData()
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("This will permanently delete all books, reading sessions, and journal entries. This cannot be undone.")
                 }
             }
             
@@ -270,41 +311,6 @@ public struct SettingsView: View {
         .navigationTitle("Settings")
         .onAppear {
             loadGoalValues()
-        }
-        .sheet(isPresented: $showingShareSheet) {
-            if !exportActivityItems.isEmpty {
-                ShareSheet(activityItems: exportActivityItems)
-            }
-        }
-        .fileImporter(
-            isPresented: $showingFileImporter,
-            allowedContentTypes: [UTType.json],
-            allowsMultipleSelection: false
-        ) { result in
-            handleFileImport(result)
-        }
-        .confirmationDialog("Clear All App Data?", isPresented: $showingClearConfirmation, titleVisibility: .visible) {
-            Button("Erase Everything", role: .destructive) {
-                SampleDataService.clearAllData(in: modelContext)
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This will permanently delete all books, reading sessions, and journal entries. This cannot be undone.")
-        }
-        .alert(importErrorMessage != nil ? "Import Failed" : "Data Management", isPresented: $showingAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(importErrorMessage ?? importSuccessMessage ?? "")
-        }
-        .alert("Sample Data Added", isPresented: $showingSampleDataPopulatedNotice) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Sample books, reading sessions spanning streaks, and journal notes have been loaded.")
-        }
-        .alert("Notification Permission Denied", isPresented: $showingPermissionDeniedAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Please enable notifications for BookStride in iPadOS Settings to receive daily reading reminders.")
         }
     }
     
@@ -434,7 +440,7 @@ public struct SettingsView: View {
         do {
             let fileURL = try DataExportService.writeToTemporaryExportFile(package)
             self.exportActivityItems = [fileURL]
-            self.showingShareSheet = true
+            presentShareSheet(items: [fileURL])
         } catch {
             importErrorMessage = "Failed to export backup: \(error.localizedDescription)"
             showingAlert = true
@@ -498,9 +504,59 @@ public struct SettingsView: View {
                 journalDTOs: journalDTOs
             )
             self.exportActivityItems = urls
-            self.showingShareSheet = true
+            presentShareSheet(items: urls)
         } catch {
             importErrorMessage = "Failed to export CSV: \(error.localizedDescription)"
+            showingAlert = true
+        }
+    }
+    
+    /// Presents native iPadOS Share Sheet (UIActivityViewController) with properly anchored popover.
+    private func presentShareSheet(items: [Any]) {
+        guard let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene ?? UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootVC = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController ?? windowScene.windows.first?.rootViewController else {
+            return
+        }
+        
+        var topVC = rootVC
+        while let presented = topVC.presentedViewController, !presented.isBeingDismissed {
+            topVC = presented
+        }
+        
+        let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = topVC.view
+            popover.sourceRect = CGRect(x: topVC.view.bounds.midX, y: topVC.view.bounds.midY, width: 0, height: 0)
+            popover.permittedArrowDirections = []
+        }
+        topVC.present(activityVC, animated: true)
+    }
+    
+    @MainActor
+    private func clearAllLibraryData() {
+        do {
+            let sessions = try modelContext.fetch(FetchDescriptor<ReadingSession>())
+            for s in sessions {
+                modelContext.delete(s)
+            }
+            
+            let entries = try modelContext.fetch(FetchDescriptor<JournalEntry>())
+            for e in entries {
+                modelContext.delete(e)
+            }
+            
+            let books = try modelContext.fetch(FetchDescriptor<Book>())
+            for b in books {
+                modelContext.delete(b)
+            }
+            
+            try modelContext.save()
+            importSuccessMessage = "All library books, sessions, and journal notes have been cleared."
+            importErrorMessage = nil
+            showingAlert = true
+        } catch {
+            SampleDataService.clearAllData(in: modelContext)
+            importErrorMessage = "Failed to clear data: \(error.localizedDescription)"
             showingAlert = true
         }
     }
@@ -509,12 +565,12 @@ public struct SettingsView: View {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
-            guard url.startAccessingSecurityScopedResource() else {
-                importErrorMessage = "Access to file was denied by iPadOS security."
-                showingAlert = true
-                return
+            let isSecurityScoped = url.startAccessingSecurityScopedResource()
+            defer {
+                if isSecurityScoped {
+                    url.stopAccessingSecurityScopedResource()
+                }
             }
-            defer { url.stopAccessingSecurityScopedResource() }
             
             do {
                 let data = try Data(contentsOf: url)
@@ -651,7 +707,7 @@ public struct SettingsView: View {
     }
 }
 
-// iPadOS ShareSheet representation
+// iPadOS ShareSheet representation (fallback)
 public struct ShareSheet: UIViewControllerRepresentable {
     public var activityItems: [Any]
     public var applicationActivities: [UIActivity]? = nil
@@ -661,9 +717,16 @@ public struct ShareSheet: UIViewControllerRepresentable {
             activityItems: activityItems,
             applicationActivities: applicationActivities
         )
+        if let popover = controller.popoverPresentationController {
+            popover.permittedArrowDirections = []
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let rootVC = windowScene.windows.first?.rootViewController {
+                popover.sourceView = rootVC.view
+                popover.sourceRect = CGRect(x: rootVC.view.bounds.midX, y: rootVC.view.bounds.midY, width: 0, height: 0)
+            }
+        }
         return controller
     }
     
     public func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
-

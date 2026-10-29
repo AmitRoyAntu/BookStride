@@ -58,6 +58,13 @@
 		A1000050 /* GoalConsistencyCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000050 /* GoalConsistencyCard.swift */; };
 		A1000051 /* JournalDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000051 /* JournalDetailView.swift */; };
 		A1000052 /* ReadingForecastService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000052 /* ReadingForecastService.swift */; };
+		A1000053 /* WidgetSharedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000053 /* WidgetSharedModels.swift */; };
+		A1000054 /* ReadingWrappedService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000054 /* ReadingWrappedService.swift */; };
+		A1000055 /* ShareSheetPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000055 /* ShareSheetPresenter.swift */; };
+		A1000056 /* ReadingWrappedCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000056 /* ReadingWrappedCardView.swift */; };
+		A1000057 /* ReadingWrappedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000057 /* ReadingWrappedView.swift */; };
+		A1000058 /* BookStrideWidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000058 /* BookStrideWidgetIntents.swift */; };
+		A1000059 /* BookStrideTimerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000059 /* BookStrideTimerWidget.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -114,6 +121,13 @@
 		B1000051 /* JournalDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalDetailView.swift; sourceTree = "<group>"; };
 		B1000052 /* ReadingForecastService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingForecastService.swift; sourceTree = "<group>"; };
 		C1000001 /* BookStride.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookStride.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1000053 /* WidgetSharedModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSharedModels.swift; sourceTree = "<group>"; };
+		B1000054 /* ReadingWrappedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingWrappedService.swift; sourceTree = "<group>"; };
+		B1000055 /* ShareSheetPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheetPresenter.swift; sourceTree = "<group>"; };
+		B1000056 /* ReadingWrappedCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingWrappedCardView.swift; sourceTree = "<group>"; };
+		B1000057 /* ReadingWrappedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingWrappedView.swift; sourceTree = "<group>"; };
+		B1000058 /* BookStrideWidgetIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideWidgetIntents.swift; sourceTree = "<group>"; };
+		B1000059 /* BookStrideTimerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideTimerWidget.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,6 +157,7 @@
 				E1000006 /* Services */,
 				E1000007 /* Utilities */,
 				E1000008 /* Views */,
+				E1000019 /* Widgets */,
 				E1000009 /* Resources */,
 			);
 			path = BookStride;
@@ -188,6 +203,8 @@
 				B1000013 /* SampleDataService.swift */,
 				B1000014 /* AppleBooksService.swift */,
 				B1000052 /* ReadingForecastService.swift */,
+				B1000053 /* WidgetSharedModels.swift */,
+				B1000054 /* ReadingWrappedService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -199,6 +216,7 @@
 				B1000016 /* DateUtilities.swift */,
 				B1000017 /* Formatters.swift */,
 				B1000018 /* LayoutConstants.swift */,
+				B1000055 /* ShareSheetPresenter.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -286,6 +304,8 @@
 				B1000036 /* ReadingCalendarHeatmap.swift */,
 				B1000037 /* BookTimeDistributionChart.swift */,
 				B1000050 /* GoalConsistencyCard.swift */,
+				B1000056 /* ReadingWrappedCardView.swift */,
+				B1000057 /* ReadingWrappedView.swift */,
 			);
 			path = Insights;
 			sourceTree = "<group>";
@@ -320,6 +340,15 @@
 				B1000047 /* BookPickerSheet.swift */,
 			);
 			path = Components;
+			sourceTree = "<group>";
+		};
+		E1000019 /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				B1000058 /* BookStrideWidgetIntents.swift */,
+				B1000059 /* BookStrideTimerWidget.swift */,
+			);
+			path = Widgets;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -441,6 +470,13 @@
 				A1000045 /* MetricCard.swift in Sources */,
 				A1000046 /* SectionHeaderView.swift in Sources */,
 				A1000047 /* BookPickerSheet.swift in Sources */,
+				A1000053 /* WidgetSharedModels.swift in Sources */,
+				A1000054 /* ReadingWrappedService.swift in Sources */,
+				A1000055 /* ShareSheetPresenter.swift in Sources */,
+				A1000056 /* ReadingWrappedCardView.swift in Sources */,
+				A1000057 /* ReadingWrappedView.swift in Sources */,
+				A1000058 /* BookStrideWidgetIntents.swift in Sources */,
+				A1000059 /* BookStrideTimerWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

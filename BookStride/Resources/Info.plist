@@ -20,6 +20,21 @@
 	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.amitroy.BookStride</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>bookstride</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Bookstride needs permission to save your Reading Wrapped cards to your Photo Library.</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>ibooks</string>
