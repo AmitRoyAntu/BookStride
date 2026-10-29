@@ -11,6 +11,7 @@ public enum TimeFilter: String, CaseIterable, Identifiable {
     case last7Days = "7 Days"
     case last30Days = "30 Days"
     case last90Days = "90 Days"
+    case thisYear = "This Year"
     case allTime = "All Time"
     
     public var id: String { rawValue }
@@ -23,6 +24,9 @@ public enum TimeFilter: String, CaseIterable, Identifiable {
             return calendar.date(byAdding: .day, value: -29, to: calendar.startOfDay(for: now))
         case .last90Days:
             return calendar.date(byAdding: .day, value: -89, to: calendar.startOfDay(for: now))
+        case .thisYear:
+            let comps = calendar.dateComponents([.year], from: now)
+            return calendar.date(from: comps)
         case .allTime:
             return nil
         }
@@ -95,12 +99,26 @@ public struct HeatmapDayPoint: Identifiable, Equatable {
     public let minutes: Int
     public let intensity: Int // 0 (none), 1 (light), 2 (medium), 3 (good), 4 (goal met)
     public let isCurrentMonth: Bool
+    public let sessionCount: Int
+    public let metGoal: Bool
+    public let isToday: Bool
     
-    public init(date: Date, minutes: Int, intensity: Int, isCurrentMonth: Bool) {
+    public init(
+        date: Date,
+        minutes: Int,
+        intensity: Int,
+        isCurrentMonth: Bool = true,
+        sessionCount: Int = 0,
+        metGoal: Bool = false,
+        isToday: Bool = false
+    ) {
         self.date = date
         self.minutes = minutes
         self.intensity = intensity
         self.isCurrentMonth = isCurrentMonth
+        self.sessionCount = sessionCount
+        self.metGoal = metGoal
+        self.isToday = isToday
     }
 }
 
@@ -114,6 +132,9 @@ public struct InsightsAnalyticsSummary: Equatable {
     public let longestStreak: Int
     public let goalCompletionRate: Double
     public let totalPagesRead: Int
+    public let readingSecondsToday: Int
+    public let readingSecondsThisWeek: Int
+    public let readingSecondsThisMonth: Int
     
     public init(
         totalReadingSeconds: Int = 0,
@@ -124,7 +145,10 @@ public struct InsightsAnalyticsSummary: Equatable {
         currentStreak: Int = 0,
         longestStreak: Int = 0,
         goalCompletionRate: Double = 0.0,
-        totalPagesRead: Int = 0
+        totalPagesRead: Int = 0,
+        readingSecondsToday: Int = 0,
+        readingSecondsThisWeek: Int = 0,
+        readingSecondsThisMonth: Int = 0
     ) {
         self.totalReadingSeconds = totalReadingSeconds
         self.averageDailySeconds = averageDailySeconds
@@ -135,6 +159,9 @@ public struct InsightsAnalyticsSummary: Equatable {
         self.longestStreak = longestStreak
         self.goalCompletionRate = goalCompletionRate
         self.totalPagesRead = totalPagesRead
+        self.readingSecondsToday = readingSecondsToday
+        self.readingSecondsThisWeek = readingSecondsThisWeek
+        self.readingSecondsThisMonth = readingSecondsThisMonth
     }
 }
 
@@ -243,6 +270,21 @@ public enum ReadingStatisticsService {
         // Books finished
         let finishedBooksCount = books.filter { $0.status == ReadingStatus.finished.rawValue }.count
         
+        // Today, This Week, This Month calculations from allTimeDailyTotals
+        let todayNormalized = calendar.startOfDay(for: now)
+        let readingToday = allTimeDailyTotals[todayNormalized] ?? 0
+        
+        var readingThisWeek = 0
+        var readingThisMonth = 0
+        for (date, seconds) in allTimeDailyTotals {
+            if calendar.isDate(date, equalTo: now, toGranularity: .weekOfYear) {
+                readingThisWeek += seconds
+            }
+            if calendar.isDate(date, equalTo: now, toGranularity: .month) {
+                readingThisMonth += seconds
+            }
+        }
+        
         let summary = InsightsAnalyticsSummary(
             totalReadingSeconds: totalActiveSeconds,
             averageDailySeconds: avgDailySeconds,
@@ -252,7 +294,10 @@ public enum ReadingStatisticsService {
             currentStreak: streakInfo.currentStreak,
             longestStreak: streakInfo.longestStreak,
             goalCompletionRate: completionRate,
-            totalPagesRead: totalPages
+            totalPagesRead: totalPages,
+            readingSecondsToday: readingToday,
+            readingSecondsThisWeek: readingThisWeek,
+            readingSecondsThisMonth: readingThisMonth
         )
         
         // 3. Daily bar chart data
@@ -309,6 +354,9 @@ public enum ReadingStatisticsService {
         case .last7Days: numberOfDays = 7
         case .last30Days: numberOfDays = 30
         case .last90Days: numberOfDays = 90
+        case .thisYear:
+            let dayOfYear = calendar.ordinality(of: .day, in: .year, for: now) ?? 365
+            numberOfDays = max(1, dayOfYear)
         case .allTime: numberOfDays = min(60, max(7, dailyTotals.count))
         }
         
@@ -449,6 +497,91 @@ public enum ReadingStatisticsService {
             
             points.append(HeatmapDayPoint(date: dayDate, minutes: minutes, intensity: intensity, isCurrentMonth: true))
         }
+        return points
+    }
+    
+    /// Computes full-year GitHub-style heatmap points for any given year with session counts,
+    /// goal met status, and day-of-year integrity.
+    public static func computeYearlyHeatmap(
+        sessions: [ReadingSessionDTO],
+        year: Int,
+        dailyGoalMinutes: Int = 30,
+        now: Date = Date(),
+        calendar: Calendar = DateUtilities.defaultCalendar
+    ) -> [HeatmapDayPoint] {
+        let goalSeconds = max(60, dailyGoalMinutes * 60)
+        
+        var dailyTotals: [Date: Int] = [:]
+        var dailySessionCounts: [Date: Int] = [:]
+        
+        let completed = sessions.filter { $0.status == SessionStatus.completed.rawValue }
+        for s in completed {
+            let activeSec = s.activeSeconds
+            guard activeSec > 0 else { continue }
+            let end = s.endedAt ?? s.startedAt.addingTimeInterval(Double(activeSec))
+            let allocations = DateUtilities.splitSessionAcrossDays(
+                startedAt: s.startedAt,
+                endedAt: end,
+                activeSeconds: activeSec,
+                calendar: calendar
+            )
+            for a in allocations {
+                dailyTotals[a.date, default: 0] += a.activeSeconds
+            }
+            let startDay = calendar.startOfDay(for: s.startedAt)
+            dailySessionCounts[startDay, default: 0] += 1
+        }
+        
+        var dateComps = DateComponents()
+        dateComps.year = year
+        dateComps.month = 1
+        dateComps.day = 1
+        guard let yearStart = calendar.date(from: dateComps),
+              let daysInYear = calendar.range(of: .day, in: .year, for: yearStart) else {
+            return []
+        }
+        
+        let normalizedToday = calendar.startOfDay(for: now)
+        let currentMonthComps = calendar.dateComponents([.year, .month], from: now)
+        
+        var points: [HeatmapDayPoint] = []
+        for dayOffset in 0..<daysInYear.count {
+            guard let dayDate = calendar.date(byAdding: .day, value: dayOffset, to: yearStart) else { continue }
+            let seconds = dailyTotals[dayDate] ?? 0
+            let minutes = seconds / 60
+            let sCount = dailySessionCounts[dayDate] ?? 0
+            let met = seconds >= goalSeconds
+            let isToday = (dayDate == normalizedToday)
+            
+            let dayMonthComps = calendar.dateComponents([.year, .month], from: dayDate)
+            let isCurrentMonth = (dayMonthComps == currentMonthComps)
+            
+            let intensity: Int
+            if seconds == 0 {
+                intensity = 0
+            } else if seconds >= goalSeconds {
+                intensity = 4
+            } else if seconds >= (goalSeconds * 2 / 3) {
+                intensity = 3
+            } else if seconds >= (goalSeconds / 3) {
+                intensity = 2
+            } else {
+                intensity = 1
+            }
+            
+            points.append(
+                HeatmapDayPoint(
+                    date: dayDate,
+                    minutes: minutes,
+                    intensity: intensity,
+                    isCurrentMonth: isCurrentMonth,
+                    sessionCount: sCount,
+                    metGoal: met,
+                    isToday: isToday
+                )
+            )
+        }
+        
         return points
     }
 }

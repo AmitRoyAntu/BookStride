@@ -2,7 +2,7 @@
 //  JournalCardView.swift
 //  BookStride
 //
-//  Stylized reading journal entry card formatted for notes and quotes.
+//  Stylized reading journal entry card formatted for notes, quotes, and reflections.
 //
 
 import SwiftUI
@@ -21,18 +21,27 @@ public struct JournalCardView: View {
         self.onDelete = onDelete
     }
     
+    private var badgeColor: Color {
+        switch entry.entryType {
+        case .quote:
+            return BookStrideTheme.streakAmber
+        case .reflection:
+            return BookStrideTheme.forestGreen
+        case .note:
+            return BookStrideTheme.forestGreen
+        }
+    }
+    
     public var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header with type badge, book link, and favorite star
             HStack(spacing: 8) {
                 Label(entry.entryType.rawValue, systemImage: entry.entryType.iconName)
                     .font(.caption2.weight(.semibold))
-                    .foregroundColor(entry.entryType == .quote ? BookStrideTheme.streakAmber : BookStrideTheme.forestGreen)
+                    .foregroundColor(badgeColor)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(
-                        (entry.entryType == .quote ? BookStrideTheme.streakAmber : BookStrideTheme.forestGreen).opacity(0.12)
-                    )
+                    .background(badgeColor.opacity(0.12))
                     .cornerRadius(8)
                 
                 if let book = entry.book {
@@ -42,7 +51,7 @@ public struct JournalCardView: View {
                         .lineLimit(1)
                 }
                 
-                if let page = entry.pageNumber {
+                if let page = entry.pageNumber, page >= 0 {
                     Text("• p. \(page)")
                         .font(.caption)
                         .foregroundColor(BookStrideTheme.mutedSlate)
@@ -60,6 +69,7 @@ public struct JournalCardView: View {
                         .foregroundColor(entry.isFavorite ? BookStrideTheme.streakAmber : BookStrideTheme.mutedSlate)
                         .font(.subheadline)
                 }
+                .buttonStyle(.borderless)
             }
             
             // Content
@@ -77,6 +87,22 @@ public struct JournalCardView: View {
                         .lineSpacing(4)
                 }
                 .padding(.horizontal, 4)
+            } else if entry.entryType == .reflection {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles")
+                            .font(.caption2)
+                            .foregroundColor(BookStrideTheme.forestGreen)
+                        Text("Reflection")
+                            .font(.caption2.weight(.bold))
+                            .foregroundColor(BookStrideTheme.forestGreen)
+                            .textCase(.uppercase)
+                    }
+                    Text(entry.content)
+                        .font(.body)
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
+                        .lineSpacing(3)
+                }
             } else {
                 Text(entry.content)
                     .font(.body)
@@ -116,7 +142,7 @@ public struct JournalCardView: View {
             }
         }
         .sheet(isPresented: $showingEditSheet) {
-            AddEditJournalEntrySheet(entryToEdit: entry)
+            AddEditJournalEntrySheet(entryToEdit: entry, associatedBook: entry.book)
         }
         .confirmationDialog("Delete Journal Entry?", isPresented: $showingDeleteAlert, titleVisibility: .visible) {
             Button("Delete Entry", role: .destructive) {

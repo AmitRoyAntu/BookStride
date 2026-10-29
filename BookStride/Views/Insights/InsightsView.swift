@@ -89,16 +89,32 @@ public struct InsightsView: View {
                     MetricCard(
                         title: "Total Reading Time",
                         value: Formatters.formatDuration(seconds: computedData.summary.totalReadingSeconds, style: .full),
-                        subtitle: "Over selected \(selectedFilter.rawValue.lowercased())",
+                        subtitle: "Filter: \(selectedFilter.rawValue)",
                         iconName: "clock.fill",
                         accentColor: BookStrideTheme.forestGreen
                     )
                     
                     MetricCard(
-                        title: "Daily Average",
-                        value: Formatters.formatDuration(seconds: computedData.summary.averageDailySeconds, style: .short),
-                        subtitle: "Goal: \(dailyGoalMinutes)m per day",
-                        iconName: "chart.bar.fill",
+                        title: "Reading Today",
+                        value: Formatters.formatDuration(seconds: computedData.summary.readingSecondsToday, style: .short),
+                        subtitle: "Goal: \(dailyGoalMinutes)m",
+                        iconName: "sun.max.fill",
+                        accentColor: BookStrideTheme.forestGreen
+                    )
+                    
+                    MetricCard(
+                        title: "This Week",
+                        value: Formatters.formatDuration(seconds: computedData.summary.readingSecondsThisWeek, style: .short),
+                        subtitle: "Active local week",
+                        iconName: "calendar.badge.clock",
+                        accentColor: BookStrideTheme.forestGreenLight
+                    )
+                    
+                    MetricCard(
+                        title: "This Month",
+                        value: Formatters.formatDuration(seconds: computedData.summary.readingSecondsThisMonth, style: .short),
+                        subtitle: "Active local month",
+                        iconName: "calendar",
                         accentColor: BookStrideTheme.forestGreenLight
                     )
                     
@@ -143,7 +159,15 @@ public struct InsightsView: View {
                 )
                 .padding(.horizontal, 24)
                 
-                // 3. Side-by-side or stacked charts on iPad (responsive portrait/landscape)
+                // 3. Goal Consistency Breakdown
+                GoalConsistencyCard(
+                    summary: computedData.summary,
+                    dailyPoints: computedData.dailyPoints,
+                    dailyGoalMinutes: dailyGoalMinutes
+                )
+                .padding(.horizontal, 24)
+                
+                // 4. Side-by-side or stacked trends on iPad (responsive portrait/landscape)
                 ViewThatFits(in: .horizontal) {
                     HStack(alignment: .top, spacing: 20) {
                         WeeklyTrendChart(points: computedData.weeklyTrend)
@@ -156,18 +180,29 @@ public struct InsightsView: View {
                 }
                 .padding(.horizontal, 24)
                 
-                // 4. Heatmap & Book Distribution (responsive portrait/landscape)
-                ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .top, spacing: 20) {
-                        ReadingCalendarHeatmap(points: computedData.heatmapPoints)
-                        BookTimeDistributionChart(distribution: computedData.bookDistribution)
-                    }
-                    VStack(spacing: 20) {
-                        ReadingCalendarHeatmap(points: computedData.heatmapPoints)
-                        BookTimeDistributionChart(distribution: computedData.bookDistribution)
-                    }
-                }
+                // 5. GitHub-style Reading Consistency Heatmap (Full Year with Year Nav)
+                ReadingCalendarHeatmap(
+                    sessions: allSessions.map { s in
+                        ReadingSessionDTO(
+                            id: s.id,
+                            bookId: s.book?.id,
+                            startedAt: s.startedAt,
+                            endedAt: s.endedAt,
+                            status: s.statusRawValue,
+                            accumulatedActiveSeconds: s.accumulatedActiveSeconds,
+                            pausedDurationSeconds: s.pausedDurationSeconds,
+                            startPage: s.startPage,
+                            endPage: s.endPage,
+                            notes: s.notes
+                        )
+                    },
+                    dailyGoalMinutes: dailyGoalMinutes
+                )
                 .padding(.horizontal, 24)
+                
+                // 6. Book Distribution Breakdown
+                BookTimeDistributionChart(distribution: computedData.bookDistribution)
+                    .padding(.horizontal, 24)
             }
             .padding(.vertical, 20)
         }

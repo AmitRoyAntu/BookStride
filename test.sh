@@ -18,6 +18,7 @@ swiftc -module-cache-path /tmp/clang-cache \
   BookStrideTests/ReadingStatisticsServiceTests.swift \
   BookStrideTests/DataExportServiceTests.swift \
   BookStrideTests/ValidationTests.swift \
+  BookStrideTests/Phase2FeatureTests.swift \
   BookStrideTests/TestRunner.swift \
   -o /tmp/BookStride_runner
 

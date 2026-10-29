@@ -2,111 +2,335 @@
 //  ReadingCalendarHeatmap.swift
 //  BookStride
 //
-//  Calendar heatmap displaying daily reading consistency across the current month.
+//  GitHub-contribution-style annual reading consistency calendar for iPadOS.
+//  Includes year navigation, month headers, weekday labels, accessible readout, and day inspection.
 //
 
 import SwiftUI
 
 public struct ReadingCalendarHeatmap: View {
-    public var points: [HeatmapDayPoint]
+    public var sessions: [ReadingSessionDTO]
+    public var dailyGoalMinutes: Int
+    
+    @State private var selectedYear: Int
     @State private var selectedPoint: HeatmapDayPoint?
     
-    private let weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 7)
+    private let calendar = Calendar.current
+    private let dayRowLabels = ["", "Mon", "", "Wed", "", "Fri", ""]
     
+    public init(sessions: [ReadingSessionDTO], dailyGoalMinutes: Int = 30) {
+        self.sessions = sessions
+        self.dailyGoalMinutes = dailyGoalMinutes
+        _selectedYear = State(initialValue: Calendar.current.component(.year, from: Date()))
+    }
+    
+    // Fallback initializer for backwards compatibility
     public init(points: [HeatmapDayPoint]) {
-        self.points = points
+        self.sessions = []
+        self.dailyGoalMinutes = 30
+        _selectedYear = State(initialValue: Calendar.current.component(.year, from: Date()))
+    }
+    
+    private var yearPoints: [HeatmapDayPoint] {
+        ReadingStatisticsService.computeYearlyHeatmap(
+            sessions: sessions,
+            year: selectedYear,
+            dailyGoalMinutes: dailyGoalMinutes,
+            calendar: calendar
+        )
+    }
+    
+    // Group days into columns of 7 (Sunday=0 to Saturday=6)
+    private var weekColumns: [[HeatmapDayPoint?]] {
+        guard let first = yearPoints.first else { return [] }
+        
+        let firstWeekday = calendar.component(.weekday, from: first.date) // 1 = Sunday
+        var weeks: [[HeatmapDayPoint?]] = []
+        var currentWeek: [HeatmapDayPoint?] = Array(repeating: nil, count: firstWeekday - 1)
+        
+        for point in yearPoints {
+            currentWeek.append(point)
+            if currentWeek.count == 7 {
+                weeks.append(currentWeek)
+                currentWeek = []
+            }
+        }
+        
+        if !currentWeek.isEmpty {
+            while currentWeek.count < 7 {
+                currentWeek.append(nil)
+            }
+            weeks.append(currentWeek)
+        }
+        
+        return weeks
+    }
+    
+    // Determine month headers position along week columns
+    private var monthHeaders: [(name: String, weekIndex: Int)] {
+        var headers: [(name: String, weekIndex: Int)] = []
+        var lastSeenMonth = -1
+        let df = DateFormatter()
+        df.dateFormat = "MMM"
+        
+        for (wIndex, week) in weekColumns.enumerated() {
+            if let firstValidDay = week.compactMap({ $0 }).first {
+                let m = calendar.component(.month, from: firstValidDay.date)
+                if m != lastSeenMonth {
+                    headers.append((df.string(from: firstValidDay.date), wIndex))
+                    lastSeenMonth = m
+                }
+            }
+        }
+        return headers
     }
     
     public var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header: Title & Year Navigator
+            HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Reading Habit Heatmap")
+                    Text("Reading Consistency Calendar")
                         .font(.system(.headline, design: .serif, weight: .bold))
                         .foregroundColor(BookStrideTheme.deepCharcoal)
-                    Text("Daily reading consistency for this month")
+                    Text("Daily habit consistency and goal momentum")
                         .font(.caption)
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
+                
                 Spacer()
                 
+                // Year Navigation Controls
+                HStack(spacing: 8) {
+                    Button {
+                        selectedYear -= 1
+                        selectedPoint = nil
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(BookStrideTheme.forestGreen)
+                            .padding(8)
+                            .background(BookStrideTheme.cardLight)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(BookStrideTheme.borderLight, lineWidth: 1))
+                    }
+                    .accessibilityLabel("Previous Year")
+                    
+                    Text("\(String(format: "%d", selectedYear))")
+                        .font(.headline.weight(.bold))
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
+                        .frame(minWidth: 55)
+                    
+                    Button {
+                        selectedYear += 1
+                        selectedPoint = nil
+                    } label: {
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(BookStrideTheme.forestGreen)
+                            .padding(8)
+                            .background(BookStrideTheme.cardLight)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(BookStrideTheme.borderLight, lineWidth: 1))
+                    }
+                    .accessibilityLabel("Next Year")
+                    
+                    // Quick "Today" Jump Button
+                    let currentRealYear = calendar.component(.year, from: Date())
+                    if selectedYear != currentRealYear {
+                        Button("This Year") {
+                            selectedYear = currentRealYear
+                            selectedPoint = nil
+                        }
+                        .font(.caption2.weight(.medium))
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(BookStrideTheme.forestGreen.opacity(0.12))
+                        .cornerRadius(12)
+                    }
+                }
+            }
+            
+            // GitHub Contribution Grid (horizontally scrollable)
+            ScrollView(.horizontal, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 6) {
+                    // Month Label Row
+                    HStack(spacing: 0) {
+                        Color.clear.frame(width: 28, height: 16) // Spacing for weekday column
+                        
+                        ZStack(alignment: .leading) {
+                            Color.clear.frame(width: CGFloat(weekColumns.count) * 17.0, height: 16)
+                            
+                            ForEach(monthHeaders, id: \.weekIndex) { header in
+                                Text(header.name)
+                                    .font(.system(size: 10, weight: .medium))
+                                    .foregroundColor(BookStrideTheme.mutedSlate)
+                                    .offset(x: CGFloat(header.weekIndex) * 17.0)
+                            }
+                        }
+                    }
+                    
+                    // Main Grid: Weekday labels on left, 53 week columns on right
+                    HStack(alignment: .top, spacing: 6) {
+                        // Weekday indicators (Mon, Wed, Fri)
+                        VStack(spacing: 3) {
+                            ForEach(0..<7, id: \.self) { row in
+                                Text(dayRowLabels[row])
+                                    .font(.system(size: 9, weight: .regular))
+                                    .foregroundColor(BookStrideTheme.mutedSlate)
+                                    .frame(width: 22, height: 14, alignment: .trailing)
+                            }
+                        }
+                        
+                        // Week columns
+                        HStack(spacing: 3) {
+                            ForEach(0..<weekColumns.count, id: \.self) { colIndex in
+                                VStack(spacing: 3) {
+                                    ForEach(0..<7, id: \.self) { rowIndex in
+                                        if let point = weekColumns[colIndex][rowIndex] {
+                                            dayCell(point: point)
+                                        } else {
+                                            Color.clear.frame(width: 14, height: 14)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+            
+            // Legend & Selection readout
+            HStack(alignment: .center) {
                 // Legend
                 HStack(spacing: 4) {
                     Text("Less")
                         .font(.caption2)
                         .foregroundColor(BookStrideTheme.mutedSlate)
                     ForEach(0...4, id: \.self) { lvl in
-                        RoundedRectangle(cornerRadius: 2)
+                        RoundedRectangle(cornerRadius: 3)
                             .fill(intensityColor(lvl))
-                            .frame(width: 10, height: 10)
+                            .frame(width: 11, height: 11)
                     }
                     Text("More")
                         .font(.caption2)
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
-            }
-            
-            // Weekday Header
-            HStack {
-                ForEach(weekdays, id: \.self) { day in
-                    Text(day)
-                        .font(.caption2.weight(.medium))
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            
-            // Calendar Grid
-            LazyVGrid(columns: columns, spacing: 8) {
-                // Leading padding days to align month start with weekday
-                if let first = points.first {
-                    let firstWeekday = Calendar.current.component(.weekday, from: first.date)
-                    ForEach(0..<(firstWeekday - 1), id: \.self) { _ in
-                        Color.clear.frame(height: 36)
-                    }
-                }
                 
-                ForEach(points) { point in
-                    let dayNum = Calendar.current.component(.day, from: point.date)
-                    let isSelected = selectedPoint?.id == point.id
-                    
-                    Button {
-                        selectedPoint = point
-                    } label: {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(intensityColor(point.intensity))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 6)
-                                        .stroke(isSelected ? BookStrideTheme.deepCharcoal : Color.clear, lineWidth: 1.5)
-                                )
-                            
-                            Text("\(dayNum)")
-                                .font(.caption2.weight(point.intensity >= 3 ? .bold : .regular))
-                                .foregroundColor(point.intensity >= 3 ? .white : BookStrideTheme.deepCharcoal)
-                        }
-                        .frame(height: 36)
-                    }
-                    .buttonStyle(.plain)
-                }
+                Spacer()
+                
+                Text("\(totalActiveDaysInYear) active days in \(String(format: "%d", selectedYear))")
+                    .font(.caption2.weight(.medium))
+                    .foregroundColor(BookStrideTheme.mutedSlate)
             }
             
-            // Inspection readout
+            // Detailed Day Inspection Card
             if let selected = selectedPoint {
-                HStack {
-                    Image(systemName: "info.circle")
-                        .foregroundColor(BookStrideTheme.forestGreen)
-                    Text("\(Formatters.formatDate(selected.date, style: .fullDate)): \(selected.minutes) minutes read")
-                        .font(.caption)
-                        .foregroundColor(BookStrideTheme.deepCharcoal)
-                    Spacer()
-                }
-                .padding(.top, 4)
+                dayDetailCard(point: selected)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .padding(20)
         .BookStrideCardStyle()
+    }
+    
+    // MARK: - Subviews & Helpers
+    
+    private var totalActiveDaysInYear: Int {
+        yearPoints.filter { $0.minutes > 0 }.count
+    }
+    
+    @ViewBuilder
+    private func dayCell(point: HeatmapDayPoint) -> some View {
+        let isSelected = selectedPoint?.id == point.id
+        
+        Button {
+            selectedPoint = point
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(intensityColor(point.intensity))
+                    .frame(width: 14, height: 14)
+                
+                // Ring for today
+                if point.isToday {
+                    RoundedRectangle(cornerRadius: 3)
+                        .stroke(BookStrideTheme.streakAmber, lineWidth: 1.5)
+                        .frame(width: 14, height: 14)
+                }
+                
+                // Active selection ring
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 3)
+                        .stroke(BookStrideTheme.deepCharcoal, lineWidth: 2)
+                        .frame(width: 16, height: 16)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(Formatters.formatDate(point.date, style: .fullDate)): \(point.minutes) minutes read. \(point.metGoal ? "Daily goal achieved." : (point.minutes > 0 ? "Goal not reached." : "No reading recorded."))")
+        .accessibilityHint("Double tap to inspect details.")
+    }
+    
+    @ViewBuilder
+    private func dayDetailCard(point: HeatmapDayPoint) -> some View {
+        HStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(intensityColor(point.intensity))
+                    .frame(width: 40, height: 40)
+                
+                Image(systemName: point.metGoal ? "checkmark" : (point.minutes > 0 ? "book.fill" : "moon.stars"))
+                    .font(.callout.weight(.bold))
+                    .foregroundColor(point.intensity >= 2 ? .white : BookStrideTheme.deepCharcoal)
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(Formatters.formatDate(point.date, style: .fullDate))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
+                
+                if point.minutes > 0 {
+                    Text("\(point.minutes) minutes read • \(point.sessionCount) \(point.sessionCount == 1 ? "session" : "sessions")")
+                        .font(.caption)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                } else {
+                    Text("No reading sessions logged on this day")
+                        .font(.caption)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                }
+            }
+            
+            Spacer()
+            
+            if point.minutes > 0 {
+                HStack(spacing: 6) {
+                    Image(systemName: point.metGoal ? "target" : "hourglass")
+                        .font(.caption2)
+                    Text(point.metGoal ? "Goal Met (\(dailyGoalMinutes)m)" : "\(max(0, dailyGoalMinutes - point.minutes))m to goal")
+                        .font(.caption2.weight(.bold))
+                }
+                .foregroundColor(point.metGoal ? BookStrideTheme.forestGreen : BookStrideTheme.streakAmber)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(
+                    (point.metGoal ? BookStrideTheme.forestGreen : BookStrideTheme.streakAmber).opacity(0.12)
+                )
+                .cornerRadius(12)
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(BookStrideTheme.cardLight)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(BookStrideTheme.borderLight, lineWidth: 1)
+        )
     }
     
     private func intensityColor(_ level: Int) -> Color {
@@ -115,12 +339,12 @@ public struct ReadingCalendarHeatmap: View {
             return Color(uiColor: UIColor { trait in
                 trait.userInterfaceStyle == .dark
                     ? UIColor(white: 0.22, alpha: 1.0)
-                    : UIColor(red: 216/255, green: 206/255, blue: 191/255, alpha: 0.35)
+                    : UIColor(red: 234/255, green: 230/255, blue: 222/255, alpha: 1.0)
             })
         case 1:
-            return BookStrideTheme.forestGreenLight.opacity(0.35)
+            return BookStrideTheme.forestGreenLight.opacity(0.40)
         case 2:
-            return BookStrideTheme.forestGreenLight.opacity(0.65)
+            return BookStrideTheme.forestGreenLight.opacity(0.70)
         case 3:
             return BookStrideTheme.forestGreen.opacity(0.85)
         case 4:
@@ -129,9 +353,8 @@ public struct ReadingCalendarHeatmap: View {
             return Color(uiColor: UIColor { trait in
                 trait.userInterfaceStyle == .dark
                     ? UIColor(white: 0.22, alpha: 1.0)
-                    : UIColor(red: 216/255, green: 206/255, blue: 191/255, alpha: 0.35)
+                    : UIColor(red: 234/255, green: 230/255, blue: 222/255, alpha: 1.0)
             })
         }
     }
 }
-

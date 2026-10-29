@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import Charts
 
 public struct BookDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -18,6 +19,7 @@ public struct BookDetailView: View {
     @State private var showingEditSheet: Bool = false
     @State private var showingProgressSheet: Bool = false
     @State private var showingAddJournalSheet: Bool = false
+    @State private var defaultJournalType: JournalEntryType = .note
     @State private var showingActiveSession: Bool = false
     @State private var showingDeleteAlert: Bool = false
     @State private var showingConflictAlert: Bool = false
@@ -41,6 +43,33 @@ public struct BookDetailView: View {
         return Formatters.formatDate(date, style: .mediumDate)
     }
     
+    private struct DailyBookActivity: Identifiable {
+        let id: Date
+        let date: Date
+        let minutes: Double
+        let pages: Int
+    }
+    
+    private var dailyActivityPoints: [DailyBookActivity] {
+        let calendar = Calendar.current
+        var dict: [Date: (seconds: Int, pages: Int)] = [:]
+        for s in completedSessions {
+            let day = calendar.startOfDay(for: s.startedAt)
+            let pages = (s.endPage ?? 0) > (s.startPage ?? 0) ? ((s.endPage ?? 0) - (s.startPage ?? 0)) : 0
+            let prev = dict[day] ?? (0, 0)
+            dict[day] = (prev.seconds + s.activeDurationSeconds, prev.pages + pages)
+        }
+        return dict.keys.sorted().map { day in
+            let val = dict[day]!
+            return DailyBookActivity(
+                id: day,
+                date: day,
+                minutes: Double(val.seconds) / 60.0,
+                pages: val.pages
+            )
+        }
+    }
+    
     public var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
@@ -53,7 +82,13 @@ public struct BookDetailView: View {
                 // 3. Reading Progress & Speed Insights
                 progressAndInsightsSection
                 
-                // 4. Book Description
+                // 4. Book Analytics Grid
+                bookAnalyticsSection
+                
+                // 5. Reading Activity Over Time Chart
+                activityOverTimeSection
+                
+                // 6. Book Description
                 if let desc = book.bookDescription, !desc.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         SectionHeaderView(title: "About the Book")
@@ -67,10 +102,10 @@ public struct BookDetailView: View {
                     }
                 }
                 
-                // 5. Notes & Quotes for this Book
+                // 7. Notes, Quotes & Reflections for this Book
                 notesAndQuotesSection
                 
-                // 6. Session History for this Book
+                // 8. Session History for this Book
                 sessionsHistorySection
             }
             .padding(.horizontal, 32)
@@ -115,7 +150,7 @@ public struct BookDetailView: View {
             UpdateProgressSheet(book: book)
         }
         .sheet(isPresented: $showingAddJournalSheet) {
-            AddEditJournalEntrySheet(associatedBook: book)
+            AddEditJournalEntrySheet(associatedBook: book, defaultEntryType: defaultJournalType)
         }
         .sheet(isPresented: $showingActiveSession) {
             ActiveSessionView(
@@ -139,7 +174,7 @@ public struct BookDetailView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Deleting this book will also remove its associated reading sessions and notes.")
+            Text("Deleting this book will remove its reading sessions. Your journal notes, quotes, and reflections will be safely preserved in your Reading Journal.")
         }
     }
     
@@ -319,15 +354,36 @@ public struct BookDetailView: View {
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 
-                // Add Note / Quote
-                Button {
-                    showingAddJournalSheet = true
+                // Add Entry Menu (Note, Quote, Reflection)
+                Menu {
+                    Button {
+                        defaultJournalType = .note
+                        showingAddJournalSheet = true
+                    } label: {
+                        Label("Add Note", systemImage: "note.text")
+                    }
+                    
+                    Button {
+                        defaultJournalType = .quote
+                        showingAddJournalSheet = true
+                    } label: {
+                        Label("Add Quote", systemImage: "quote.opening")
+                    }
+                    
+                    Button {
+                        defaultJournalType = .reflection
+                        showingAddJournalSheet = true
+                    } label: {
+                        Label("Add Reflection", systemImage: "sparkles")
+                    }
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "square.and.pencil")
-                        Text("Add Note")
+                        Text("Add Journal Entry")
                             .lineLimit(1)
                             .fixedSize(horizontal: true, vertical: false)
+                        Image(systemName: "chevron.down")
+                            .font(.caption2)
                     }
                     .font(.callout.weight(.medium))
                     .foregroundColor(BookStrideTheme.deepCharcoal)
@@ -366,16 +422,46 @@ public struct BookDetailView: View {
                     }
                 }
                 
-                if let est = estimatedCompletionString {
-                    Divider()
-                    HStack(spacing: 8) {
-                        Image(systemName: "calendar.badge.clock")
-                            .foregroundColor(BookStrideTheme.forestGreen)
-                        Text("Estimated Completion: \(est)")
-                            .font(.caption)
-                            .foregroundColor(BookStrideTheme.mutedSlate)
-                        Spacer()
+                Divider()
+                
+                // Estimated Completion Card / Empty State
+                HStack(spacing: 12) {
+                    Image(systemName: "calendar.badge.clock")
+                        .font(.title3)
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Text("Estimated Completion")
+                                .font(.caption.weight(.medium))
+                                .foregroundColor(BookStrideTheme.mutedSlate)
+                            
+                            if estimatedCompletionString != nil {
+                                Text("Approximate")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundColor(BookStrideTheme.forestGreen)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(BookStrideTheme.forestGreen.opacity(0.12))
+                                    .cornerRadius(6)
+                            }
+                        }
+                        
+                        if let est = estimatedCompletionString {
+                            Text(est)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundColor(BookStrideTheme.deepCharcoal)
+                        } else if book.status == .finished {
+                            Text("Book finished")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundColor(BookStrideTheme.forestGreen)
+                        } else {
+                            Text("Log ≥5 pages over 10m to estimate completion date")
+                                .font(.caption)
+                                .foregroundColor(BookStrideTheme.mutedSlate)
+                        }
                     }
+                    Spacer()
                 }
             }
             .padding(20)
@@ -383,20 +469,173 @@ public struct BookDetailView: View {
         }
     }
     
+    private var bookAnalyticsSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            SectionHeaderView(title: "Book Analytics")
+            
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 180, maximum: 240), spacing: 14)], spacing: 14) {
+                MetricCard(
+                    title: "Total Reading Time",
+                    value: Formatters.formatDuration(seconds: book.totalActiveReadingSeconds, style: .short),
+                    subtitle: "Across \(completedSessions.count) sessions",
+                    iconName: "clock.fill"
+                )
+                
+                MetricCard(
+                    title: "Total Pages Read",
+                    value: "\(book.totalRecordedPagesRead)",
+                    subtitle: "Recorded in sessions",
+                    iconName: "book.pages"
+                )
+                
+                MetricCard(
+                    title: "Avg Session Length",
+                    value: Formatters.formatDuration(seconds: book.averageSessionDurationSeconds, style: .short),
+                    subtitle: "Active reading per session",
+                    iconName: "timer"
+                )
+                
+                MetricCard(
+                    title: "Reading Speed",
+                    value: speedDisplayString,
+                    subtitle: speedSubtitleString,
+                    iconName: "gauge.with.needle"
+                )
+                
+                MetricCard(
+                    title: "First Reading Date",
+                    value: book.firstReadingDate.map { Formatters.formatDate($0, style: .shortDate) } ?? "—",
+                    subtitle: "Started reading",
+                    iconName: "calendar"
+                )
+                
+                MetricCard(
+                    title: "Last Reading Date",
+                    value: book.lastReadingDate.map { Formatters.formatDate($0, style: .shortDate) } ?? "—",
+                    subtitle: "Most recent session",
+                    iconName: "calendar.badge.clock"
+                )
+            }
+        }
+    }
+    
+    private var speedDisplayString: String {
+        if let speed = book.readingSpeedPagesPerHour() {
+            return String(format: "%.1f p/h", speed)
+        }
+        return "—"
+    }
+    
+    private var speedSubtitleString: String {
+        if book.readingSpeedPagesPerHour() != nil {
+            return "Pages read per hour"
+        }
+        return "Need ≥5 pgs logged"
+    }
+    
+    private var activityOverTimeSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            SectionHeaderView(title: "Reading Activity Over Time")
+            
+            if dailyActivityPoints.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "chart.bar.xaxis")
+                        .font(.title2)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                    Text("No session activity recorded yet")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
+                    Text("Start a reading session to see your progress chart over time.")
+                        .font(.caption)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
+                .BookStrideCardStyle()
+            } else {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Text("Minutes Read Per Day")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(BookStrideTheme.deepCharcoal)
+                        Spacer()
+                        Text("\(dailyActivityPoints.count) active days")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                    }
+                    
+                    Chart(dailyActivityPoints) { item in
+                        BarMark(
+                            x: .value("Date", item.date, unit: .day),
+                            y: .value("Minutes", item.minutes)
+                        )
+                        .foregroundStyle(BookStrideTheme.forestGreen.gradient)
+                        .cornerRadius(4)
+                    }
+                    .chartXAxis {
+                        AxisMarks(values: .automatic) { _ in
+                            AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [4, 4]))
+                            AxisTick()
+                            AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                                .font(.caption2)
+                        }
+                    }
+                    .chartYAxis {
+                        AxisMarks { value in
+                            AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [4, 4]))
+                            AxisTick()
+                            AxisValueLabel {
+                                if let mins = value.as(Double.self) {
+                                    Text("\(Int(mins))m")
+                                        .font(.caption2)
+                                }
+                            }
+                        }
+                    }
+                    .frame(height: 180)
+                }
+                .padding(20)
+                .BookStrideCardStyle()
+            }
+        }
+    }
+    
     private var notesAndQuotesSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            SectionHeaderView(title: "Journal & Quotes") {
-                Button {
-                    showingAddJournalSheet = true
+            SectionHeaderView(title: "Journal & Quotes (\(book.journalEntries.count))") {
+                Menu {
+                    Button {
+                        defaultJournalType = .note
+                        showingAddJournalSheet = true
+                    } label: {
+                        Label("Add Note", systemImage: "note.text")
+                    }
+                    
+                    Button {
+                        defaultJournalType = .quote
+                        showingAddJournalSheet = true
+                    } label: {
+                        Label("Add Quote", systemImage: "quote.opening")
+                    }
+                    
+                    Button {
+                        defaultJournalType = .reflection
+                        showingAddJournalSheet = true
+                    } label: {
+                        Label("Add Reflection", systemImage: "sparkles")
+                    }
                 } label: {
-                    Label("Add", systemImage: "plus")
-                        .font(.callout.weight(.medium))
-                        .foregroundColor(BookStrideTheme.forestGreen)
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus")
+                        Text("Add")
+                    }
+                    .font(.callout.weight(.medium))
+                    .foregroundColor(BookStrideTheme.forestGreen)
                 }
             }
             
             if book.journalEntries.isEmpty {
-                Text("No notes or quotes recorded for this book yet.")
+                Text("No notes, quotes, or reflections recorded for this book yet.")
                     .font(.subheadline)
                     .foregroundColor(BookStrideTheme.mutedSlate)
                     .padding()
@@ -405,10 +644,15 @@ public struct BookDetailView: View {
             } else {
                 VStack(spacing: 12) {
                     ForEach(book.journalEntries.sorted { $0.createdAt > $1.createdAt }) { entry in
-                        JournalCardView(entry: entry, onDelete: {
-                            modelContext.delete(entry)
-                            try? modelContext.save()
-                        })
+                        NavigationLink {
+                            JournalDetailView(entry: entry)
+                        } label: {
+                            JournalCardView(entry: entry, onDelete: {
+                                modelContext.delete(entry)
+                                try? modelContext.save()
+                            })
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }

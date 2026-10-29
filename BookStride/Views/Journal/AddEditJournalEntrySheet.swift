@@ -2,7 +2,7 @@
 //  AddEditJournalEntrySheet.swift
 //  BookStride
 //
-//  Sheet to add or edit journal notes and favorite quotes.
+//  Sheet to add or edit journal notes, quotes, and reflections with unsaved changes warnings.
 //
 
 import SwiftUI
@@ -16,22 +16,49 @@ public struct AddEditJournalEntrySheet: View {
     
     public var entryToEdit: JournalEntry?
     public var associatedBook: Book?
+    public var defaultEntryType: JournalEntryType
     
     @State private var selectedBookId: UUID?
-    @State private var entryType: JournalEntryType = .note
+    @State private var entryType: JournalEntryType
     @State private var content: String = ""
     @State private var pageNumberString: String = ""
     @State private var isFavorite: Bool = false
-    @State private var showingError: Bool = false
     
-    public init(entryToEdit: JournalEntry? = nil, associatedBook: Book? = nil) {
+    // Initial state snapshot for dirty checking
+    @State private var initialContent: String = ""
+    @State private var initialPageNumberString: String = ""
+    @State private var initialSelectedBookId: UUID?
+    @State private var initialEntryType: JournalEntryType = .note
+    @State private var initialIsFavorite: Bool = false
+    
+    // Alerts
+    @State private var showingEmptyContentError: Bool = false
+    @State private var showingPageNumberError: Bool = false
+    @State private var showingDiscardConfirmation: Bool = false
+    
+    public init(
+        entryToEdit: JournalEntry? = nil,
+        associatedBook: Book? = nil,
+        defaultEntryType: JournalEntryType = .note
+    ) {
         self.entryToEdit = entryToEdit
         self.associatedBook = associatedBook
+        self.defaultEntryType = defaultEntryType
+        _entryType = State(initialValue: entryToEdit?.entryType ?? defaultEntryType)
+    }
+    
+    private var hasUnsavedChanges: Bool {
+        content != initialContent ||
+        pageNumberString != initialPageNumberString ||
+        selectedBookId != initialSelectedBookId ||
+        entryType != initialEntryType ||
+        isFavorite != initialIsFavorite
     }
     
     public var body: some View {
         NavigationStack {
             Form {
+                // Section 1: Entry Type
                 Section(header: Text("Entry Type")) {
                     Picker("Type", selection: $entryType) {
                         ForEach(JournalEntryType.allCases) { t in
@@ -41,9 +68,10 @@ public struct AddEditJournalEntrySheet: View {
                     .pickerStyle(.segmented)
                 }
                 
-                Section(header: Text("Associated Book")) {
+                // Section 2: Associated Book & Page
+                Section(header: Text("Book Context")) {
                     Picker("Book", selection: $selectedBookId) {
-                        Text("None (General Reading Note)").tag(UUID?.none)
+                        Text("None (General Reading Entry)").tag(UUID?.none)
                         ForEach(allBooks) { b in
                             Text(b.title).tag(UUID?.some(b.id))
                         }
@@ -52,31 +80,33 @@ public struct AddEditJournalEntrySheet: View {
                     HStack {
                         Text("Page Number:")
                         Spacer()
-                        TextField("Optional", text: $pageNumberString)
+                        TextField("Optional (e.g. 142)", text: $pageNumberString)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                     }
                 }
                 
-                Section(header: Text(entryType == .quote ? "Quote Passage" : "Note Content")) {
+                // Section 3: Content
+                Section(header: Text(contentSectionHeader)) {
                     TextField(
-                        entryType == .quote ? "Enter quote or highlighted passage..." : "Write your thoughts or reflection...",
+                        placeholderPrompt,
                         text: $content,
                         axis: .vertical
                     )
-                    .lineLimit(5...10)
+                    .lineLimit(6...14)
                 }
                 
+                // Section 4: Favorite Option
                 Section {
                     Toggle("Mark as Favorite", isOn: $isFavorite)
                 }
             }
-            .navigationTitle(entryToEdit == nil ? "New Journal Entry" : "Edit Entry")
+            .navigationTitle(entryToEdit == nil ? "New \(entryType.rawValue)" : "Edit \(entryType.rawValue)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        dismiss()
+                        handleCancel()
                     }
                 }
                 
@@ -91,11 +121,46 @@ public struct AddEditJournalEntrySheet: View {
             .onAppear {
                 loadInitialValues()
             }
-            .alert("Empty Entry", isPresented: $showingError) {
+            .alert("Empty Content", isPresented: $showingEmptyContentError) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text("Please write some content for your note or quote before saving.")
+                Text("Please write some content for your \(entryType.rawValue.lowercased()) before saving.")
             }
+            .alert("Invalid Page Number", isPresented: $showingPageNumberError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Page number must be a positive number.")
+            }
+            .confirmationDialog(
+                "Discard Unsaved Changes?",
+                isPresented: $showingDiscardConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Discard Changes", role: .destructive) {
+                    dismiss()
+                }
+                Button("Keep Editing", role: .cancel) {}
+            } message: {
+                Text("You have unsaved changes in this journal entry. Are you sure you want to discard them?")
+            }
+        }
+    }
+    
+    // MARK: - Helpers
+    
+    private var contentSectionHeader: String {
+        switch entryType {
+        case .quote: return "Quote / Highlighted Passage"
+        case .reflection: return "Personal Reflection"
+        case .note: return "Reading Note"
+        }
+    }
+    
+    private var placeholderPrompt: String {
+        switch entryType {
+        case .quote: return "Type or paste the memorable quote..."
+        case .reflection: return "Reflect on insights, connections, or lessons from this reading..."
+        case .note: return "Jot down summary notes, thoughts, or ideas..."
         }
     }
     
@@ -108,27 +173,54 @@ public struct AddEditJournalEntrySheet: View {
             isFavorite = entry.isFavorite
         } else if let book = associatedBook {
             selectedBookId = book.id
-            if let curr = book.currentPage {
+            entryType = defaultEntryType
+            if let curr = book.currentPage, curr > 0 {
                 pageNumberString = "\(curr)"
             }
+        } else {
+            entryType = defaultEntryType
+        }
+        
+        // Save snapshots for dirty comparison
+        initialContent = content
+        initialPageNumberString = pageNumberString
+        initialSelectedBookId = selectedBookId
+        initialEntryType = entryType
+        initialIsFavorite = isFavorite
+    }
+    
+    private func handleCancel() {
+        if hasUnsavedChanges {
+            showingDiscardConfirmation = true
+        } else {
+            dismiss()
         }
     }
     
     private func saveEntry() {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            showingError = true
+            showingEmptyContentError = true
             return
         }
         
-        let page = Int(pageNumberString.trimmingCharacters(in: .whitespacesAndNewlines))
+        var pageNum: Int? = nil
+        let trimmedPage = pageNumberString.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedPage.isEmpty {
+            guard let parsed = Int(trimmedPage), parsed >= 0 else {
+                showingPageNumberError = true
+                return
+            }
+            pageNum = parsed
+        }
+        
         let chosenBook = allBooks.first(where: { $0.id == selectedBookId })
         
         if let existing = entryToEdit {
             existing.book = chosenBook
             existing.entryType = entryType
             existing.content = trimmed
-            existing.pageNumber = page
+            existing.pageNumber = pageNum
             existing.isFavorite = isFavorite
             existing.updatedAt = Date()
         } else {
@@ -136,7 +228,7 @@ public struct AddEditJournalEntrySheet: View {
                 book: chosenBook,
                 content: trimmed,
                 entryType: entryType,
-                pageNumber: page,
+                pageNumber: pageNum,
                 isFavorite: isFavorite
             )
             modelContext.insert(newEntry)
@@ -146,4 +238,3 @@ public struct AddEditJournalEntrySheet: View {
         dismiss()
     }
 }
-
