@@ -80,7 +80,11 @@ public final class ReadingTimerService: ObservableObject {
     // MARK: - Lifecycle & State Restoration
     
     public func restoreActiveSession(now: Date = Date()) {
-        guard let validData = userDefaults.data(forKey: Self.storageKey) ?? userDefaults.data(forKey: "ReadFlow_ActiveSessionState_v1"),
+        var data = userDefaults.data(forKey: Self.storageKey) ?? userDefaults.data(forKey: "ReadFlow_ActiveSessionState_v1")
+        if data == nil && userDefaults == AppGroupConfig.sharedDefaults {
+            data = UserDefaults.standard.data(forKey: Self.storageKey) ?? UserDefaults.standard.data(forKey: "ReadFlow_ActiveSessionState_v1")
+        }
+        guard let validData = data,
               let state = try? JSONDecoder().decode(ActiveSessionState.self, from: validData) else {
             return
         }
@@ -103,7 +107,7 @@ public final class ReadingTimerService: ObservableObject {
             }
         }
         
-        recalculateElapsed()
+        recalculateElapsed(now: now)
         if isRunning {
             startTicker()
         }
@@ -202,9 +206,7 @@ public final class ReadingTimerService: ObservableObject {
         guard now.timeIntervalSince(lastWidgetActionTimestamp) > 0.3 else { return }
         lastWidgetActionTimestamp = now
         
-        if activeState == nil {
-            restoreActiveSession(now: now)
-        }
+        restoreActiveSession(now: now)
         guard let state = activeState else { return }
         
         if state.isPaused {

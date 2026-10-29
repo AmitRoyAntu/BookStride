@@ -653,3 +653,4 @@ public struct ReadingWrappedCardView: View {
         return "Your personal reading recap."
     }
 }
+

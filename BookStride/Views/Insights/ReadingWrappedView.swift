@@ -616,3 +616,4 @@ public struct ReadingWrappedView: View {
         return df.monthSymbols[max(0, min(11, month - 1))]
     }
 }
+

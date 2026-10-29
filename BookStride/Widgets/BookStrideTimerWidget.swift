@@ -623,3 +623,4 @@ public struct MediumReadingTimerWidgetView: View {
         return "Bookstride reading timer for \(title). Status: \(state). Today's reading total: \(today)."
     }
 }
+

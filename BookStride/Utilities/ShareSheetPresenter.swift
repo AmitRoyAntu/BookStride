@@ -10,6 +10,7 @@ import SwiftUI
 import UIKit
 import Photos
 import UniformTypeIdentifiers
+import LinkPresentation
 
 @MainActor
 public enum WrappedCardRenderer {
@@ -84,6 +85,42 @@ public enum PhotoLibrarySaver {
     }
 }
 
+// MARK: - Activity Item Source with Link Metadata
+
+/// An item source providing rich title, icon, and file metadata to UIActivityViewController.
+/// Explicitly identifies the item as a local file download, preventing OSStatus -10814
+/// collaboration / CloudKit share evaluation errors from LaunchServices.
+public final class ShareActivityItemSource: NSObject, UIActivityItemSource {
+    public let fileURL: URL
+    public let itemTitle: String
+    public let previewImage: UIImage?
+    
+    public init(fileURL: URL, itemTitle: String, previewImage: UIImage? = nil) {
+        self.fileURL = fileURL
+        self.itemTitle = itemTitle
+        self.previewImage = previewImage
+        super.init()
+    }
+    
+    public func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
+        fileURL
+    }
+    
+    public func activityViewController(_ activityViewController: UIActivityViewController, itemForActivityType activityType: UIActivity.ActivityType?) -> Any? {
+        fileURL
+    }
+    
+    public func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
+        let metadata = LPLinkMetadata()
+        metadata.title = itemTitle
+        metadata.originalURL = fileURL
+        if let image = previewImage {
+            metadata.imageProvider = NSItemProvider(object: image)
+        }
+        return metadata
+    }
+}
+
 // MARK: - iPadOS Compatible Share Sheet
 
 public struct ActivityViewSheet: UIViewControllerRepresentable {
@@ -96,20 +133,28 @@ public struct ActivityViewSheet: UIViewControllerRepresentable {
     }
     
     public func makeUIViewController(context: Context) -> UIActivityViewController {
+        let preparedItems = activityItems.map { item -> Any in
+            if let url = item as? URL {
+                return ShareActivityItemSource(fileURL: url, itemTitle: url.lastPathComponent)
+            }
+            return item
+        }
         let controller = UIActivityViewController(
-            activityItems: activityItems,
+            activityItems: preparedItems,
             applicationActivities: applicationActivities
         )
         // iPadOS popover presentation safeguard
         controller.popoverPresentationController?.permittedArrowDirections = []
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let root = windowScene.windows.first?.rootViewController {
+            let safeBounds = root.view.bounds
+            let anchorSize: CGFloat = 32
             controller.popoverPresentationController?.sourceView = root.view
             controller.popoverPresentationController?.sourceRect = CGRect(
-                x: root.view.bounds.midX,
-                y: root.view.bounds.midY,
-                width: 0,
-                height: 0
+                x: max(0, safeBounds.midX - (anchorSize / 2)),
+                y: max(0, safeBounds.midY - (anchorSize / 2)),
+                width: anchorSize,
+                height: anchorSize
             )
         }
         return controller
@@ -157,3 +202,4 @@ public struct DocumentExportPickerSheet: UIViewControllerRepresentable {
         }
     }
 }
+

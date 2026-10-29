@@ -359,3 +359,4 @@ public enum ReadingWrappedServiceTests {
         assert(wrapped.completedBooks.first?.title == unicodeTitle, "Unicode title should be preserved exactly")
     }
 }
+

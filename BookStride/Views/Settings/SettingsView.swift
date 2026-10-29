@@ -523,10 +523,23 @@ public struct SettingsView: View {
             topVC = presented
         }
         
-        let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        let preparedItems = items.map { item -> Any in
+            if let url = item as? URL {
+                return ShareActivityItemSource(fileURL: url, itemTitle: url.lastPathComponent)
+            }
+            return item
+        }
+        
+        let activityVC = UIActivityViewController(activityItems: preparedItems, applicationActivities: nil)
         if let popover = activityVC.popoverPresentationController {
+            let anchorSize: CGFloat = 32
             popover.sourceView = topVC.view
-            popover.sourceRect = CGRect(x: topVC.view.bounds.midX, y: topVC.view.bounds.midY, width: 0, height: 0)
+            popover.sourceRect = CGRect(
+                x: max(0, topVC.view.bounds.midX - (anchorSize / 2)),
+                y: max(0, topVC.view.bounds.midY - (anchorSize / 2)),
+                width: anchorSize,
+                height: anchorSize
+            )
             popover.permittedArrowDirections = []
         }
         topVC.present(activityVC, animated: true)
@@ -721,8 +734,14 @@ public struct ShareSheet: UIViewControllerRepresentable {
             popover.permittedArrowDirections = []
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let rootVC = windowScene.windows.first?.rootViewController {
+                let anchorSize: CGFloat = 32
                 popover.sourceView = rootVC.view
-                popover.sourceRect = CGRect(x: rootVC.view.bounds.midX, y: rootVC.view.bounds.midY, width: 0, height: 0)
+                popover.sourceRect = CGRect(
+                    x: max(0, rootVC.view.bounds.midX - (anchorSize / 2)),
+                    y: max(0, rootVC.view.bounds.midY - (anchorSize / 2)),
+                    width: anchorSize,
+                    height: anchorSize
+                )
             }
         }
         return controller

@@ -132,3 +132,4 @@ public enum AppGroupConfig {
         UserDefaults(suiteName: appGroupId) ?? .standard
     }
 }
+

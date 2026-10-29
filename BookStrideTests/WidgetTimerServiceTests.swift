@@ -145,3 +145,4 @@ public enum WidgetTimerServiceTests {
         assert(widgetSnap.todayProgressFraction == 1.0, "Progress fraction must be clamped to max 1.0")
     }
 }
+
