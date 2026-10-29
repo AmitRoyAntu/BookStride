@@ -65,7 +65,7 @@ Instead of forcing you into a proprietary reader, Bookstride lets you read where
 ### Build & Run
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/BookStride.git
+git clone https://github.com/AmitRoyAntu/BookStride.git
 cd BookStride
 
 # 2. Open the Xcode project
@@ -75,11 +75,15 @@ open BookStride.xcodeproj
 ```
 
 ### Running Tests
-The repository includes a fast test runner verifying core timer state, habit streaks, aggregations, and data persistence:
+The repository includes a standalone Swift test runner covering timer state, habit streaks, analytics, data export/import validation, and journal features. Run it from the repository root on macOS with Xcode's Swift toolchain:
 
 ```bash
 ./test.sh
 ```
+
+`test.sh` is the canonical command for the full suite. It explicitly compiles
+`BookStrideTests/Phase2FeatureTests.swift` in addition to the sources listed in
+`Package.swift`, so `swift test` is not an equivalent replacement.
 
 ---
 
