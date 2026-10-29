@@ -24,9 +24,12 @@ let package = Package(
                 "Models/SchemaExport.swift",
                 "Utilities/DateUtilities.swift",
                 "Utilities/Formatters.swift",
+                "Services/WidgetSharedModels.swift",
                 "Services/ReadingTimerService.swift",
                 "Services/StreakCalculationService.swift",
                 "Services/ReadingStatisticsService.swift",
+                "Services/ReadingForecastService.swift",
+                "Services/ReadingWrappedService.swift",
                 "Services/DataExportService.swift"
             ]
         ),
@@ -40,6 +43,10 @@ let package = Package(
                 "ReadingStatisticsServiceTests.swift",
                 "DataExportServiceTests.swift",
                 "ValidationTests.swift",
+                "Phase2FeatureTests.swift",
+                "PolishReleaseTests.swift",
+                "ReadingWrappedServiceTests.swift",
+                "WidgetTimerServiceTests.swift",
                 "TestRunner.swift"
             ]
         )
