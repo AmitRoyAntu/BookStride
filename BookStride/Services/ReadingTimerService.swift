@@ -79,7 +79,7 @@ public final class ReadingTimerService: ObservableObject {
     
     // MARK: - Lifecycle & State Restoration
     
-    public func restoreActiveSession() {
+    public func restoreActiveSession(now: Date = Date()) {
         guard let validData = userDefaults.data(forKey: Self.storageKey) ?? userDefaults.data(forKey: "ReadFlow_ActiveSessionState_v1"),
               let state = try? JSONDecoder().decode(ActiveSessionState.self, from: validData) else {
             return
@@ -91,14 +91,14 @@ public final class ReadingTimerService: ObservableObject {
         
         // Check for stale session if app was terminated/backgrounded while timer was running
         if !state.isPaused, let resume = state.lastResumedAt ?? Optional(state.startedAt) {
-            let elapsedSinceResume = Date().timeIntervalSince(resume)
+            let elapsedSinceResume = now.timeIntervalSince(resume)
             let totalRunningSeconds = state.accumulatedActiveSeconds + Int(max(0, elapsedSinceResume))
             
             if elapsedSinceResume > Self.staleThresholdSeconds {
                 self.unmonitoredElapsedSeconds = totalRunningSeconds
                 self.showStaleSessionAlert = true
                 // Pause timer while user reviews stale session
-                pauseSession()
+                pauseSession(now: now)
                 return
             }
         }
@@ -202,7 +202,9 @@ public final class ReadingTimerService: ObservableObject {
         guard now.timeIntervalSince(lastWidgetActionTimestamp) > 0.3 else { return }
         lastWidgetActionTimestamp = now
         
-        restoreActiveSession()
+        if activeState == nil {
+            restoreActiveSession(now: now)
+        }
         guard let state = activeState else { return }
         
         if state.isPaused {
