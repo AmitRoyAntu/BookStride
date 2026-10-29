@@ -10,7 +10,7 @@ import UserNotifications
 
 public final class NotificationService: ObservableObject {
     public static let shared = NotificationService()
-    public static let reminderIdentifier = "BookStride.daily.reading.reminder"
+    public static let reminderIdentifier = "bookstride.daily.reading.reminder"
     
     @Published public private(set) var isAuthorized: Bool = false
     @Published public private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
@@ -48,7 +48,7 @@ public final class NotificationService: ObservableObject {
         
         let content = UNMutableNotificationContent()
         content.title = "Time for your reading ritual"
-        content.body = "A few quiet pages with BookStride keep your streak flowing."
+        content.body = "A few quiet pages with Bookstride keep your streak flowing."
         content.sound = .default
         
         var dateComponents = DateComponents()

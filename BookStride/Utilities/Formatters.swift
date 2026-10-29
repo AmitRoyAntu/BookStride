@@ -65,7 +65,9 @@ public enum Formatters {
     }()
     
     public static func preferredDurationStyle() -> DurationStyle {
-        let raw = UserDefaults.standard.string(forKey: "BookStride_preferred_duration_style") ?? "full"
+        let raw = UserDefaults.standard.string(forKey: "bookstride_preferred_duration_style") ??
+                  UserDefaults.standard.string(forKey: "BookStride_preferred_duration_style") ??
+                  UserDefaults.standard.string(forKey: "readflow_preferred_duration_style") ?? "full"
         switch raw {
         case "short": return .short
         case "compact": return .compact

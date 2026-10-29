@@ -29,7 +29,7 @@ public final class Book {
     @Relationship(deleteRule: .cascade, inverse: \ReadingSession.book)
     public var sessions: [ReadingSession] = []
     
-    @Relationship(deleteRule: .cascade, inverse: \JournalEntry.book)
+    @Relationship(deleteRule: .nullify, inverse: \JournalEntry.book)
     public var journalEntries: [JournalEntry] = []
     
     public init(
@@ -101,44 +101,68 @@ public final class Book {
             .max()
     }
     
-    /// Estimates completion date given remaining pages and reading rate (pages per hour)
-    public func estimatedCompletionDate(defaultMinutesPerDay: Int = 30) -> Date? {
+    /// Total pages recorded as read across all completed sessions for this book
+    public var totalRecordedPagesRead: Int {
+        var total = 0
+        for s in sessions where s.status == .completed {
+            if let start = s.startPage, let end = s.endPage, end > start, start >= 0 {
+                total += (end - start)
+            }
+        }
+        return total
+    }
+    
+    /// Average duration per completed session in seconds
+    public var averageSessionDurationSeconds: Int {
+        let count = completedSessionCount
+        guard count > 0 else { return 0 }
+        return totalActiveReadingSeconds / count
+    }
+    
+    /// Calculates verified reading speed in pages per hour based only on actual session logs.
+    /// Returns nil if insufficient data exists (< 5 pages or < 10 mins of valid active reading).
+    public func readingSpeedPagesPerHour() -> Double? {
+        let completedSessions = sessions.filter { $0.status == .completed }
+        var validPages = 0
+        var validSeconds = 0
+        
+        for s in completedSessions {
+            // Require valid start and end pages, with forward progress and at least 60s active time
+            if let start = s.startPage, let end = s.endPage, end > start, start >= 0, s.activeDurationSeconds >= 60 {
+                validPages += (end - start)
+                validSeconds += s.activeDurationSeconds
+            }
+        }
+        
+        // Data integrity rule: require at least 5 pages read and 10 minutes (600s) of active reading
+        guard validPages >= 5, validSeconds >= 600 else {
+            return nil
+        }
+        
+        let hours = Double(validSeconds) / 3600.0
+        guard hours > 0 else { return nil }
+        return Double(validPages) / hours
+    }
+    
+    /// Estimates completion date given remaining pages and calculated reading rate.
+    /// Returns nil when data is insufficient rather than fabricating an estimate.
+    public func estimatedCompletionDate(dailyReadingMinutes: Int = 30) -> Date? {
         guard status == .currentlyReading,
               let total = totalPages,
               let current = currentPage,
-              total > current else {
+              total > current, current >= 0 else {
+            return nil
+        }
+        
+        guard let pagesPerHour = readingSpeedPagesPerHour(), pagesPerHour > 0 else {
             return nil
         }
         
         let remainingPages = total - current
-        let completedSessions = sessions.filter { $0.status == .completed }
-        let totalSeconds = completedSessions.reduce(0) { $0 + $1.activeDurationSeconds }
-        
-        // Calculate pages read recorded across sessions
-        var pagesReadInSessions = 0
-        for s in completedSessions {
-            if let start = s.startPage, let end = s.endPage, end > start {
-                pagesReadInSessions += (end - start)
-            }
-        }
-        
-        let pagesPerHour: Double
-        if pagesReadInSessions > 5 && totalSeconds > 300 {
-            let hours = Double(totalSeconds) / 3600.0
-            pagesPerHour = Double(pagesReadInSessions) / hours
-        } else if current > 0 && totalSeconds > 300 {
-            let hours = Double(totalSeconds) / 3600.0
-            pagesPerHour = Double(current) / hours
-        } else {
-            // Standard reading speed assumption: ~30 pages/hour (~2 mins per page)
-            pagesPerHour = 30.0
-        }
-        
-        guard pagesPerHour > 0 else { return nil }
         let hoursNeeded = Double(remainingPages) / pagesPerHour
-        let dailyReadingHours = max(0.2, Double(defaultMinutesPerDay) / 60.0)
-        let daysNeeded = ceil(hoursNeeded / dailyReadingHours)
+        let dailyHours = max(0.1, Double(max(5, dailyReadingMinutes)) / 60.0)
+        let daysNeeded = ceil(hoursNeeded / dailyHours)
         
-        return Calendar.current.date(byAdding: .day, value: Int(daysNeeded), to: Date())
+        return Calendar.current.date(byAdding: .day, value: max(1, Int(daysNeeded)), to: Date())
     }
 }

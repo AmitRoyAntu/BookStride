@@ -18,7 +18,7 @@ public enum DataTransferError: LocalizedError {
         case .invalidJSON:
             return "The selected file is not a valid JSON document."
         case .unsupportedSchemaVersion(let v):
-            return "Backup schema version \(v) is not supported by this version of BookStride."
+            return "Backup schema version \(v) is not supported by this version of Bookstride."
         case .missingRequiredFields(let details):
             return "Backup data is missing required structure: \(details)"
         case .importFailed(let reason):
@@ -76,7 +76,7 @@ public enum DataExportService {
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd_HHmm"
         let timestamp = df.string(from: package.exportedAt)
-        let filename = "BookStride_Backup_\(timestamp).json"
+        let filename = "Bookstride_Backup_\(timestamp).json"
         
         let tempDir = FileManager.default.temporaryDirectory
         let fileURL = tempDir.appendingPathComponent(filename)

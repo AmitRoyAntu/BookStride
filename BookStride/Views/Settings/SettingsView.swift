@@ -200,12 +200,27 @@ public struct SettingsView: View {
                 }
             }
             
-            // Section 6: About BookStride
-            Section(header: Text("About BookStride")) {
+            // Section 6: About Bookstride
+            Section(header: Text("About Bookstride")) {
                 HStack {
                     Text("App Name")
                     Spacer()
-                    Text("BookStride")
+                    Text("Bookstride")
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                }
+                
+                HStack {
+                    Text("Tagline")
+                    Spacer()
+                    Text("Your reading journey, one day at a time.")
+                        .font(.caption)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                }
+                
+                HStack {
+                    Text("Descriptor")
+                    Spacer()
+                    Text("Reading Tracker & Journal")
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
                 

@@ -70,7 +70,7 @@ public final class ReadingTimerService: ObservableObject {
     // MARK: - Lifecycle & State Restoration
     
     public func restoreActiveSession() {
-        guard let data = userDefaults.data(forKey: Self.storageKey),
+        guard let data = userDefaults.data(forKey: Self.storageKey) ?? userDefaults.data(forKey: "ReadFlow_ActiveSessionState_v1"),
               let state = try? JSONDecoder().decode(ActiveSessionState.self, from: data) else {
             return
         }

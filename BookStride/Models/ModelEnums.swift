@@ -37,6 +37,7 @@ public enum SessionStatus: String, Codable, CaseIterable, Identifiable {
 public enum JournalEntryType: String, Codable, CaseIterable, Identifiable {
     case note = "Note"
     case quote = "Quote"
+    case reflection = "Reflection"
     
     public var id: String { rawValue }
     
@@ -44,6 +45,7 @@ public enum JournalEntryType: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .note: return "note.text"
         case .quote: return "quote.opening"
+        case .reflection: return "sparkles"
         }
     }
 }
