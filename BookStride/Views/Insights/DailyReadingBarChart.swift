@@ -24,7 +24,7 @@ public struct DailyReadingBarChart: View {
                     Text("Daily Reading Activity")
                         .font(.system(.headline, design: .serif, weight: .bold))
                         .foregroundColor(BookStrideTheme.deepCharcoal)
-                    Text("Minutes read per day with \(Int(goalMinutes))m goal line")
+                    Text("Last 7 days with \(Int(goalMinutes))m goal line")
                         .font(.caption)
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
@@ -32,7 +32,7 @@ public struct DailyReadingBarChart: View {
             }
             
             if points.allSatisfy({ $0.minutes == 0 }) {
-                Text("No reading time recorded for this period.")
+                Text("No reading time recorded in the last 7 days.")
                     .font(.subheadline)
                     .foregroundColor(BookStrideTheme.mutedSlate)
                     .frame(height: 180)
@@ -64,10 +64,10 @@ public struct DailyReadingBarChart: View {
                     }
                 }
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: points.count > 14 ? .weekOfYear : .day)) { value in
+                    AxisMarks(values: .stride(by: .day)) { value in
                         if let date = value.as(Date.self) {
                             AxisValueLabel {
-                                Text(date, format: .dateTime.day().month(.abbreviated))
+                                Text(date, format: .dateTime.weekday(.abbreviated).day())
                                     .font(.caption2)
                             }
                         }

@@ -49,7 +49,7 @@ public struct GoalConsistencyCard: View {
                     Text("\(daysWithGoalMet) of \(daysTracked) Days")
                         .font(.system(.title3, design: .serif, weight: .bold))
                         .foregroundColor(BookStrideTheme.forestGreen)
-                    Text("Goal Hit Rate")
+                    Text("Past 7 Days")
                         .font(.caption2)
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }

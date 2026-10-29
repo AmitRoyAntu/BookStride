@@ -31,24 +31,31 @@ public struct ReadingCalendarHeatmap: View {
         _selectedYear = State(initialValue: Calendar.current.component(.year, from: Date()))
     }
     
-    private var yearPoints: [HeatmapDayPoint] {
-        ReadingStatisticsService.computeYearlyHeatmap(
+    private struct YearlyGridData {
+        let year: Int
+        let points: [HeatmapDayPoint]
+        let weekColumns: [[HeatmapDayPoint?]]
+        let monthHeaders: [(name: String, weekIndex: Int)]
+        let activeDaysCount: Int
+    }
+    
+    private func buildGridData() -> YearlyGridData {
+        let points = ReadingStatisticsService.computeYearlyHeatmap(
             sessions: sessions,
             year: selectedYear,
             dailyGoalMinutes: dailyGoalMinutes,
             calendar: calendar
         )
-    }
-    
-    // Group days into columns of 7 (Sunday=0 to Saturday=6)
-    private var weekColumns: [[HeatmapDayPoint?]] {
-        guard let first = yearPoints.first else { return [] }
+        
+        guard let first = points.first else {
+            return YearlyGridData(year: selectedYear, points: [], weekColumns: [], monthHeaders: [], activeDaysCount: 0)
+        }
         
         let firstWeekday = calendar.component(.weekday, from: first.date) // 1 = Sunday
         var weeks: [[HeatmapDayPoint?]] = []
         var currentWeek: [HeatmapDayPoint?] = Array(repeating: nil, count: firstWeekday - 1)
         
-        for point in yearPoints {
+        for point in points {
             currentWeek.append(point)
             if currentWeek.count == 7 {
                 weeks.append(currentWeek)
@@ -63,17 +70,12 @@ public struct ReadingCalendarHeatmap: View {
             weeks.append(currentWeek)
         }
         
-        return weeks
-    }
-    
-    // Determine month headers position along week columns
-    private var monthHeaders: [(name: String, weekIndex: Int)] {
         var headers: [(name: String, weekIndex: Int)] = []
         var lastSeenMonth = -1
         let df = DateFormatter()
         df.dateFormat = "MMM"
         
-        for (wIndex, week) in weekColumns.enumerated() {
+        for (wIndex, week) in weeks.enumerated() {
             if let firstValidDay = week.compactMap({ $0 }).first {
                 let m = calendar.component(.month, from: firstValidDay.date)
                 if m != lastSeenMonth {
@@ -82,10 +84,21 @@ public struct ReadingCalendarHeatmap: View {
                 }
             }
         }
-        return headers
+        
+        let activeDays = points.filter { $0.minutes > 0 }.count
+        
+        return YearlyGridData(
+            year: selectedYear,
+            points: points,
+            weekColumns: weeks,
+            monthHeaders: headers,
+            activeDaysCount: activeDays
+        )
     }
     
     public var body: some View {
+        let grid = buildGridData()
+        
         VStack(alignment: .leading, spacing: 16) {
             // Header: Title & Year Navigator
             HStack(alignment: .center) {
@@ -160,9 +173,9 @@ public struct ReadingCalendarHeatmap: View {
                         Color.clear.frame(width: 28, height: 16) // Spacing for weekday column
                         
                         ZStack(alignment: .leading) {
-                            Color.clear.frame(width: CGFloat(weekColumns.count) * 17.0, height: 16)
+                            Color.clear.frame(width: CGFloat(grid.weekColumns.count) * 17.0, height: 16)
                             
-                            ForEach(monthHeaders, id: \.weekIndex) { header in
+                            ForEach(grid.monthHeaders, id: \.weekIndex) { header in
                                 Text(header.name)
                                     .font(.system(size: 10, weight: .medium))
                                     .foregroundColor(BookStrideTheme.mutedSlate)
@@ -185,10 +198,10 @@ public struct ReadingCalendarHeatmap: View {
                         
                         // Week columns
                         HStack(spacing: 3) {
-                            ForEach(0..<weekColumns.count, id: \.self) { colIndex in
+                            ForEach(0..<grid.weekColumns.count, id: \.self) { colIndex in
                                 VStack(spacing: 3) {
                                     ForEach(0..<7, id: \.self) { rowIndex in
-                                        if let point = weekColumns[colIndex][rowIndex] {
+                                        if let point = grid.weekColumns[colIndex][rowIndex] {
                                             dayCell(point: point)
                                         } else {
                                             Color.clear.frame(width: 14, height: 14)
@@ -221,7 +234,7 @@ public struct ReadingCalendarHeatmap: View {
                 
                 Spacer()
                 
-                Text("\(totalActiveDaysInYear) active days in \(String(format: "%d", selectedYear))")
+                Text("\(grid.activeDaysCount) active days in \(String(format: "%d", selectedYear))")
                     .font(.caption2.weight(.medium))
                     .foregroundColor(BookStrideTheme.mutedSlate)
             }
@@ -237,10 +250,6 @@ public struct ReadingCalendarHeatmap: View {
     }
     
     // MARK: - Subviews & Helpers
-    
-    private var totalActiveDaysInYear: Int {
-        yearPoints.filter { $0.minutes > 0 }.count
-    }
     
     @ViewBuilder
     private func dayCell(point: HeatmapDayPoint) -> some View {

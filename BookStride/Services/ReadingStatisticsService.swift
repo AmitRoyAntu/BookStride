@@ -300,11 +300,11 @@ public enum ReadingStatisticsService {
             readingSecondsThisMonth: readingThisMonth
         )
         
-        // 3. Daily bar chart data
+        // 3. Daily bar chart data (fixed for the last 7 days)
         let dailyPoints = generateDailyPoints(
-            filter: filter,
-            dailyTotals: filteredDailyTotals,
+            dailyTotals: allTimeDailyTotals,
             dailyGoalSeconds: goalSeconds,
+            numberOfDays: 7,
             now: now,
             calendar: calendar
         )
@@ -342,24 +342,14 @@ public enum ReadingStatisticsService {
     
     // MARK: - Chart Helper Generators
     
+    /// Generates daily reading activity points fixed for the last 7 days.
     private static func generateDailyPoints(
-        filter: TimeFilter,
         dailyTotals: [Date: Int],
         dailyGoalSeconds: Int,
+        numberOfDays: Int = 7,
         now: Date,
         calendar: Calendar
     ) -> [DailyReadingPoint] {
-        let numberOfDays: Int
-        switch filter {
-        case .last7Days: numberOfDays = 7
-        case .last30Days: numberOfDays = 30
-        case .last90Days: numberOfDays = 90
-        case .thisYear:
-            let dayOfYear = calendar.ordinality(of: .day, in: .year, for: now) ?? 365
-            numberOfDays = max(1, dayOfYear)
-        case .allTime: numberOfDays = min(60, max(7, dailyTotals.count))
-        }
-        
         let normalizedToday = calendar.startOfDay(for: now)
         var points: [DailyReadingPoint] = []
         
