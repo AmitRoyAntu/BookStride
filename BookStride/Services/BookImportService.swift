@@ -99,6 +99,11 @@ public enum BookImportService {
         }
     }
     
+    /// Extracts metadata and thumbnail from an EPUB or PDF file URL.
+    public static func extractMetadata(from url: URL) throws -> ExtractedBookMetadata {
+        try parseDocument(at: url)
+    }
+    
     // MARK: - PDF Parser
     
     private static func parsePDF(at url: URL, fileName: String) throws -> ExtractedBookMetadata {
