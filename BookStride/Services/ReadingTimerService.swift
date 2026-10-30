@@ -48,6 +48,12 @@ public struct ActiveSessionState: Codable, Equatable {
     }
 }
 
+public enum ReadingTimerState: Equatable {
+    case idle
+    case reading
+    case paused
+}
+
 public final class ReadingTimerService: ObservableObject {
     public static let shared = ReadingTimerService()
     
@@ -59,6 +65,12 @@ public final class ReadingTimerService: ObservableObject {
     @Published public private(set) var currentElapsedSeconds: Int = 0
     @Published public private(set) var isRunning: Bool = false
     @Published public private(set) var isPaused: Bool = false
+    
+    public var state: ReadingTimerState {
+        if isPaused { return .paused }
+        if isRunning { return .reading }
+        return .idle
+    }
     @Published public var showStaleSessionAlert: Bool = false
     @Published public var unmonitoredElapsedSeconds: Int = 0
     

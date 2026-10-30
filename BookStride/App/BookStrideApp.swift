@@ -65,10 +65,10 @@ struct BookStrideApp: App {
                 .keyboardShortcut("r", modifiers: [.command])
                 
                 Button("Pause / Resume Session") {
-                    if ReadingTimerService.shared.state == .reading {
-                        ReadingTimerService.shared.pauseSession()
-                    } else if ReadingTimerService.shared.state == .paused {
+                    if ReadingTimerService.shared.isPaused {
                         ReadingTimerService.shared.resumeSession()
+                    } else if ReadingTimerService.shared.isRunning {
+                        ReadingTimerService.shared.pauseSession()
                     }
                 }
                 .keyboardShortcut("p", modifiers: [.command])
