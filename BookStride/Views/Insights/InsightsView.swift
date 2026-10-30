@@ -212,7 +212,7 @@ public struct InsightsView: View {
     }
     
     private var timeFilterPicker: some View {
-        Picker("Time Period", selection: $selectedFilter) {
+        Picker("", selection: $selectedFilter) {
             ForEach(TimeFilter.allCases) { filter in
                 Text(filter.rawValue).tag(filter)
             }
@@ -220,6 +220,7 @@ public struct InsightsView: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .frame(maxWidth: 420)
+        .accessibilityLabel("Time Period")
     }
     
     private var readingWrappedButton: some View {

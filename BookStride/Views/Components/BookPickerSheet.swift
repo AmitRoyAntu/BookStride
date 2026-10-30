@@ -146,8 +146,38 @@ public struct BookPickerSheet: View {
                                 }
                             }
                         }
+                        
+                        Section {
+                            Button {
+                                dismiss()
+                                onAddNewBook()
+                            } label: {
+                                HStack(spacing: 14) {
+                                    Image(systemName: "plus.circle.fill")
+                                        .font(.title2)
+                                        .foregroundColor(BookStrideTheme.forestGreen)
+                                        .frame(width: 32)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Add a New Book")
+                                            .font(.body.weight(.medium))
+                                            .foregroundColor(BookStrideTheme.forestGreen)
+                                        Text("Add a book to your library to track it")
+                                            .font(.caption)
+                                            .foregroundColor(BookStrideTheme.mutedSlate)
+                                    }
+                                    Spacer()
+                                }
+                                .padding(.vertical, 4)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
+                    #if os(iOS)
                     .listStyle(.insetGrouped)
+                    #else
+                    .listStyle(.inset(alternatesRowBackgrounds: true))
+                    #endif
                 }
             }
             .navigationTitle("Select Book to Read")
@@ -156,6 +186,15 @@ public struct BookPickerSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
+                    }
+                }
+                
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        dismiss()
+                        onAddNewBook()
+                    } label: {
+                        Label("Add Book", systemImage: "plus")
                     }
                 }
                 

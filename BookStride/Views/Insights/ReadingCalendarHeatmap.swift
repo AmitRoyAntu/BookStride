@@ -166,13 +166,16 @@ public struct ReadingCalendarHeatmap: View {
             
             // Heatmap Centered/Scrollable Grid
             ViewThatFits(in: .horizontal) {
-                HStack {
+                HStack(alignment: .center) {
                     Spacer(minLength: 0)
                     calendarGridView(grid: grid)
                     Spacer(minLength: 0)
                 }
+                .frame(maxWidth: .infinity)
+                
                 ScrollView(.horizontal, showsIndicators: false) {
                     calendarGridView(grid: grid)
+                        .padding(.horizontal, 4)
                 }
             }
             
@@ -232,12 +235,14 @@ public struct ReadingCalendarHeatmap: View {
                 
                 ForEach(0..<grid.weekColumns.count, id: \.self) { wIndex in
                     if let header = grid.monthHeaders.first(where: { $0.weekIndex == wIndex }) {
-                        Text(header.name)
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(BookStrideTheme.mutedSlate)
-                            .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
-                            .frame(width: 14, alignment: .leading)
+                        ZStack(alignment: .leading) {
+                            Color.clear.frame(width: 14, height: 14)
+                            Text(header.name)
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(BookStrideTheme.mutedSlate)
+                                .lineLimit(1)
+                                .fixedSize()
+                        }
                     } else {
                         Color.clear.frame(width: 14, height: 14)
                     }
