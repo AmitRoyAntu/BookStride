@@ -246,3 +246,4 @@ public struct BookStrideShortcutsProvider: AppShortcutsProvider {
     }
 }
 #endif
+

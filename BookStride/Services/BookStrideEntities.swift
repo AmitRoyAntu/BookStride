@@ -117,3 +117,4 @@ public struct BookQuery: EntityQuery {
     }
 }
 #endif
+
