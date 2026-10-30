@@ -58,6 +58,13 @@ public enum UIKeyboardTypeCompat {
     case asciiCapableNumberPad
 }
 
+public enum TextInputAutocapitalizationCompat {
+    case never
+    case words
+    case sentences
+    case characters
+}
+
 extension View {
     @ViewBuilder
     public func navigationBarTitleDisplayMode(_ mode: NavigationBarTitleDisplayModeCompat) -> some View {
@@ -66,6 +73,11 @@ extension View {
     
     @ViewBuilder
     public func keyboardType(_ type: UIKeyboardTypeCompat) -> some View {
+        self
+    }
+    
+    @ViewBuilder
+    public func textInputAutocapitalization(_ autocapitalization: TextInputAutocapitalizationCompat?) -> some View {
         self
     }
 }
