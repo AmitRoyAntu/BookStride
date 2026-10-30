@@ -55,8 +55,12 @@ struct BookStrideApp: App {
         .commands {
             SidebarCommands()
             CommandMenu("Reading Timer") {
-                Button("Start Reading Session") {
-                    ReadingTimerService.shared.startSession()
+                Button("Start Reading Session...") {
+                    if ReadingTimerService.shared.activeState == nil {
+                        ReadingTimerService.shared.shouldTriggerBookPicker = true
+                    } else {
+                        ReadingTimerService.shared.shouldOpenTimerModal = true
+                    }
                 }
                 .keyboardShortcut("r", modifiers: [.command])
                 
