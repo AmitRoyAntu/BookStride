@@ -54,11 +54,11 @@ public enum IncomingShareProcessor {
     private static func importAsBook(_ item: IncomingShareItem, in modelContext: ModelContext) throws {
         var bookTitle = item.title.isEmpty ? "New Book" : item.title
         var author = item.author
-        var totalPages: Int? = nil
-        var coverData: Data? = nil
+        var totalPages: Int? = item.totalPages
+        var coverData: Data? = item.coverImageData
         var sourceFormat = BookSourceFormat.manual
         var fileName: String? = nil
-        var appleBooksURL: String? = nil
+        var appleBooksURL: String? = item.urlString
         
         if item.type == .file, let relPath = item.relativeFilePath, let filesDir = IncomingShareQueue.filesDirectoryURL {
             let fileURL = filesDir.appendingPathComponent(relPath)

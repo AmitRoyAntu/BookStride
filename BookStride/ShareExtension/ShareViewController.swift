@@ -2,22 +2,26 @@
 //  ShareViewController.swift
 //  BookStrideShareExtension
 //
-//  iPad Share Sheet extension providing a review and confirmation UI
-//  for saving shared web URLs, quotes, and EPUB/PDF files directly to BookStride.
+//  iPad and Mac Share Sheet extension providing a review and confirmation UI
+//  for saving shared Apple Books links, web URLs, quotes, and EPUB/PDF files directly to BookStride.
 //
 
 import UIKit
 import SwiftUI
 import UniformTypeIdentifiers
+#if canImport(LinkPresentation)
+import LinkPresentation
+#endif
 
 @objc(ShareViewController)
 public class ShareViewController: UIViewController {
     
-    private var detectedType: IncomingShareType = .textQuote
+    private var detectedType: IncomingShareType = .url
     private var detectedTitle: String = ""
     private var detectedAuthor: String = ""
     private var detectedURL: String? = nil
     private var detectedText: String? = nil
+    private var detectedCoverData: Data? = nil
     private var relativeFilePath: String? = nil
     private var fileFormat: String? = nil
     
@@ -36,21 +40,68 @@ public class ShareViewController: UIViewController {
         
         let dispatchGroup = DispatchGroup()
         
+        // Check for attributed content text on extensionItem (e.g. "Title by Author")
+        if let contentText = extensionItem.attributedContentText?.string, !contentText.isEmpty {
+            if contentText.contains(" by ") {
+                let parts = contentText.components(separatedBy: " by ")
+                if parts.count >= 2 {
+                    if detectedTitle.isEmpty {
+                        detectedTitle = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                    if detectedAuthor.isEmpty {
+                        detectedAuthor = parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                }
+            }
+        }
+        
         for provider in attachments {
-            // 1. Check for URL
+            // 1. Web URL / Apple Books link / LPLinkMetadata
             if provider.hasItemConformingToTypeIdentifier(UTType.url.identifier) {
                 dispatchGroup.enter()
                 provider.loadItem(forTypeIdentifier: UTType.url.identifier, options: nil) { [weak self] (item, error) in
                     defer { dispatchGroup.leave() }
                     guard let self = self else { return }
+                    
+                    #if canImport(LinkPresentation)
+                    if let linkMeta = item as? LPLinkMetadata {
+                        if let t = linkMeta.title, !t.isEmpty, self.detectedTitle.isEmpty {
+                            self.detectedTitle = t
+                        }
+                        if let u = linkMeta.url ?? linkMeta.originalURL {
+                            self.detectedURL = u.absoluteString
+                            self.detectedType = .url
+                            if self.detectedTitle.isEmpty, let parsed = self.parseTitleFromAppleBooksURL(u) {
+                                self.detectedTitle = parsed
+                            }
+                        }
+                        if let imgProvider = linkMeta.imageProvider ?? linkMeta.iconProvider {
+                            dispatchGroup.enter()
+                            imgProvider.loadDataRepresentation(forTypeIdentifier: UTType.image.identifier) { [weak self] (data, _) in
+                                defer { dispatchGroup.leave() }
+                                if let data = data {
+                                    self?.detectedCoverData = data
+                                }
+                            }
+                        }
+                        return
+                    }
+                    #endif
+                    
                     if let url = item as? URL {
                         self.detectedType = .url
                         self.detectedURL = url.absoluteString
-                        self.detectedTitle = extensionItem.attributedContentText?.string ?? url.lastPathComponent
+                        if self.detectedTitle.isEmpty {
+                            if let parsed = self.parseTitleFromAppleBooksURL(url) {
+                                self.detectedTitle = parsed
+                            } else {
+                                self.detectedTitle = url.lastPathComponent
+                            }
+                        }
                     }
                 }
             }
-            // 2. Check for EPUB or PDF File
+            // 3. EPUB or PDF File
             else if provider.hasItemConformingToTypeIdentifier(UTType.pdf.identifier) ||
                     provider.hasItemConformingToTypeIdentifier("org.idpf.epub-container") ||
                     provider.hasItemConformingToTypeIdentifier(UTType.data.identifier) {
@@ -64,7 +115,9 @@ public class ShareViewController: UIViewController {
                         if ext == "pdf" || ext == "epub" {
                             self.detectedType = .file
                             self.fileFormat = ext
-                            self.detectedTitle = fileURL.deletingPathExtension().lastPathComponent
+                            if self.detectedTitle.isEmpty {
+                                self.detectedTitle = fileURL.deletingPathExtension().lastPathComponent
+                            }
                             
                             // Copy file safely into App Group files directory
                             if let filesDir = IncomingShareQueue.filesDirectoryURL {
@@ -77,16 +130,29 @@ public class ShareViewController: UIViewController {
                     }
                 }
             }
-            // 3. Check for Plain Text / Quote
+            // 4. Plain Text / Quote / Title String
             else if provider.hasItemConformingToTypeIdentifier(UTType.plainText.identifier) {
                 dispatchGroup.enter()
                 provider.loadItem(forTypeIdentifier: UTType.plainText.identifier, options: nil) { [weak self] (item, error) in
                     defer { dispatchGroup.leave() }
                     guard let self = self else { return }
                     if let text = item as? String {
-                        self.detectedType = .textQuote
                         self.detectedText = text
-                        self.detectedTitle = String(text.prefix(40))
+                        // Check if text is formatted as "Title by Author"
+                        if text.contains(" by ") {
+                            let parts = text.components(separatedBy: " by ")
+                            if parts.count >= 2 {
+                                if self.detectedTitle.isEmpty {
+                                    self.detectedTitle = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
+                                }
+                                if self.detectedAuthor.isEmpty {
+                                    self.detectedAuthor = parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
+                                }
+                            }
+                        } else if self.detectedTitle.isEmpty {
+                            self.detectedTitle = String(text.prefix(50))
+                            self.detectedType = .textQuote
+                        }
                     }
                 }
             }
@@ -95,6 +161,16 @@ public class ShareViewController: UIViewController {
         dispatchGroup.notify(queue: .main) { [weak self] in
             self?.presentReviewView()
         }
+    }
+    
+    private func parseTitleFromAppleBooksURL(_ url: URL) -> String? {
+        let components = url.pathComponents
+        if let bookIndex = components.firstIndex(of: "book"), bookIndex + 1 < components.count {
+            let slug = components[bookIndex + 1]
+            let cleaned = slug.replacingOccurrences(of: "-", with: " ").capitalized
+            return cleaned.isEmpty ? nil : cleaned
+        }
+        return nil
     }
     
     private func presentReviewView() {
@@ -106,9 +182,11 @@ public class ShareViewController: UIViewController {
             textContent: detectedText,
             relativeFilePath: relativeFilePath,
             fileFormat: fileFormat,
+            coverImageData: detectedCoverData,
             onSave: { [weak self] item in
                 do {
                     try IncomingShareQueue.enqueue(item)
+                    self?.notifyHostApplication()
                     self?.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
                 } catch {
                     self?.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
@@ -134,18 +212,32 @@ public class ShareViewController: UIViewController {
         ])
         hostingController.didMove(toParent: self)
     }
+    
+    private func notifyHostApplication() {
+        // Trigger responder chain or open URL if possible
+        var responder: UIResponder? = self
+        while responder != nil {
+            if let application = responder as? UIApplication {
+                application.open(URL(string: "bookstride://incoming")!, options: [:], completionHandler: nil)
+                break
+            }
+            responder = responder?.next
+        }
+    }
 }
 
 struct ShareSheetReviewView: View {
     @State private var itemType: IncomingShareType
     @State private var title: String
     @State private var author: String
+    @State private var totalPagesText: String = ""
     @State private var destination: String // "library" or "journal"
     
     let urlString: String?
     let textContent: String?
     let relativeFilePath: String?
     let fileFormat: String?
+    let coverImageData: Data?
     
     let onSave: (IncomingShareItem) -> Void
     let onCancel: () -> Void
@@ -158,35 +250,69 @@ struct ShareSheetReviewView: View {
         textContent: String?,
         relativeFilePath: String?,
         fileFormat: String?,
+        coverImageData: Data? = nil,
         onSave: @escaping (IncomingShareItem) -> Void,
         onCancel: @escaping () -> Void
     ) {
         _itemType = State(initialValue: initialType)
-        _title = State(initialValue: initialTitle.isEmpty ? "New Shared Item" : initialTitle)
+        _title = State(initialValue: initialTitle.isEmpty ? "New Book" : initialTitle)
         _author = State(initialValue: initialAuthor)
         _destination = State(initialValue: initialType == .textQuote ? "journal" : "library")
         self.urlString = urlString
         self.textContent = textContent
         self.relativeFilePath = relativeFilePath
         self.fileFormat = fileFormat
+        self.coverImageData = coverImageData
         self.onSave = onSave
         self.onCancel = onCancel
+    }
+    
+    private var isAppleBooksLink: Bool {
+        guard let url = urlString?.lowercased() else { return false }
+        return url.contains("books.apple.com") || url.contains("ibooks://") || url.contains("itms-books://")
     }
     
     var body: some View {
         NavigationStack {
             Form {
                 Section("Shared Content") {
-                    HStack(spacing: 12) {
-                        Image(systemName: iconName)
-                            .font(.title2)
-                            .foregroundColor(Color(hex: "2D5A43"))
-                            .frame(width: 36, height: 36)
-                        
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(typeLabel)
-                                .font(.caption.weight(.bold))
+                    HStack(alignment: .top, spacing: 14) {
+                        if let coverData = coverImageData, let uiImage = UIImage(data: coverData) {
+                            Image(uiImage: uiImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 50, height: 75)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(hex: "E4DFD3"), lineWidth: 1))
+                                .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 1)
+                        } else {
+                            Image(systemName: iconName)
+                                .font(.title)
                                 .foregroundColor(Color(hex: "2D5A43"))
+                                .frame(width: 44, height: 44)
+                                .background(Color(hex: "2D5A43").opacity(0.12))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 6) {
+                                Text(typeLabel)
+                                    .font(.caption.weight(.bold))
+                                    .foregroundColor(Color(hex: "2D5A43"))
+                                
+                                if isAppleBooksLink {
+                                    HStack(spacing: 3) {
+                                        Image(systemName: "book.fill")
+                                        Text("Apple Books")
+                                    }
+                                    .font(.system(size: 9, weight: .semibold))
+                                    .foregroundColor(Color(hex: "2D5A43"))
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color(hex: "2D5A43").opacity(0.15))
+                                    .clipShape(Capsule())
+                                }
+                            }
                             
                             if let url = urlString {
                                 Text(url)
@@ -208,10 +334,12 @@ struct ShareSheetReviewView: View {
                     .padding(.vertical, 4)
                 }
                 
-                Section("Details") {
+                Section("Book Details") {
                     TextField("Title", text: $title)
+                    TextField("Author", text: $author)
                     if destination == "library" {
-                        TextField("Author (optional)", text: $author)
+                        TextField("Number of Pages (optional)", text: $totalPagesText)
+                            .keyboardType(.numberPad)
                     }
                 }
                 
@@ -222,6 +350,14 @@ struct ShareSheetReviewView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+                
+                if destination == "library" && isAppleBooksLink {
+                    Section {
+                        Label("Direct link will be stored so you can tap 'Read in Apple Books' at any time.", systemImage: "arrow.up.right.square")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
             .navigationTitle("Save to BookStride")
             .navigationBarTitleDisplayMode(.inline)
@@ -231,6 +367,7 @@ struct ShareSheetReviewView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
+                        let parsedPages = Int(totalPagesText.trimmingCharacters(in: .whitespacesAndNewlines))
                         let item = IncomingShareItem(
                             type: itemType,
                             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -239,7 +376,9 @@ struct ShareSheetReviewView: View {
                             textContent: textContent,
                             targetDestination: destination,
                             relativeFilePath: relativeFilePath,
-                            fileFormat: fileFormat
+                            fileFormat: fileFormat,
+                            totalPages: parsedPages,
+                            coverImageData: coverImageData
                         )
                         onSave(item)
                     }
@@ -252,7 +391,7 @@ struct ShareSheetReviewView: View {
     
     private var iconName: String {
         switch itemType {
-        case .url: return "link"
+        case .url: return isAppleBooksLink ? "book.fill" : "link"
         case .textQuote: return "quote.bubble.fill"
         case .file: return "doc.fill"
         }
@@ -260,10 +399,11 @@ struct ShareSheetReviewView: View {
     
     private var typeLabel: String {
         switch itemType {
-        case .url: return "Web Link"
+        case .url: return isAppleBooksLink ? "Apple Book" : "Web Link"
         case .textQuote: return "Quote / Highlight"
         case .file: return "Book File (\(fileFormat?.uppercased() ?? ""))"
         }
     }
 }
+
 

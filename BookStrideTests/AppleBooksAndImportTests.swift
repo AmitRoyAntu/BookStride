@@ -16,6 +16,7 @@ public enum AppleBooksAndImportTests {
         testDuplicateDetection()
         testModelSourceFormatAccessors()
         testExtractMetadataMethodSignature()
+        testIncomingShareItemEncodingAndAppleBooksSupport()
         print("✅ AppleBooksAndImportTests passed successfully.\n")
     }
     
@@ -118,6 +119,38 @@ public enum AppleBooksAndImportTests {
             assert(ext == "docx", "Expected docx extension in error: \(ext)")
         } catch {
             // Any other error is acceptable if system restricts path
+        }
+    }
+    
+    private static func testIncomingShareItemEncodingAndAppleBooksSupport() {
+        let sampleCover = "cover-data".data(using: .utf8)
+        let item = IncomingShareItem(
+            type: .url,
+            title: "Atomic Habits",
+            author: "James Clear",
+            urlString: "https://books.apple.com/us/book/atomic-habits/id1396349942",
+            targetDestination: "library",
+            totalPages: 320,
+            coverImageData: sampleCover
+        )
+        
+        assert(item.title == "Atomic Habits", "Title should match")
+        assert(item.author == "James Clear", "Author should match")
+        assert(item.totalPages == 320, "Total pages should be 320")
+        assert(item.coverImageData == sampleCover, "Cover data should match")
+        assert(AppleBooksService.isValidAppleBooksURL(item.urlString ?? ""), "URL must be valid Apple Books link")
+        
+        // Test JSON encode/decode
+        do {
+            let encoded = try JSONEncoder().encode(item)
+            let decoded = try JSONDecoder().decode(IncomingShareItem.self, from: encoded)
+            assert(decoded.id == item.id, "Decoded id should match")
+            assert(decoded.title == item.title, "Decoded title should match")
+            assert(decoded.totalPages == 320, "Decoded totalPages should match")
+            assert(decoded.urlString == item.urlString, "Decoded urlString should match")
+            assert(decoded.coverImageData == sampleCover, "Decoded coverImageData should match")
+        } catch {
+            assert(false, "IncomingShareItem must encode/decode cleanly: \(error)")
         }
     }
 }

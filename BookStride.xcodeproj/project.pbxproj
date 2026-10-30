@@ -85,6 +85,10 @@
 		A1000097 /* BookStrideShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000085 /* BookStrideShortcuts.swift */; };
 		A1000098 /* IncomingShareQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000086 /* IncomingShareQueue.swift */; };
 		A1000099 /* IncomingShareProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000087 /* IncomingShareProcessor.swift */; };
+		A1000100 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000088 /* ShareViewController.swift */; };
+		A1000101 /* IncomingShareQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000086 /* IncomingShareQueue.swift */; };
+		A1000102 /* ColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000015 /* ColorTheme.swift */; };
+		A1000103 /* BookStrideShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C1000004 /* BookStrideShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +98,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = F1000002;
 			remoteInfo = BookStrideWidgetExtension;
+		};
+		L1000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = I1000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F1000003;
+			remoteInfo = BookStrideShareExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -105,6 +116,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				A1000080 /* BookStrideWidgetExtension.appex in Embed Foundation Extensions */,
+				A1000103 /* BookStrideShareExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -184,6 +196,10 @@
 		B1000087 /* IncomingShareProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingShareProcessor.swift; sourceTree = "<group>"; };
 		C1000001 /* BookStride.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookStride.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1000002 /* BookStrideWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BookStrideWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1000004 /* BookStrideShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BookStrideShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1000088 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		B1000089 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B1000090 /* BookStrideShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BookStrideShareExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -195,6 +211,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D1000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1000003 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -221,6 +244,7 @@
 				E1000007 /* Utilities */,
 				E1000008 /* Views */,
 				E1000019 /* Widgets */,
+				E1000020 /* ShareExtension */,
 				E1000009 /* Resources */,
 			);
 			path = BookStride;
@@ -231,6 +255,7 @@
 			children = (
 				C1000001 /* BookStride.app */,
 				C1000002 /* BookStrideWidgetExtension.appex */,
+				C1000004 /* BookStrideShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -426,6 +451,16 @@
 			path = Widgets;
 			sourceTree = "<group>";
 		};
+		E1000020 /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				B1000088 /* ShareViewController.swift */,
+				B1000089 /* Info.plist */,
+				B1000090 /* BookStrideShareExtension.entitlements */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -442,6 +477,7 @@
 			);
 			dependencies = (
 				K1000001 /* PBXTargetDependency */,
+				K1000002 /* PBXTargetDependency */,
 			);
 			name = BookStride;
 			productName = BookStride;
@@ -465,6 +501,23 @@
 			productReference = C1000002 /* BookStrideWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		F1000003 /* BookStrideShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = G1000004 /* Build configuration list for PBXNativeTarget "BookStrideShareExtension" */;
+			buildPhases = (
+				D1000003 /* Frameworks */,
+				H1000005 /* Sources */,
+				H1000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BookStrideShareExtension;
+			productName = BookStrideShareExtension;
+			productReference = C1000004 /* BookStrideShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -479,6 +532,9 @@
 						CreatedOnToolsVersion = 15.0;
 					};
 					F1000002 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					F1000003 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
@@ -498,6 +554,7 @@
 			targets = (
 				F1000001 /* BookStride */,
 				F1000002 /* BookStrideWidgetExtension */,
+				F1000003 /* BookStrideShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -512,6 +569,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		H1000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		H1000006 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -611,6 +675,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		H1000005 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000100 /* ShareViewController.swift in Sources */,
+				A1000101 /* IncomingShareQueue.swift in Sources */,
+				A1000102 /* ColorTheme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -618,6 +692,11 @@
 			isa = PBXTargetDependency;
 			target = F1000002 /* BookStrideWidgetExtension */;
 			targetProxy = L1000001 /* PBXContainerItemProxy */;
+		};
+		K1000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F1000003 /* BookStrideShareExtension */;
+			targetProxy = L1000002 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -895,6 +974,85 @@
 			};
 			name = Release;
 		};
+		J1000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = BookStride/ShareExtension/BookStrideShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7GCZYFC62V;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BookStride/ShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride.BookStrideShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG SHARE_EXTENSION";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		J1000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = BookStride/ShareExtension/BookStrideShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7GCZYFC62V;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BookStride/ShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride.BookStrideShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = SHARE_EXTENSION;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -921,6 +1079,15 @@
 			buildConfigurations = (
 				J1000005 /* Debug */,
 				J1000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		G1000004 /* Build configuration list for PBXNativeTarget "BookStrideShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				J1000007 /* Debug */,
+				J1000008 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

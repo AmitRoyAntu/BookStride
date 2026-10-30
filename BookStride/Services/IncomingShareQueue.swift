@@ -24,6 +24,8 @@ public struct IncomingShareItem: Codable, Identifiable, Equatable {
     public var targetDestination: String // "library" or "journal"
     public var relativeFilePath: String?
     public var fileFormat: String? // "epub" or "pdf"
+    public var totalPages: Int?
+    public var coverImageData: Data?
     public var createdAt: Date
     
     public init(
@@ -36,6 +38,8 @@ public struct IncomingShareItem: Codable, Identifiable, Equatable {
         targetDestination: String = "library",
         relativeFilePath: String? = nil,
         fileFormat: String? = nil,
+        totalPages: Int? = nil,
+        coverImageData: Data? = nil,
         createdAt: Date = Date()
     ) {
         self.id = id
@@ -47,6 +51,8 @@ public struct IncomingShareItem: Codable, Identifiable, Equatable {
         self.targetDestination = targetDestination
         self.relativeFilePath = relativeFilePath
         self.fileFormat = fileFormat
+        self.totalPages = totalPages
+        self.coverImageData = coverImageData
         self.createdAt = createdAt
     }
 }
