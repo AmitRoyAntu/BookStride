@@ -61,294 +61,331 @@ public struct SettingsView: View {
         }
     }
     
+    private var alertTitle: String {
+        importErrorMessage != nil ? "Data Management Notice" : "Data Management"
+    }
+    
+    private var alertMessageText: String {
+        importErrorMessage ?? importSuccessMessage ?? ""
+    }
+    
     public var body: some View {
         Form {
-            // Section 1: Reading Goals
-            Section(header: Text("Reading Goals")) {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text("Daily Reading Time Goal")
-                        Spacer()
-                        Text("\(dailyMinutes) minutes")
-                            .font(.headline)
-                            .foregroundColor(BookStrideTheme.forestGreen)
-                    }
-                    Stepper("Daily minutes", value: $dailyMinutes, in: 5...300, step: 5)
-                        .onChange(of: dailyMinutes) { _, newVal in
-                            saveGoals()
-                        }
-                }
-                
-                Toggle("Daily Pages Goal", isOn: $hasDailyPagesGoal)
-                    .onChange(of: hasDailyPagesGoal) { _, _ in saveGoals() }
-                if hasDailyPagesGoal {
-                    Stepper("Target: \(dailyPages) pages", value: $dailyPages, in: 5...200, step: 5)
-                        .onChange(of: dailyPages) { _, _ in saveGoals() }
-                }
-                
-                Toggle("Yearly Book Target", isOn: $hasYearlyBooksGoal)
-                    .onChange(of: hasYearlyBooksGoal) { _, _ in saveGoals() }
-                if hasYearlyBooksGoal {
-                    Stepper("Target: \(yearlyBooks) books / year", value: $yearlyBooks, in: 1...100, step: 1)
-                        .onChange(of: yearlyBooks) { _, _ in saveGoals() }
-                }
-            }
-            
-            // Section 2: Display Preferences
-            Section(header: Text("Preferred Time Display")) {
-                Picker("Time Format", selection: $preferredDurationStyle) {
-                    Text("Full Units (1 hr 25 mins)").tag("full")
-                    Text("Short Units (1h 25m)").tag("short")
-                    Text("Compact Decimals (1.4 hrs)").tag("compact")
-                }
-                .pickerStyle(.menu)
-            }
-            
-            // Section 3: Streak Rule Explanation & Reminders
-            Section(header: Text("How Streaks Work")) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("Transparent Habit Counting", systemImage: "info.circle")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(BookStrideTheme.deepCharcoal)
-                    
-                    Text("• A calendar day qualifies for your streak once your active reading reaches your daily goal (\(dailyMinutes) min).\n• While today is underway, an active streak from yesterday is never prematurely broken.\n• Paused intervals are strictly deducted from active time.\n• Sessions crossing local midnight credit their active minutes to the respective calendar days.")
-                        .font(.caption)
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                        .lineSpacing(4)
-                }
-                .padding(.vertical, 4)
-            }
-            
-            Section(header: Text("Notifications & Habit Reminders")) {
-                Toggle("Daily Reading Reminder", isOn: $enableDailyReminder)
-                    .onChange(of: enableDailyReminder) { _, isEnabled in
-                        handleReminderToggle(isEnabled)
-                    }
-                
-                if enableDailyReminder {
-                    DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: .hourAndMinute)
-                        .onChange(of: reminderTime) { _, newTime in
-                            scheduleReminder(at: newTime)
-                        }
-                }
-                
-                HStack {
-                    Text("Permission Status:")
-                        .font(.caption)
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                    Spacer()
-                    Text(notificationService.isAuthorized ? "Authorized" : "Not Enabled")
-                        .font(.caption.weight(.medium))
-                        .foregroundColor(notificationService.isAuthorized ? BookStrideTheme.forestGreen : BookStrideTheme.mutedSlate)
-                }
-            }
-            .alert("Notification Permission Denied", isPresented: $showingPermissionDeniedAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Please enable notifications for BookStride in iPadOS Settings to receive daily reading reminders.")
-            }
-            
-            // Section 4: Data Management (Export & Import)
-            Section(header: Text("Data Management & Backup")) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Local Data Scope")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(BookStrideTheme.deepCharcoal)
-                    Text("\(allBooks.count) Books • \(allSessions.count) Sessions • \(allJournalEntries.count) Journal Notes")
-                        .font(.caption)
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                }
-                .padding(.vertical, 4)
-                
-                Button {
-                    prepareJSONBackupExport()
-                } label: {
-                    HStack {
-                        Image(systemName: "archivebox.fill")
-                        Text("Export Full Backup (JSON)")
-                        Spacer()
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.caption2)
-                            .foregroundColor(BookStrideTheme.mutedSlate)
-                    }
-                    .foregroundColor(BookStrideTheme.deepCharcoal)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                
-                Button {
-                    prepareCSVSpreadsheetsExport()
-                } label: {
-                    HStack {
-                        Image(systemName: "tablecells.fill")
-                        Text("Export Spreadsheets (CSV)")
-                        Spacer()
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.caption2)
-                            .foregroundColor(BookStrideTheme.mutedSlate)
-                    }
-                    .foregroundColor(BookStrideTheme.deepCharcoal)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                
-                Button {
-                    showingFileImporter = true
-                } label: {
-                    HStack {
-                        Image(systemName: "square.and.arrow.down")
-                        Text("Import Backup (JSON)")
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundColor(BookStrideTheme.mutedSlate)
-                    }
-                    .foregroundColor(BookStrideTheme.deepCharcoal)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                
-                HStack {
-                    Text("Offline-first:")
-                    Spacer()
-                    Text("All data is stored locally on this iPad")
-                        .font(.caption)
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                }
-            }
-            .confirmationDialog("Export Full Backup", isPresented: $showingJSONExportDialog, titleVisibility: .visible) {
-                Button("Save to Files (iCloud / Local)") {
-                    showingDocumentPicker = true
-                }
-                Button("Share via AirDrop or Apps...") {
-                    showingShareSheet = true
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Save your complete BookStride library, reading history, and journal notes to a JSON file.")
-            }
-            .confirmationDialog("Export Spreadsheets", isPresented: $showingCSVExportDialog, titleVisibility: .visible) {
-                Button("Save to Files (iCloud / Local)") {
-                    showingDocumentPicker = true
-                }
-                Button("Share via AirDrop or Apps...") {
-                    showingShareSheet = true
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Export books, reading sessions, and journal entries as RFC 4180 CSV spreadsheets.")
-            }
-            .sheet(isPresented: $showingDocumentPicker) {
-                DocumentExportPickerSheet(urls: exportedURLs) { success in
-                    if success {
-                        importSuccessMessage = "Files saved successfully to the selected folder."
-                        importErrorMessage = nil
-                        showingAlert = true
-                    }
-                }
-            }
-            .sheet(isPresented: $showingShareSheet) {
-                ActivityViewSheet(activityItems: exportedURLs)
-            }
-            .fileImporter(
-                isPresented: $showingFileImporter,
-                allowedContentTypes: [.json],
-                allowsMultipleSelection: false
-            ) { result in
-                handleFileImport(result)
-            }
-            .alert(importErrorMessage != nil ? "Data Management Notice" : "Data Management", isPresented: $showingAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(importErrorMessage ?? importSuccessMessage ?? "")
-            }
-            
-            // Section 5: Evaluation & Demo Data
-            Section(header: Text("Evaluation & Demo Data")) {
-                Button {
-                    SampleDataService.populateSampleData(in: modelContext)
-                    showingSampleDataPopulatedNotice = true
-                } label: {
-                    HStack {
-                        Image(systemName: "wand.and.stars")
-                        Text("Populate Realistic Sample Data")
-                        Spacer()
-                    }
-                    .foregroundColor(BookStrideTheme.forestGreen)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .alert("Sample Data Added", isPresented: $showingSampleDataPopulatedNotice) {
-                    Button("OK", role: .cancel) {}
-                } message: {
-                    Text("Sample books, reading sessions spanning streaks, and journal notes have been loaded.")
-                }
-                
-                Button(role: .destructive) {
-                    showingClearConfirmation = true
-                } label: {
-                    HStack {
-                        Image(systemName: "trash")
-                        Text("Clear All Data")
-                        Spacer()
-                    }
-                    .foregroundColor(.red)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .alert("Clear All App Data?", isPresented: $showingClearConfirmation) {
-                    Button("Erase Everything", role: .destructive) {
-                        clearAllLibraryData()
-                    }
-                    Button("Cancel", role: .cancel) {}
-                } message: {
-                    Text("This will permanently delete all books, reading sessions, and journal entries. This cannot be undone.")
-                }
-            }
-            
-            // Section 6: About BookStride
-            Section(header: Text("About BookStride")) {
-                HStack {
-                    Text("App Name")
-                    Spacer()
-                    Text("BookStride")
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                }
-                
-                HStack {
-                    Text("Tagline")
-                    Spacer()
-                    Text("Your reading journey, one day at a time.")
-                        .font(.caption)
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                }
-                
-                HStack {
-                    Text("Descriptor")
-                    Spacer()
-                    Text("Reading Tracker & Journal")
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                }
-                
-                HStack {
-                    Text("Version")
-                    Spacer()
-                    Text("1.0.0 (iPadOS Native)")
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                }
-                
-                HStack {
-                    Text("Companion App")
-                    Spacer()
-                    Text("Designed for Apple Books")
-                        .foregroundColor(BookStrideTheme.mutedSlate)
-                }
-            }
+            readingGoalsSection
+            displayPreferencesSection
+            howStreaksWorkSection
+            notificationsSection
+            dataManagementSection
+            demoDataSection
+            aboutAppSection
         }
         .BookStrideBackground()
         .navigationTitle("Settings")
         .onAppear {
             loadGoalValues()
+        }
+        .alert(alertTitle, isPresented: $showingAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(alertMessageText)
+        }
+        .sheet(isPresented: $showingDocumentPicker) {
+            #if canImport(UIKit)
+            DocumentExportPickerSheet(urls: exportedURLs) { success in
+                if success {
+                    importSuccessMessage = "Files saved successfully to the selected folder."
+                    importErrorMessage = nil
+                    showingAlert = true
+                }
+            }
+            #endif
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            #if canImport(UIKit)
+            ActivityViewSheet(activityItems: exportedURLs)
+            #endif
+        }
+        .fileImporter(
+            isPresented: $showingFileImporter,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            handleFileImport(result)
+        }
+    }
+    
+    // MARK: - Sections
+    
+    @ViewBuilder
+    private var readingGoalsSection: some View {
+        Section(header: Text("Reading Goals")) {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("Daily Reading Time Goal")
+                    Spacer()
+                    Text("\(dailyMinutes) minutes")
+                        .font(.headline)
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                }
+                Stepper("Daily minutes", value: $dailyMinutes, in: 5...300, step: 5)
+                    .onChange(of: dailyMinutes) { _, newVal in
+                        saveGoals()
+                    }
+            }
+            
+            Toggle("Daily Pages Goal", isOn: $hasDailyPagesGoal)
+                .onChange(of: hasDailyPagesGoal) { _, _ in saveGoals() }
+            if hasDailyPagesGoal {
+                Stepper("Target: \(dailyPages) pages", value: $dailyPages, in: 5...200, step: 5)
+                    .onChange(of: dailyPages) { _, _ in saveGoals() }
+            }
+            
+            Toggle("Yearly Book Target", isOn: $hasYearlyBooksGoal)
+                .onChange(of: hasYearlyBooksGoal) { _, _ in saveGoals() }
+            if hasYearlyBooksGoal {
+                Stepper("Target: \(yearlyBooks) books / year", value: $yearlyBooks, in: 1...100, step: 1)
+                    .onChange(of: yearlyBooks) { _, _ in saveGoals() }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var displayPreferencesSection: some View {
+        Section(header: Text("Preferred Time Display")) {
+            Picker("Time Format", selection: $preferredDurationStyle) {
+                Text("Full Units (1 hr 25 mins)").tag("full")
+                Text("Short Units (1h 25m)").tag("short")
+                Text("Compact Decimals (1.4 hrs)").tag("compact")
+            }
+            .pickerStyle(.menu)
+        }
+    }
+    
+    @ViewBuilder
+    private var howStreaksWorkSection: some View {
+        Section(header: Text("How Streaks Work")) {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Transparent Habit Counting", systemImage: "info.circle")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
+                
+                Text("• A calendar day qualifies for your streak once your active reading reaches your daily goal (\(dailyMinutes) min).\n• While today is underway, an active streak from yesterday is never prematurely broken.\n• Paused intervals are strictly deducted from active time.\n• Sessions crossing local midnight credit their active minutes to the respective calendar days.")
+                    .font(.caption)
+                    .foregroundColor(BookStrideTheme.mutedSlate)
+                    .lineSpacing(4)
+            }
+            .padding(.vertical, 4)
+        }
+    }
+    
+    @ViewBuilder
+    private var notificationsSection: some View {
+        Section(header: Text("Notifications & Habit Reminders")) {
+            Toggle("Daily Reading Reminder", isOn: $enableDailyReminder)
+                .onChange(of: enableDailyReminder) { _, isEnabled in
+                    handleReminderToggle(isEnabled)
+                }
+            
+            if enableDailyReminder {
+                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: .hourAndMinute)
+                    .onChange(of: reminderTime) { _, newTime in
+                        scheduleReminder(at: newTime)
+                    }
+            }
+            
+            HStack {
+                Text("Permission Status:")
+                    .font(.caption)
+                    .foregroundColor(BookStrideTheme.mutedSlate)
+                Spacer()
+                Text(notificationService.isAuthorized ? "Authorized" : "Not Enabled")
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(notificationService.isAuthorized ? BookStrideTheme.forestGreen : BookStrideTheme.mutedSlate)
+            }
+        }
+        .alert("Notification Permission Denied", isPresented: $showingPermissionDeniedAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Please enable notifications for BookStride in iPadOS Settings to receive daily reading reminders.")
+        }
+    }
+    
+    @ViewBuilder
+    private var dataManagementSection: some View {
+        Section(header: Text("Data Management & Backup")) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Local Data Scope")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
+                Text("\(allBooks.count) Books • \(allSessions.count) Sessions • \(allJournalEntries.count) Journal Notes")
+                    .font(.caption)
+                    .foregroundColor(BookStrideTheme.mutedSlate)
+            }
+            .padding(.vertical, 4)
+            
+            Button {
+                prepareJSONBackupExport()
+            } label: {
+                HStack {
+                    Image(systemName: "archivebox.fill")
+                    Text("Export Full Backup (JSON)")
+                    Spacer()
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.caption2)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                }
+                .foregroundColor(BookStrideTheme.deepCharcoal)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            
+            Button {
+                prepareCSVSpreadsheetsExport()
+            } label: {
+                HStack {
+                    Image(systemName: "tablecells.fill")
+                    Text("Export Spreadsheets (CSV)")
+                    Spacer()
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.caption2)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                }
+                .foregroundColor(BookStrideTheme.deepCharcoal)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            
+            Button {
+                showingFileImporter = true
+            } label: {
+                HStack {
+                    Image(systemName: "square.and.arrow.down")
+                    Text("Import Backup (JSON)")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption2)
+                        .foregroundColor(BookStrideTheme.mutedSlate)
+                }
+                .foregroundColor(BookStrideTheme.deepCharcoal)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            
+            HStack {
+                Text("Offline-first:")
+                Spacer()
+                Text("All data is stored locally on this device")
+                    .font(.caption)
+                    .foregroundColor(BookStrideTheme.mutedSlate)
+            }
+        }
+        .confirmationDialog("Export Full Backup", isPresented: $showingJSONExportDialog, titleVisibility: .visible) {
+            Button("Save to Files (iCloud / Local)") {
+                showingDocumentPicker = true
+            }
+            Button("Share via AirDrop or Apps...") {
+                showingShareSheet = true
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Save your complete BookStride library, reading history, and journal notes to a JSON file.")
+        }
+        .confirmationDialog("Export Spreadsheets", isPresented: $showingCSVExportDialog, titleVisibility: .visible) {
+            Button("Save to Files (iCloud / Local)") {
+                showingDocumentPicker = true
+            }
+            Button("Share via AirDrop or Apps...") {
+                showingShareSheet = true
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Export books, reading sessions, and journal entries as RFC 4180 CSV spreadsheets.")
+        }
+    }
+    
+    @ViewBuilder
+    private var demoDataSection: some View {
+        Section(header: Text("Evaluation & Demo Data")) {
+            Button {
+                SampleDataService.populateSampleData(in: modelContext)
+                showingSampleDataPopulatedNotice = true
+            } label: {
+                HStack {
+                    Image(systemName: "wand.and.stars")
+                    Text("Populate Realistic Sample Data")
+                    Spacer()
+                }
+                .foregroundColor(BookStrideTheme.forestGreen)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .alert("Sample Data Added", isPresented: $showingSampleDataPopulatedNotice) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Sample books, reading sessions spanning streaks, and journal notes have been loaded.")
+            }
+            
+            Button(role: .destructive) {
+                showingClearConfirmation = true
+            } label: {
+                HStack {
+                    Image(systemName: "trash")
+                    Text("Clear All Data")
+                    Spacer()
+                }
+                .foregroundColor(.red)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .alert("Clear All App Data?", isPresented: $showingClearConfirmation) {
+                Button("Erase Everything", role: .destructive) {
+                    clearAllLibraryData()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will permanently delete all books, reading sessions, and journal entries. This cannot be undone.")
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var aboutAppSection: some View {
+        Section(header: Text("About BookStride")) {
+            HStack {
+                Text("App Name")
+                Spacer()
+                Text("BookStride")
+                    .foregroundColor(BookStrideTheme.mutedSlate)
+            }
+            
+            HStack {
+                Text("Tagline")
+                Spacer()
+                Text("Your reading journey, one day at a time.")
+                    .font(.caption)
+                    .foregroundColor(BookStrideTheme.mutedSlate)
+            }
+            
+            HStack {
+                Text("Descriptor")
+                Spacer()
+                Text("Reading Tracker & Journal")
+                    .foregroundColor(BookStrideTheme.mutedSlate)
+            }
+            
+            HStack {
+                Text("Version")
+                Spacer()
+                Text("1.0.0 (Native SwiftUI)")
+                    .foregroundColor(BookStrideTheme.mutedSlate)
+            }
+            
+            HStack {
+                Text("Companion App")
+                Spacer()
+                Text("Designed for Apple Books")
+                    .foregroundColor(BookStrideTheme.mutedSlate)
+            }
         }
     }
     
