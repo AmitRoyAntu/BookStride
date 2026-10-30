@@ -13,7 +13,7 @@ xcuserdata/
 # Build artifacts & DerivedData
 build/
 DerivedData/
-build_temp/
+build-temp/
 *.build/
 
 # Compilation outputs & debug symbols

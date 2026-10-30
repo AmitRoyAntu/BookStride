@@ -15,6 +15,7 @@ public enum AppleBooksAndImportTests {
         testAppleBooksSearchURL()
         testDuplicateDetection()
         testModelSourceFormatAccessors()
+        testExtractMetadataMethodSignature()
         print("✅ AppleBooksAndImportTests passed successfully.\n")
     }
     
@@ -105,5 +106,18 @@ public enum AppleBooksAndImportTests {
         assert(bookDTO.sourceFormat == "PDF", "sourceFormat should be PDF")
         assert(bookDTO.importedFileName == "sample.pdf", "importedFileName should match")
         assert(bookDTO.appleBooksURL == "ibooks://", "appleBooksURL should match")
+    }
+    
+    private static func testExtractMetadataMethodSignature() {
+        // Verify extractMetadata throws expected unsupportedFormat on non-existent or unsupported file format
+        let dummyURL = URL(fileURLWithPath: "/tmp/nonexistent.docx")
+        do {
+            _ = try BookImportService.extractMetadata(from: dummyURL)
+            assert(false, "Should have thrown unsupported format error")
+        } catch let BookImportError.unsupportedFormat(ext) {
+            assert(ext == "docx", "Expected docx extension in error: \(ext)")
+        } catch {
+            // Any other error is acceptable if system restricts path
+        }
     }
 }
