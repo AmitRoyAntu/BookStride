@@ -33,6 +33,9 @@ struct BookStrideApp: App {
         WindowGroup {
             AppNavigationSplitView()
                 .BookStrideBackground()
+                #if os(macOS)
+                .frame(minWidth: 960, minHeight: 640)
+                #endif
                 .onChange(of: scenePhase) { _, newPhase in
                     switch newPhase {
                     case .active:
@@ -49,6 +52,24 @@ struct BookStrideApp: App {
                 }
         }
         .modelContainer(container)
+        .commands {
+            SidebarCommands()
+            CommandMenu("Reading Timer") {
+                Button("Start Reading Session") {
+                    ReadingTimerService.shared.startSession()
+                }
+                .keyboardShortcut("r", modifiers: [.command])
+                
+                Button("Pause / Resume Session") {
+                    if ReadingTimerService.shared.state == .reading {
+                        ReadingTimerService.shared.pauseSession()
+                    } else if ReadingTimerService.shared.state == .paused {
+                        ReadingTimerService.shared.resumeSession()
+                    }
+                }
+                .keyboardShortcut("p", modifiers: [.command])
+            }
+        }
     }
     
     private func handleIncomingURL(_ url: URL) {
