@@ -164,55 +164,16 @@ public struct ReadingCalendarHeatmap: View {
                 }
             }
             
-            // Heatmap Scrollable Grid
-            ScrollView(.horizontal, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 4) {
-                    // Month Headers Row
-                    HStack(alignment: .bottom, spacing: 3) {
-                        Color.clear.frame(width: 24, height: 14) // weekday label offset
-                        
-                        ForEach(0..<grid.weekColumns.count, id: \.self) { wIndex in
-                            if let header = grid.monthHeaders.first(where: { $0.weekIndex == wIndex }) {
-                                Text(header.name)
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundColor(BookStrideTheme.mutedSlate)
-                                    .frame(width: 14, alignment: .leading)
-                            } else {
-                                Color.clear.frame(width: 14, height: 14)
-                            }
-                        }
-                    }
-                    
-                    // Day Rows (Sun..Sat)
-                    HStack(alignment: .top, spacing: 3) {
-                        // Weekday labels column
-                        VStack(spacing: 3) {
-                            ForEach(0..<7, id: \.self) { row in
-                                Text(dayRowLabels[row])
-                                    .font(.system(size: 9, weight: .medium))
-                                    .foregroundColor(BookStrideTheme.mutedSlate)
-                                    .frame(width: 24, height: 14, alignment: .trailing)
-                            }
-                        }
-                        
-                        // Weeks Grid
-                        ForEach(0..<grid.weekColumns.count, id: \.self) { wIndex in
-                            let week = grid.weekColumns[wIndex]
-                            VStack(spacing: 3) {
-                                ForEach(0..<7, id: \.self) { rIndex in
-                                    if let point = week[rIndex] {
-                                        dayCell(point: point)
-                                    } else {
-                                        RoundedRectangle(cornerRadius: 3)
-                                            .fill(Color.clear)
-                                            .frame(width: 14, height: 14)
-                                    }
-                                }
-                            }
-                        }
-                    }
+            // Heatmap Centered/Scrollable Grid
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    Spacer(minLength: 0)
+                    calendarGridView(grid: grid)
+                    Spacer(minLength: 0)
                 }
-                .padding(.vertical, 4)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    calendarGridView(grid: grid)
+                }
             }
             
             // Legend Row
@@ -261,6 +222,59 @@ public struct ReadingCalendarHeatmap: View {
     }
     
     // MARK: - Subviews & Helpers
+    
+    @ViewBuilder
+    private func calendarGridView(grid: YearlyGridData) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            // Month Headers Row
+            HStack(alignment: .bottom, spacing: 3) {
+                Color.clear.frame(width: 24, height: 14) // weekday label offset
+                
+                ForEach(0..<grid.weekColumns.count, id: \.self) { wIndex in
+                    if let header = grid.monthHeaders.first(where: { $0.weekIndex == wIndex }) {
+                        Text(header.name)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .frame(width: 14, alignment: .leading)
+                    } else {
+                        Color.clear.frame(width: 14, height: 14)
+                    }
+                }
+            }
+            
+            // Day Rows (Sun..Sat)
+            HStack(alignment: .top, spacing: 3) {
+                // Weekday labels column
+                VStack(spacing: 3) {
+                    ForEach(0..<7, id: \.self) { row in
+                        Text(dayRowLabels[row])
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                            .frame(width: 24, height: 14, alignment: .trailing)
+                    }
+                }
+                
+                // Weeks Grid
+                ForEach(0..<grid.weekColumns.count, id: \.self) { wIndex in
+                    let week = grid.weekColumns[wIndex]
+                    VStack(spacing: 3) {
+                        ForEach(0..<7, id: \.self) { rIndex in
+                            if let point = week[rIndex] {
+                                dayCell(point: point)
+                            } else {
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(Color.clear)
+                                    .frame(width: 14, height: 14)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
     
     @ViewBuilder
     private func dayCell(point: HeatmapDayPoint) -> some View {

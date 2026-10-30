@@ -218,6 +218,7 @@ public struct InsightsView: View {
             }
         }
         .pickerStyle(.segmented)
+        .labelsHidden()
         .frame(maxWidth: 420)
     }
     

@@ -70,14 +70,20 @@ public struct SettingsView: View {
     }
     
     public var body: some View {
-        Form {
-            readingGoalsSection
-            displayPreferencesSection
-            howStreaksWorkSection
-            notificationsSection
-            dataManagementSection
-            demoDataSection
-            aboutAppSection
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                readingGoalsSection
+                displayPreferencesSection
+                howStreaksWorkSection
+                notificationsSection
+                dataManagementSection
+                demoDataSection
+                aboutAppSection
+            }
+            .frame(maxWidth: 680)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 20)
+            .frame(maxWidth: .infinity, alignment: .top)
         }
         .BookStrideBackground()
         .navigationTitle("Settings")
@@ -114,56 +120,115 @@ public struct SettingsView: View {
         }
     }
     
+    // MARK: - Helper Card Container
+    
+    private func settingsCard<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.system(.subheadline, design: .serif, weight: .bold))
+                .foregroundColor(BookStrideTheme.deepCharcoal)
+                .padding(.horizontal, 4)
+            
+            VStack(alignment: .leading, spacing: 14) {
+                content()
+            }
+            .padding(LayoutConstants.cardInnerPadding)
+            .BookStrideCardStyle()
+        }
+    }
+    
     // MARK: - Sections
     
     @ViewBuilder
     private var readingGoalsSection: some View {
-        Section(header: Text("Reading Goals")) {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
+        settingsCard(title: "Reading Goals") {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
                     Text("Daily Reading Time Goal")
-                    Spacer()
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
                     Text("\(dailyMinutes) minutes")
-                        .font(.headline)
+                        .font(.headline.weight(.semibold))
                         .foregroundColor(BookStrideTheme.forestGreen)
                 }
-                Stepper("Daily minutes", value: $dailyMinutes, in: 5...300, step: 5)
+                Spacer()
+                Stepper("", value: $dailyMinutes, in: 5...300, step: 5)
+                    .labelsHidden()
                     .onChange(of: dailyMinutes) { _, newVal in
                         saveGoals()
                     }
             }
             
-            Toggle("Daily Pages Goal", isOn: $hasDailyPagesGoal)
-                .onChange(of: hasDailyPagesGoal) { _, _ in saveGoals() }
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
+            
+            Toggle(isOn: $hasDailyPagesGoal) {
+                Text("Daily Pages Goal")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
+            }
+            .onChange(of: hasDailyPagesGoal) { _, _ in saveGoals() }
+            
             if hasDailyPagesGoal {
-                Stepper("Target: \(dailyPages) pages", value: $dailyPages, in: 5...200, step: 5)
-                    .onChange(of: dailyPages) { _, _ in saveGoals() }
+                HStack {
+                    Text("Target: \(dailyPages) pages")
+                        .font(.subheadline)
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
+                    Spacer()
+                    Stepper("", value: $dailyPages, in: 5...200, step: 5)
+                        .labelsHidden()
+                        .onChange(of: dailyPages) { _, _ in saveGoals() }
+                }
+                .padding(.leading, 8)
             }
             
-            Toggle("Yearly Book Target", isOn: $hasYearlyBooksGoal)
-                .onChange(of: hasYearlyBooksGoal) { _, _ in saveGoals() }
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
+            
+            Toggle(isOn: $hasYearlyBooksGoal) {
+                Text("Yearly Book Target")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
+            }
+            .onChange(of: hasYearlyBooksGoal) { _, _ in saveGoals() }
+            
             if hasYearlyBooksGoal {
-                Stepper("Target: \(yearlyBooks) books / year", value: $yearlyBooks, in: 1...100, step: 1)
-                    .onChange(of: yearlyBooks) { _, _ in saveGoals() }
+                HStack {
+                    Text("Target: \(yearlyBooks) books / year")
+                        .font(.subheadline)
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
+                    Spacer()
+                    Stepper("", value: $yearlyBooks, in: 1...100, step: 1)
+                        .labelsHidden()
+                        .onChange(of: yearlyBooks) { _, _ in saveGoals() }
+                }
+                .padding(.leading, 8)
             }
         }
     }
     
     @ViewBuilder
     private var displayPreferencesSection: some View {
-        Section(header: Text("Preferred Time Display")) {
-            Picker("Time Format", selection: $preferredDurationStyle) {
-                Text("Full Units (1 hr 25 mins)").tag("full")
-                Text("Short Units (1h 25m)").tag("short")
-                Text("Compact Decimals (1.4 hrs)").tag("compact")
+        settingsCard(title: "Preferred Time Display") {
+            HStack {
+                Text("Time Format")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
+                Spacer()
+                Picker("", selection: $preferredDurationStyle) {
+                    Text("Full Units (1 hr 25 mins)").tag("full")
+                    Text("Short Units (1h 25m)").tag("short")
+                    Text("Compact Decimals (1.4 hrs)").tag("compact")
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
             }
-            .pickerStyle(.menu)
         }
     }
     
     @ViewBuilder
     private var howStreaksWorkSection: some View {
-        Section(header: Text("How Streaks Work")) {
+        settingsCard(title: "How Streaks Work") {
             VStack(alignment: .leading, spacing: 8) {
                 Label("Transparent Habit Counting", systemImage: "info.circle")
                     .font(.subheadline.weight(.semibold))
@@ -174,24 +239,40 @@ public struct SettingsView: View {
                     .foregroundColor(BookStrideTheme.mutedSlate)
                     .lineSpacing(4)
             }
-            .padding(.vertical, 4)
         }
     }
     
     @ViewBuilder
     private var notificationsSection: some View {
-        Section(header: Text("Notifications & Habit Reminders")) {
-            Toggle("Daily Reading Reminder", isOn: $enableDailyReminder)
-                .onChange(of: enableDailyReminder) { _, isEnabled in
-                    handleReminderToggle(isEnabled)
-                }
+        settingsCard(title: "Notifications & Habit Reminders") {
+            Toggle(isOn: $enableDailyReminder) {
+                Text("Daily Reading Reminder")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
+            }
+            .onChange(of: enableDailyReminder) { _, isEnabled in
+                handleReminderToggle(isEnabled)
+            }
             
             if enableDailyReminder {
-                DatePicker("Reminder Time", selection: $reminderTime, displayedComponents: .hourAndMinute)
-                    .onChange(of: reminderTime) { _, newTime in
-                        scheduleReminder(at: newTime)
-                    }
+                Divider()
+                    .overlay(BookStrideTheme.borderLight)
+                
+                HStack {
+                    Text("Reminder Time")
+                        .font(.subheadline)
+                        .foregroundColor(BookStrideTheme.deepCharcoal)
+                    Spacer()
+                    DatePicker("", selection: $reminderTime, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                        .onChange(of: reminderTime) { _, newTime in
+                            scheduleReminder(at: newTime)
+                        }
+                }
             }
+            
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
             
             HStack {
                 Text("Permission Status:")
@@ -206,13 +287,13 @@ public struct SettingsView: View {
         .alert("Notification Permission Denied", isPresented: $showingPermissionDeniedAlert) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Please enable notifications for BookStride in iPadOS Settings to receive daily reading reminders.")
+            Text("Please enable notifications for BookStride in System Settings to receive daily reading reminders.")
         }
     }
     
     @ViewBuilder
     private var dataManagementSection: some View {
-        Section(header: Text("Data Management & Backup")) {
+        settingsCard(title: "Data Management & Backup") {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Local Data Scope")
                     .font(.subheadline.weight(.semibold))
@@ -221,33 +302,45 @@ public struct SettingsView: View {
                     .font(.caption)
                     .foregroundColor(BookStrideTheme.mutedSlate)
             }
-            .padding(.vertical, 4)
+            .padding(.bottom, 2)
+            
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
             
             Button {
                 prepareJSONBackupExport()
             } label: {
                 HStack {
                     Image(systemName: "archivebox.fill")
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                        .frame(width: 20)
                     Text("Export Full Backup (JSON)")
+                        .font(.subheadline)
                     Spacer()
                     Image(systemName: "square.and.arrow.up")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
                 .foregroundColor(BookStrideTheme.deepCharcoal)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
             
             Button {
                 prepareCSVSpreadsheetsExport()
             } label: {
                 HStack {
                     Image(systemName: "tablecells.fill")
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                        .frame(width: 20)
                     Text("Export Spreadsheets (CSV)")
+                        .font(.subheadline)
                     Spacer()
                     Image(systemName: "square.and.arrow.up")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
                 .foregroundColor(BookStrideTheme.deepCharcoal)
@@ -255,12 +348,18 @@ public struct SettingsView: View {
             }
             .buttonStyle(.plain)
             
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
+            
             Button {
                 showingFileImporter = true
             } label: {
                 HStack {
                     Image(systemName: "square.and.arrow.down")
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                        .frame(width: 20)
                     Text("Import Backup (JSON)")
+                        .font(.subheadline)
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.caption2)
@@ -271,8 +370,13 @@ public struct SettingsView: View {
             }
             .buttonStyle(.plain)
             
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
+            
             HStack {
                 Text("Offline-first:")
+                    .font(.caption.weight(.medium))
+                    .foregroundColor(BookStrideTheme.mutedSlate)
                 Spacer()
                 Text("All data is stored locally on this device")
                     .font(.caption)
@@ -305,17 +409,20 @@ public struct SettingsView: View {
     
     @ViewBuilder
     private var demoDataSection: some View {
-        Section(header: Text("Evaluation & Demo Data")) {
+        settingsCard(title: "Evaluation & Demo Data") {
             Button {
                 SampleDataService.populateSampleData(in: modelContext)
                 showingSampleDataPopulatedNotice = true
             } label: {
                 HStack {
                     Image(systemName: "wand.and.stars")
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                        .frame(width: 20)
                     Text("Populate Realistic Sample Data")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(BookStrideTheme.forestGreen)
                     Spacer()
                 }
-                .foregroundColor(BookStrideTheme.forestGreen)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -325,12 +432,17 @@ public struct SettingsView: View {
                 Text("Sample books, reading sessions spanning streaks, and journal notes have been loaded.")
             }
             
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
+            
             Button(role: .destructive) {
                 showingClearConfirmation = true
             } label: {
                 HStack {
                     Image(systemName: "trash")
+                        .frame(width: 20)
                     Text("Clear All Data")
+                        .font(.subheadline.weight(.medium))
                     Spacer()
                 }
                 .foregroundColor(.red)
@@ -350,40 +462,66 @@ public struct SettingsView: View {
     
     @ViewBuilder
     private var aboutAppSection: some View {
-        Section(header: Text("About BookStride")) {
+        settingsCard(title: "About BookStride") {
             HStack {
                 Text("App Name")
+                    .font(.subheadline)
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
                 Spacer()
                 Text("BookStride")
+                    .font(.subheadline.weight(.medium))
                     .foregroundColor(BookStrideTheme.mutedSlate)
             }
             
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
+            
             HStack {
                 Text("Tagline")
+                    .font(.subheadline)
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
                 Spacer()
                 Text("Your reading journey, one day at a time.")
                     .font(.caption)
                     .foregroundColor(BookStrideTheme.mutedSlate)
             }
             
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
+            
             HStack {
                 Text("Descriptor")
+                    .font(.subheadline)
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
                 Spacer()
                 Text("Reading Tracker & Journal")
+                    .font(.subheadline)
                     .foregroundColor(BookStrideTheme.mutedSlate)
             }
+            
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
             
             HStack {
                 Text("Version")
+                    .font(.subheadline)
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
                 Spacer()
                 Text("1.0.0 (Native SwiftUI)")
+                    .font(.subheadline)
                     .foregroundColor(BookStrideTheme.mutedSlate)
             }
             
+            Divider()
+                .overlay(BookStrideTheme.borderLight)
+            
             HStack {
                 Text("Companion App")
+                    .font(.subheadline)
+                    .foregroundColor(BookStrideTheme.deepCharcoal)
                 Spacer()
                 Text("Designed for Apple Books")
+                    .font(.subheadline)
                     .foregroundColor(BookStrideTheme.mutedSlate)
             }
         }
