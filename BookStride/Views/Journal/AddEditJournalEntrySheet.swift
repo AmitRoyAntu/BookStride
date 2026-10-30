@@ -79,10 +79,13 @@ public struct AddEditJournalEntrySheet: View {
                     
                     HStack {
                         Text("Page Number:")
+                            .foregroundColor(BookStrideTheme.deepCharcoal)
                         Spacer()
                         TextField("Optional (e.g. 142)", text: $pageNumberString)
+                            .textFieldStyle(.roundedBorder)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
+                            .frame(width: 140)
                     }
                 }
                 
@@ -94,6 +97,7 @@ public struct AddEditJournalEntrySheet: View {
                         axis: .vertical
                     )
                     .lineLimit(6...14)
+                    .textFieldStyle(.roundedBorder)
                 }
                 
                 // Section 4: Favorite Option
@@ -101,6 +105,7 @@ public struct AddEditJournalEntrySheet: View {
                     Toggle("Mark as Favorite", isOn: $isFavorite)
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle(entryToEdit == nil ? "New \(entryType.rawValue)" : "Edit \(entryType.rawValue)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -118,6 +123,7 @@ public struct AddEditJournalEntrySheet: View {
                     .foregroundColor(BookStrideTheme.forestGreen)
                 }
             }
+            .frame(minWidth: 520, idealWidth: 560, minHeight: 540, idealHeight: 640)
             .onAppear {
                 loadInitialValues()
             }

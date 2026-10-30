@@ -169,18 +169,38 @@ public struct BookDetailView: View {
         }
         .sheet(isPresented: $showingAppleBooksLinkSheet) {
             NavigationStack {
-                Form {
-                    Section {
+                VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Apple Books URL or Scheme")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(BookStrideTheme.deepCharcoal)
+                        
                         TextField("https://books.apple.com/... or ibooks://", text: $editedAppleBooksURL)
+                            .textFieldStyle(.roundedBorder)
                             .keyboardType(.URL)
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.never)
-                    } header: {
-                        Text("Apple Books URL")
-                    } footer: {
-                        Text("Enter a valid Apple Books Store URL or ibooks:// scheme. BookStride tracks your reading sessions, journal notes, and progress independently on your device.")
                     }
+                    
+                    HStack(alignment: .top, spacing: 12) {
+                        Image(systemName: "info.circle")
+                            .foregroundColor(BookStrideTheme.forestGreen)
+                            .font(.body)
+                        
+                        Text("Enter a valid Apple Books Store URL or ibooks:// scheme. BookStride tracks your reading sessions, journal notes, and progress independently on your device.")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(BookStrideTheme.forestGreen.opacity(0.08))
+                    .cornerRadius(8)
+                    
+                    Spacer()
                 }
+                .padding(24)
+                .background(BookStrideTheme.warmIvory)
                 .navigationTitle(book.hasAppleBooksLink ? "Edit Apple Books Link" : "Link Apple Books")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -200,6 +220,7 @@ public struct BookDetailView: View {
                         .foregroundColor(BookStrideTheme.forestGreen)
                     }
                 }
+                .frame(minWidth: 460, idealWidth: 500, minHeight: 230, idealHeight: 270)
             }
         }
         .alert("Session in Progress", isPresented: $showingConflictAlert) {

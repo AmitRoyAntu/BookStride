@@ -209,6 +209,7 @@ public struct ActiveSessionView: View {
                         Section(header: Text("Session Summary")) {
                             HStack {
                                 Text("Time Read:")
+                                    .foregroundColor(BookStrideTheme.deepCharcoal)
                                 Spacer()
                                 Text(Formatters.formatDuration(seconds: timerService.currentElapsedSeconds, style: .full))
                                     .fontWeight(.semibold)
@@ -220,10 +221,13 @@ public struct ActiveSessionView: View {
                             Section(header: Text("Progress Update")) {
                                 HStack {
                                     Text("Ending Page:")
+                                        .foregroundColor(BookStrideTheme.deepCharcoal)
                                     Spacer()
                                     TextField("Page number", text: $endPageString)
+                                        .textFieldStyle(.roundedBorder)
                                         .keyboardType(.numberPad)
                                         .multilineTextAlignment(.trailing)
+                                        .frame(width: 100)
                                 }
                             }
                         }
@@ -231,8 +235,10 @@ public struct ActiveSessionView: View {
                         Section(header: Text("Session Notes (Optional)")) {
                             TextField("Any thoughts, favorite lines, or takeaways?", text: $sessionNotes, axis: .vertical)
                                 .lineLimit(3...6)
+                                .textFieldStyle(.roundedBorder)
                         }
                     }
+                    .formStyle(.grouped)
                     .navigationTitle("Finish Reading")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
@@ -271,9 +277,10 @@ public struct ActiveSessionView: View {
                     } message: {
                         Text(pageValidationError)
                     }
+                    .frame(minWidth: 460, idealWidth: 500, minHeight: 340, idealHeight: 400)
                 }
-                .presentationDetents([.medium])
             }
+            .frame(minWidth: 500, idealWidth: 560, minHeight: 520, idealHeight: 620)
         }
     }
 }

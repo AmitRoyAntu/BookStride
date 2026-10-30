@@ -52,6 +52,7 @@ public struct BookPickerSheet: View {
                         }
                     }
                     .padding(32)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
                     List {
                         Section {
@@ -59,8 +60,9 @@ public struct BookPickerSheet: View {
                                 onSelectBook(nil, nil)
                                 dismiss()
                             } label: {
-                                HStack {
+                                HStack(spacing: 14) {
                                     Image(systemName: "timer")
+                                        .font(.title2)
                                         .foregroundColor(BookStrideTheme.forestGreen)
                                         .frame(width: 32)
                                     VStack(alignment: .leading, spacing: 2) {
@@ -71,9 +73,12 @@ public struct BookPickerSheet: View {
                                             .font(.caption)
                                             .foregroundColor(BookStrideTheme.mutedSlate)
                                     }
+                                    Spacer()
                                 }
                                 .padding(.vertical, 4)
+                                .contentShape(Rectangle())
                             }
+                            .buttonStyle(.plain)
                         }
                         
                         Section(header: Text("Choose from Library")) {
@@ -121,28 +126,28 @@ public struct BookPickerSheet: View {
                                         }
                                     }
                                     .padding(.vertical, 4)
+                                    .contentShape(Rectangle())
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
                         
-                        if selectedBook != nil {
-                            Section(header: Text("Starting Page")) {
+                        if let selected = selectedBook {
+                            Section(header: Text("Starting Page for \"\(selected.title)\"")) {
                                 HStack {
                                     Text("Current page:")
+                                        .foregroundColor(BookStrideTheme.deepCharcoal)
                                     Spacer()
                                     TextField("Page number", text: $startPageString)
+                                        .textFieldStyle(.roundedBorder)
                                         .keyboardType(.numberPad)
                                         .multilineTextAlignment(.trailing)
-                                        .frame(width: 100)
+                                        .frame(width: 110)
                                 }
                             }
                         }
                     }
-                    #if os(iOS)
                     .listStyle(.insetGrouped)
-                    #else
-                    .listStyle(.inset(alternatesRowBackgrounds: true))
-                    #endif
                 }
             }
             .navigationTitle("Select Book to Read")
@@ -157,7 +162,7 @@ public struct BookPickerSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     if selectedBook != nil {
                         Button("Start") {
-                            let page = Int(startPageString)
+                            let page = Int(startPageString.trimmingCharacters(in: .whitespacesAndNewlines))
                             onSelectBook(selectedBook, page)
                             dismiss()
                         }
@@ -166,6 +171,7 @@ public struct BookPickerSheet: View {
                     }
                 }
             }
+            .frame(minWidth: 480, idealWidth: 540, minHeight: 460, idealHeight: 580)
         }
     }
 }

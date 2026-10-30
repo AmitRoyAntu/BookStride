@@ -503,6 +503,7 @@ public struct ReadingWrappedView: View {
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle("Card Options")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -513,8 +514,8 @@ public struct ReadingWrappedView: View {
                     .foregroundColor(BookStrideTheme.forestGreen)
                 }
             }
+            .frame(minWidth: 460, idealWidth: 500, minHeight: 380, idealHeight: 440)
         }
-        .presentationDetents([.medium])
     }
     
     // MARK: - Handlers & Render Actions

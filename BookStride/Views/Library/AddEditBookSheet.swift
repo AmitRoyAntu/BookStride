@@ -50,7 +50,7 @@ public struct AddEditBookSheet: View {
             Form {
                 // Section: Book Cover & Preview
                 Section(header: Text("Book Appearance")) {
-                    HStack(spacing: 24) {
+                    HStack(alignment: .top, spacing: 20) {
                         BookCoverThumbnail(
                             imageData: coverImageData,
                             title: title.isEmpty ? "Book Title" : title,
@@ -110,8 +110,21 @@ public struct AddEditBookSheet: View {
                 
                 // Section: Basic Info
                 Section(header: Text("Book Details")) {
-                    TextField("Title (Required)", text: $title)
-                    TextField("Author", text: $author)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Title (Required)")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                        TextField("Book Title", text: $title)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Author")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                        TextField("Author name", text: $author)
+                            .textFieldStyle(.roundedBorder)
+                    }
                     
                     Picker("Reading Status", selection: $status) {
                         ForEach(ReadingStatus.allCases) { s in
@@ -122,20 +135,24 @@ public struct AddEditBookSheet: View {
                 
                 // Section: Page Progress & Validation
                 Section(header: Text("Pages & Progress")) {
-                    HStack {
-                        Text("Current Page:")
-                        Spacer()
-                        TextField("0", text: $currentPageString)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    
-                    HStack {
-                        Text("Total Pages:")
-                        Spacer()
-                        TextField("Optional", text: $totalPagesString)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
+                    HStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Current Page")
+                                .font(.caption)
+                                .foregroundColor(BookStrideTheme.mutedSlate)
+                            TextField("0", text: $currentPageString)
+                                .textFieldStyle(.roundedBorder)
+                                .keyboardType(.numberPad)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Total Pages")
+                                .font(.caption)
+                                .foregroundColor(BookStrideTheme.mutedSlate)
+                            TextField("Optional", text: $totalPagesString)
+                                .textFieldStyle(.roundedBorder)
+                                .keyboardType(.numberPad)
+                        }
                     }
                 }
                 
@@ -144,16 +161,19 @@ public struct AddEditBookSheet: View {
                     Toggle("Started Date", isOn: $hasStartDate)
                     if hasStartDate {
                         DatePicker("Date Started", selection: $startDate, displayedComponents: .date)
+                            .datePickerStyle(.compact)
                     }
                     
                     Toggle("Finished Date", isOn: $hasFinishDate)
                     if hasFinishDate {
                         DatePicker("Date Finished", selection: $finishDate, displayedComponents: .date)
+                            .datePickerStyle(.compact)
                     }
                     
                     // Star Rating
                     HStack {
                         Text("Personal Rating:")
+                            .foregroundColor(BookStrideTheme.deepCharcoal)
                         Spacer()
                         HStack(spacing: 6) {
                             ForEach(1...5, id: \.self) { star in
@@ -170,21 +190,35 @@ public struct AddEditBookSheet: View {
                         }
                     }
                     
-                    TextField("Description or Thoughts", text: $bookDescription, axis: .vertical)
-                        .lineLimit(3...5)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Description or Thoughts")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                        TextField("Optional summary, thoughts, or notes", text: $bookDescription, axis: .vertical)
+                            .lineLimit(3...5)
+                            .textFieldStyle(.roundedBorder)
+                    }
                 }
                 
                 // Section: Apple Books Link
-                Section(
-                    header: Text("Apple Books Link (Optional)"),
-                    footer: Text("Store link (https://books.apple.com/...) or scheme (ibooks://...) to launch directly from BookStride.")
-                ) {
-                    TextField("https://books.apple.com/...", text: $appleBooksLink)
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled(true)
+                Section {
+                    VStack(alignment: .leading, spacing: 6) {
+                        TextField("https://books.apple.com/... or ibooks://", text: $appleBooksLink)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardType(.URL)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled(true)
+                        
+                        Text("Store link (https://books.apple.com/...) or scheme (ibooks://...) to launch directly from BookStride.")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                    }
+                    .padding(.vertical, 2)
+                } header: {
+                    Text("Apple Books Link (Optional)")
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle(bookToEdit == nil ? "Add Book" : "Edit Book")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -202,6 +236,7 @@ public struct AddEditBookSheet: View {
                     .foregroundColor(BookStrideTheme.forestGreen)
                 }
             }
+            .frame(minWidth: 520, idealWidth: 560, minHeight: 580, idealHeight: 680)
             .onAppear {
                 loadInitialData()
             }

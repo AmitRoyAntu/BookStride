@@ -30,15 +30,19 @@ public struct UpdateProgressSheet: View {
                 Section(header: Text("Book Progress")) {
                     HStack {
                         Text("Current Page:")
+                            .foregroundColor(BookStrideTheme.deepCharcoal)
                         Spacer()
                         TextField("Page", text: $pageString)
+                            .textFieldStyle(.roundedBorder)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
+                            .frame(width: 90)
                     }
                     
                     if let total = book.totalPages {
                         HStack {
                             Text("Total Pages:")
+                                .foregroundColor(BookStrideTheme.deepCharcoal)
                             Spacer()
                             Text("\(total)")
                                 .foregroundColor(BookStrideTheme.mutedSlate)
@@ -48,6 +52,7 @@ public struct UpdateProgressSheet: View {
                     Toggle("Mark as Finished", isOn: $markAsFinished)
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle("Update Progress")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -65,6 +70,7 @@ public struct UpdateProgressSheet: View {
                     .foregroundColor(BookStrideTheme.forestGreen)
                 }
             }
+            .frame(minWidth: 440, idealWidth: 480, minHeight: 240, idealHeight: 280)
             .alert("Invalid Page", isPresented: $showingError) {
                 Button("OK", role: .cancel) {}
             } message: {

@@ -122,11 +122,30 @@ public struct ImportBookReviewSheet: View {
                 
                 // Section 3: Book Details
                 Section(header: Text("Book Information")) {
-                    TextField("Title", text: $title)
-                    TextField("Author", text: $author)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Title")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                        TextField("Book Title", text: $title)
+                            .textFieldStyle(.roundedBorder)
+                    }
                     
-                    TextField("Total Pages", text: $totalPagesString)
-                        .keyboardType(.numberPad)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Author")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                        TextField("Author", text: $author)
+                            .textFieldStyle(.roundedBorder)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Total Pages")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                        TextField("Total Pages", text: $totalPagesString)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardType(.numberPad)
+                    }
                     
                     Picker("Reading Status", selection: $selectedStatus) {
                         ForEach(ReadingStatus.allCases) { status in
@@ -136,14 +155,21 @@ public struct ImportBookReviewSheet: View {
                 }
                 
                 // Section 4: Apple Books Integration Link
-                Section(
-                    header: Text("Apple Books Integration (Optional)"),
-                    footer: Text("Add a books.apple.com or ibooks:// link to open this book directly in Apple Books from the book detail screen.")
-                ) {
-                    TextField("Apple Books Link (e.g. https://books.apple.com/...)", text: $appleBooksLink)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled(true)
-                        .keyboardType(.URL)
+                Section {
+                    VStack(alignment: .leading, spacing: 6) {
+                        TextField("https://books.apple.com/... or ibooks://", text: $appleBooksLink)
+                            .textFieldStyle(.roundedBorder)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled(true)
+                            .keyboardType(.URL)
+                        
+                        Text("Add a books.apple.com or ibooks:// link to open this book directly in Apple Books from the book detail screen.")
+                            .font(.caption)
+                            .foregroundColor(BookStrideTheme.mutedSlate)
+                    }
+                    .padding(.vertical, 2)
+                } header: {
+                    Text("Apple Books Integration (Optional)")
                 }
                 
                 // Section 5: Cover Palette Preset
@@ -169,6 +195,7 @@ public struct ImportBookReviewSheet: View {
                     }
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle("Import Book")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -187,6 +214,7 @@ public struct ImportBookReviewSheet: View {
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
+            .frame(minWidth: 520, idealWidth: 560, minHeight: 560, idealHeight: 680)
             .alert("Import Duplicate Book?", isPresented: $showingDuplicateOverrideConfirmation) {
                 Button("Import Anyway") {
                     persistBook()

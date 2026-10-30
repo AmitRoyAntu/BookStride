@@ -46,33 +46,39 @@ public struct ManualSessionSheet: View {
                 
                 Section(header: Text("Date & Duration")) {
                     DatePicker("Date & Time", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                        .datePickerStyle(.compact)
                     
                     HStack {
-                        Text("Reading Time:")
+                        Text("Reading Time")
+                            .foregroundColor(BookStrideTheme.deepCharcoal)
                         Spacer()
                         Text("\(durationMinutes) min")
                             .foregroundColor(BookStrideTheme.forestGreen)
                             .fontWeight(.semibold)
+                        Stepper("", value: $durationMinutes, in: 1...600, step: 5)
+                            .labelsHidden()
                     }
-                    
-                    Stepper("Duration (minutes)", value: $durationMinutes, in: 1...600, step: 5)
                 }
                 
                 Section(header: Text("Pages (Optional)")) {
-                    HStack {
-                        Text("Start Page:")
-                        Spacer()
-                        TextField("e.g. 50", text: $startPageString)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    
-                    HStack {
-                        Text("End Page:")
-                        Spacer()
-                        TextField("e.g. 75", text: $endPageString)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
+                    HStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Start Page")
+                                .font(.caption)
+                                .foregroundColor(BookStrideTheme.mutedSlate)
+                            TextField("e.g. 50", text: $startPageString)
+                                .textFieldStyle(.roundedBorder)
+                                .keyboardType(.numberPad)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("End Page")
+                                .font(.caption)
+                                .foregroundColor(BookStrideTheme.mutedSlate)
+                            TextField("e.g. 75", text: $endPageString)
+                                .textFieldStyle(.roundedBorder)
+                                .keyboardType(.numberPad)
+                        }
                     }
                     
                     if selectedBookId != nil {
@@ -83,8 +89,10 @@ public struct ManualSessionSheet: View {
                 Section(header: Text("Notes (Optional)")) {
                     TextField("Reflections or key takeaways", text: $notes, axis: .vertical)
                         .lineLimit(3...5)
+                        .textFieldStyle(.roundedBorder)
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle(sessionToEdit == nil ? "Log Past Session" : "Edit Session")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -102,6 +110,7 @@ public struct ManualSessionSheet: View {
                     .foregroundColor(BookStrideTheme.forestGreen)
                 }
             }
+            .frame(minWidth: 500, idealWidth: 540, minHeight: 520, idealHeight: 620)
             .onAppear {
                 loadInitialValues()
             }

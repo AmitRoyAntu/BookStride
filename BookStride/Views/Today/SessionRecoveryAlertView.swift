@@ -53,8 +53,9 @@ public struct SessionRecoveryAlertView: View {
                             .font(.callout.weight(.medium))
                             .foregroundColor(BookStrideTheme.deepCharcoal)
                         Spacer()
+                        Stepper("", value: $customMinutes, in: 5...240, step: 5)
+                            .labelsHidden()
                     }
-                    Stepper("Duration", value: $customMinutes, in: 5...240, step: 5)
                     
                     Button {
                         timerService.resolveStaleSession(action: .customDuration, customMinutes: customMinutes)
@@ -85,7 +86,7 @@ public struct SessionRecoveryAlertView: View {
             Spacer()
         }
         .padding()
-        .presentationDetents([.medium, .large])
+        .frame(minWidth: 460, idealWidth: 500, minHeight: 460, idealHeight: 520)
     }
 }
 
