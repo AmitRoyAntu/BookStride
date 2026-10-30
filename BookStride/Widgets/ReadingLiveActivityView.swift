@@ -16,8 +16,8 @@ import ActivityKit
 import AppIntents
 #endif
 
-#if canImport(ActivityKit) && canImport(WidgetKit)
-@available(iOS 16.1, macOS 13.0, *)
+#if canImport(ActivityKit) && canImport(WidgetKit) && os(iOS)
+@available(iOS 16.1, *)
 public struct ReadingLiveActivityWidget: Widget {
     public let kind: String = "BookStrideReadingLiveActivity"
     
