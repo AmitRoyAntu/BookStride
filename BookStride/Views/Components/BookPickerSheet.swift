@@ -138,7 +138,11 @@ public struct BookPickerSheet: View {
                             }
                         }
                     }
+                    #if os(iOS)
                     .listStyle(.insetGrouped)
+                    #else
+                    .listStyle(.inset(alternatesRowBackgrounds: true))
+                    #endif
                 }
             }
             .navigationTitle("Select Book to Read")

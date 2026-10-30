@@ -37,6 +37,18 @@ public enum LayoutConstants {
 // MARK: - Multiplatform SwiftUI Compatibility
 
 #if os(macOS)
+public struct InsetGroupedListStyleCompat: ListStyle {
+    public func makeBody(configuration: Configuration) -> some View {
+        configuration.defaultBody
+    }
+}
+
+extension ListStyle where Self == InsetGroupedListStyleCompat {
+    public static var insetGrouped: InsetGroupedListStyleCompat {
+        InsetGroupedListStyleCompat()
+    }
+}
+
 public enum NavigationBarTitleDisplayModeCompat {
     case automatic
     case inline
