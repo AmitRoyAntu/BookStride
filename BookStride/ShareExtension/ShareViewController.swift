@@ -184,13 +184,14 @@ public class ShareViewController: UIViewController {
             fileFormat: fileFormat,
             coverImageData: detectedCoverData,
             onSave: { [weak self] item in
-                do {
-                    try IncomingShareQueue.enqueue(item)
-                    self?.notifyHostApplication()
-                    self?.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
-                } catch {
-                    self?.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
-                }
+                // 1. Enqueue to App Group storage if provisioned
+                try? IncomingShareQueue.enqueue(item)
+                
+                // 2. Transmit via deep link directly to host application (zero-dependency on device provisioning)
+                self?.openHostApplication(with: item)
+                
+                // 3. Complete share sheet request cleanly
+                self?.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
             },
             onCancel: { [weak self] in
                 let cancelError = NSError(domain: "com.amitroy.BookStride.ShareExtension", code: NSUserCancelledError, userInfo: nil)
@@ -213,12 +214,47 @@ public class ShareViewController: UIViewController {
         hostingController.didMove(toParent: self)
     }
     
-    private func notifyHostApplication() {
-        // Trigger responder chain or open URL if possible
+    private func openHostApplication(with item: IncomingShareItem) {
+        var queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "action", value: "addBook"),
+            URLQueryItem(name: "title", value: item.title),
+            URLQueryItem(name: "author", value: item.author),
+            URLQueryItem(name: "dest", value: item.targetDestination)
+        ]
+        if let u = item.urlString {
+            queryItems.append(URLQueryItem(name: "url", value: u))
+        }
+        if let p = item.totalPages {
+            queryItems.append(URLQueryItem(name: "pages", value: "\(p)"))
+        }
+        if let f = item.fileFormat {
+            queryItems.append(URLQueryItem(name: "format", value: f))
+        }
+        
+        // Compact JSON data fallback for guaranteed parsing
+        var compactItem = item
+        if (compactItem.coverImageData?.count ?? 0) > 30_000 {
+            compactItem.coverImageData = nil // keep deep link within standard URL length limits
+        }
+        if let data = try? JSONEncoder().encode(compactItem) {
+            queryItems.append(URLQueryItem(name: "data", value: data.base64EncodedString()))
+        }
+        
+        var components = URLComponents()
+        components.scheme = "bookstride"
+        components.host = "incoming"
+        components.queryItems = queryItems
+        
+        guard let url = components.url else { return }
+        
+        // 1. In extensions, extensionContext.open(_:completionHandler:) is the designated API
+        self.extensionContext?.open(url, completionHandler: nil)
+        
+        // 2. Also try responder chain fallback
         var responder: UIResponder? = self
         while responder != nil {
             if let application = responder as? UIApplication {
-                application.open(URL(string: "bookstride://incoming")!, options: [:], completionHandler: nil)
+                application.open(url, options: [:], completionHandler: nil)
                 break
             }
             responder = responder?.next

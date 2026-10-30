@@ -78,12 +78,16 @@ struct BookStrideApp: App {
     
     private func handleIncomingURL(_ url: URL) {
         IncomingShareProcessor.processPendingShares(modelContext: container.mainContext)
+        IncomingShareProcessor.processDirectURL(url, in: container.mainContext)
         guard url.scheme == "bookstride" else { return }
         switch url.host {
         case "timer", "session":
             ReadingTimerService.shared.shouldOpenTimerModal = true
         case "start":
             ReadingTimerService.shared.shouldTriggerBookPicker = true
+        case "incoming":
+            // Direct share handoff received and processed into SwiftData
+            break
         default:
             ReadingTimerService.shared.shouldOpenTimerModal = true
         }

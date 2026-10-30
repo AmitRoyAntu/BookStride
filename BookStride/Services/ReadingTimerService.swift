@@ -80,6 +80,8 @@ public final class ReadingTimerService: ObservableObject {
     
     // Last action timestamp for debouncing widget taps and preventing duplicates
     private var lastWidgetActionTimestamp: Date = .distantPast
+    private var lastWidgetReloadTimestamp: Date = .distantPast
+    private var lastSavedSnapshotData: Data?
     
     private var ticker: AnyCancellable?
     private let userDefaults: UserDefaults
@@ -201,18 +203,24 @@ public final class ReadingTimerService: ObservableObject {
         )
         
         if let data = try? JSONEncoder().encode(widgetSnapshot) {
+            let hasChanged = (data != lastSavedSnapshotData)
+            lastSavedSnapshotData = data
             userDefaults.set(data, forKey: AppGroupConfig.widgetSnapshotKey)
             if userDefaults == AppGroupConfig.sharedDefaults && userDefaults != .standard {
                 UserDefaults.standard.set(data, forKey: AppGroupConfig.widgetSnapshotKey)
             }
+            if hasChanged {
+                notifyWidgetReload()
+            }
         }
-        
-        notifyWidgetReload()
     }
     
     public func notifyWidgetReload() {
         #if canImport(WidgetKit)
-        WidgetCenter.shared.reloadAllTimelines()
+        let now = Date()
+        guard now.timeIntervalSince(lastWidgetReloadTimestamp) >= 3.0 else { return }
+        lastWidgetReloadTimestamp = now
+        WidgetCenter.shared.reloadTimelines(ofKind: "BookStrideTimerWidget")
         #endif
     }
     

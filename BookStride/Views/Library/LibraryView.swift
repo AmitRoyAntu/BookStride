@@ -22,7 +22,7 @@ public struct LibraryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allBooks: [Book]
     
-    @State private var selectedStatusFilter: ReadingStatus? = .currentlyReading
+    @State private var selectedStatusFilter: ReadingStatus? = nil
     @State private var sortOption: LibrarySortOption = .recentlyAdded
     @State private var searchText: String = ""
     @State private var showingAddBookSheet: Bool = false
@@ -129,6 +129,9 @@ public struct LibraryView: View {
         .BookStrideBackground()
         .navigationTitle("Library")
         .searchable(text: $searchText, prompt: "Search by title or author")
+        .onAppear {
+            IncomingShareProcessor.processPendingShares(modelContext: modelContext)
+        }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
