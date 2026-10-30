@@ -7,7 +7,7 @@
 //
 
 import Foundation
-#if canImport(ActivityKit) && os(iOS)
+#if canImport(ActivityKit) && os(iOS) && !targetEnvironment(macCatalyst)
 import ActivityKit
 
 @available(iOS 16.1, *)

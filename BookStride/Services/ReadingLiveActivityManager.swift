@@ -8,14 +8,14 @@
 //
 
 import Foundation
-#if canImport(ActivityKit) && os(iOS)
+#if canImport(ActivityKit) && os(iOS) && !targetEnvironment(macCatalyst)
 import ActivityKit
 #endif
 
 public final class ReadingLiveActivityManager {
     public static let shared = ReadingLiveActivityManager()
     
-    #if canImport(ActivityKit) && os(iOS)
+    #if canImport(ActivityKit) && os(iOS) && !targetEnvironment(macCatalyst)
     @available(iOS 16.1, *)
     private var currentActivity: Activity<ReadingActivityAttributes>? {
         get {
@@ -29,7 +29,7 @@ public final class ReadingLiveActivityManager {
     // MARK: - Authorization Check
     
     public var isLiveActivitiesEnabled: Bool {
-        #if canImport(ActivityKit) && os(iOS)
+        #if canImport(ActivityKit) && os(iOS) && !targetEnvironment(macCatalyst)
         if #available(iOS 16.1, *) {
             return ActivityAuthorizationInfo().areActivitiesEnabled
         }
@@ -52,7 +52,7 @@ public final class ReadingLiveActivityManager {
         todaySeconds: Int = 0,
         dailyGoalSeconds: Int = 1800
     ) {
-        #if canImport(ActivityKit) && os(iOS)
+        #if canImport(ActivityKit) && os(iOS) && !targetEnvironment(macCatalyst)
         guard #available(iOS 16.1, *), isLiveActivitiesEnabled else { return }
         
         // End any duplicate or stale activities first
@@ -105,7 +105,7 @@ public final class ReadingLiveActivityManager {
         dailyGoalSeconds: Int,
         coverColorHex: String = "forest"
     ) {
-        #if canImport(ActivityKit) && os(iOS)
+        #if canImport(ActivityKit) && os(iOS) && !targetEnvironment(macCatalyst)
         guard #available(iOS 16.1, *) else { return }
         
         let state = ReadingActivityAttributes.ContentState(
@@ -135,7 +135,7 @@ public final class ReadingLiveActivityManager {
     
     /// Ends all active reading Live Activities when the session completes or is cancelled.
     public func endActivity(dismissImmediately: Bool = false) {
-        #if canImport(ActivityKit) && os(iOS)
+        #if canImport(ActivityKit) && os(iOS) && !targetEnvironment(macCatalyst)
         guard #available(iOS 16.1, *) else { return }
         
         let dismissalPolicy: ActivityUIDismissalPolicy = dismissImmediately ? .immediate : .after(Date().addingTimeInterval(4))
@@ -154,7 +154,7 @@ public final class ReadingLiveActivityManager {
     /// Reconciles Live Activities upon app launch or foreground transition.
     /// Cancels orphan activities if no reading session is currently active in app storage.
     public func reconcile(with activeSessionState: ActiveSessionState?) {
-        #if canImport(ActivityKit) && os(iOS)
+        #if canImport(ActivityKit) && os(iOS) && !targetEnvironment(macCatalyst)
         guard #available(iOS 16.1, *) else { return }
         
         let runningActivities = Activity<ReadingActivityAttributes>.activities
@@ -181,7 +181,7 @@ public final class ReadingLiveActivityManager {
     }
     
     private func endExistingActivities() {
-        #if canImport(ActivityKit) && os(iOS)
+        #if canImport(ActivityKit) && os(iOS) && !targetEnvironment(macCatalyst)
         if #available(iOS 16.1, *) {
             for activity in Activity<ReadingActivityAttributes>.activities {
                 Task {

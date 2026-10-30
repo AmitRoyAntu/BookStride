@@ -16,7 +16,7 @@ import ActivityKit
 import AppIntents
 #endif
 
-#if canImport(ActivityKit) && canImport(WidgetKit) && os(iOS)
+#if canImport(ActivityKit) && canImport(WidgetKit) && os(iOS) && !targetEnvironment(macCatalyst)
 @available(iOS 16.1, *)
 public struct ReadingLiveActivityWidget: Widget {
     public let kind: String = "BookStrideReadingLiveActivity"
