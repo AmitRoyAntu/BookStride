@@ -6,6 +6,7 @@
 //  for saving shared Apple Books links, web URLs, quotes, and EPUB/PDF files directly to BookStride.
 //
 
+#if canImport(UIKit)
 import UIKit
 import SwiftUI
 import UniformTypeIdentifiers
@@ -441,5 +442,6 @@ struct ShareSheetReviewView: View {
         }
     }
 }
+#endif
 
 
