@@ -195,11 +195,16 @@ public struct ActivityViewSheet: UIViewControllerRepresentable {
 }
 
 public struct DocumentExportPickerSheet: UIViewControllerRepresentable {
-    public let fileURL: URL
+    public let urls: [URL]
     public let onCompletion: ((Bool) -> Void)?
     
+    public init(urls: [URL], onCompletion: ((Bool) -> Void)? = nil) {
+        self.urls = urls
+        self.onCompletion = onCompletion
+    }
+    
     public init(fileURL: URL, onCompletion: ((Bool) -> Void)? = nil) {
-        self.fileURL = fileURL
+        self.urls = [fileURL]
         self.onCompletion = onCompletion
     }
     
@@ -208,7 +213,7 @@ public struct DocumentExportPickerSheet: UIViewControllerRepresentable {
     }
     
     public func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forExporting: [fileURL], asCopy: true)
+        let picker = UIDocumentPickerViewController(forExporting: urls, asCopy: true)
         picker.delegate = context.coordinator
         picker.shouldShowFileExtensions = true
         return picker
