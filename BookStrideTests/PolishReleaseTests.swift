@@ -2,7 +2,7 @@
 //  PolishReleaseTests.swift
 //  BookStrideTests
 //
-//  Comprehensive verification suite for the Bookstride Polish Release:
+//  Comprehensive verification suite for the BookStride Polish Release:
 //  - Reading pace calculation and completion forecasting engine
 //  - Heatmap future date detection and session/journal date linking
 //  - RFC 4180 CSV export escaping, header structure, and Unicode/Bengali preservation

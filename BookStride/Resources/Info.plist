@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Bookstride</string>
+	<string>BookStride</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Bookstride needs permission to save your Reading Wrapped cards to your Photo Library.</string>
+	<string>BookStride needs permission to save your Reading Wrapped cards to your Photo Library.</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>ibooks</string>
@@ -44,7 +44,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSUserNotificationsUsageDescription</key>
-	<string>Bookstride uses notifications to send your optional daily reading habit reminder.</string>
+	<string>BookStride uses notifications to send your optional daily reading habit reminder.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

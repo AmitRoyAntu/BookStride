@@ -178,7 +178,7 @@ public struct BookDetailView: View {
                     } header: {
                         Text("Apple Books URL")
                     } footer: {
-                        Text("Enter a valid Apple Books Store URL or ibooks:// scheme. Bookstride tracks your reading sessions, journal notes, and progress independently on your device.")
+                        Text("Enter a valid Apple Books Store URL or ibooks:// scheme. BookStride tracks your reading sessions, journal notes, and progress independently on your device.")
                     }
                 }
                 .navigationTitle(book.hasAppleBooksLink ? "Edit Apple Books Link" : "Link Apple Books")

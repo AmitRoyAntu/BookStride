@@ -2,7 +2,7 @@
 //  BookStrideWidgetIntents.swift
 //  BookStride
 //
-//  App Intents providing interactive controls for the Bookstride Reading Timer widget.
+//  App Intents providing interactive controls for the BookStride Reading Timer widget.
 //
 
 import Foundation
@@ -17,7 +17,7 @@ import WidgetKit
 @available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
 public struct ToggleReadingTimerIntent: AppIntent {
     public static var title: LocalizedStringResource = "Toggle Reading Timer"
-    public static var description = IntentDescription("Pause or resume the active Bookstride reading timer.")
+    public static var description = IntentDescription("Pause or resume the active BookStride reading timer.")
     
     public init() {}
     

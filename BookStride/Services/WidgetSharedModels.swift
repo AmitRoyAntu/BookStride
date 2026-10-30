@@ -2,7 +2,7 @@
 //  WidgetSharedModels.swift
 //  BookStride
 //
-//  Shared models, snapshots, and configuration between the Bookstride main app
+//  Shared models, snapshots, and configuration between the BookStride main app
 //  and its WidgetKit extension.
 //
 

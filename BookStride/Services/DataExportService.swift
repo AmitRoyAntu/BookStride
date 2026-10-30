@@ -18,7 +18,7 @@ public enum DataTransferError: LocalizedError {
         case .invalidJSON:
             return "The selected file is not a valid JSON document."
         case .unsupportedSchemaVersion(let v):
-            return "Backup schema version \(v) is not supported by this version of Bookstride."
+            return "Backup schema version \(v) is not supported by this version of BookStride."
         case .missingRequiredFields(let details):
             return "Backup data is missing required structure: \(details)"
         case .importFailed(let reason):
@@ -136,7 +136,7 @@ public enum DataExportService {
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd_HHmm"
         let timestamp = df.string(from: package.exportedAt)
-        let filename = "Bookstride_Backup_\(timestamp).json"
+        let filename = "BookStride_Backup_\(timestamp).json"
         
         let tempDir = FileManager.default.temporaryDirectory
         let fileURL = tempDir.appendingPathComponent(filename)
@@ -247,9 +247,9 @@ public enum DataExportService {
             bookTitles[b.id] = b.title
         }
         
-        let booksURL = tempDir.appendingPathComponent("Bookstride_Books_\(timestamp).csv")
-        let sessionsURL = tempDir.appendingPathComponent("Bookstride_Sessions_\(timestamp).csv")
-        let journalURL = tempDir.appendingPathComponent("Bookstride_Journal_\(timestamp).csv")
+        let booksURL = tempDir.appendingPathComponent("BookStride_Books_\(timestamp).csv")
+        let sessionsURL = tempDir.appendingPathComponent("BookStride_Sessions_\(timestamp).csv")
+        let journalURL = tempDir.appendingPathComponent("BookStride_Journal_\(timestamp).csv")
         
         let booksData = exportBooksToCSV(bookDTOs: bookDTOs).data(using: .utf8) ?? Data()
         let sessionsData = exportSessionsToCSV(sessionDTOs: sessionDTOs, bookTitles: bookTitles).data(using: .utf8) ?? Data()

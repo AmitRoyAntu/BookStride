@@ -349,7 +349,7 @@ public struct SmallReadingTimerWidgetView: View {
         let title = snapshot.state == .idle ? "No active session" : snapshot.bookTitle
         let state = snapshot.state.label
         let elapsed = Formatters.formatDuration(seconds: snapshot.accumulatedActiveSeconds, style: .short)
-        return "Bookstride reading timer. Book: \(title). State: \(state). Elapsed time: \(elapsed)."
+        return "BookStride reading timer. Book: \(title). State: \(state). Elapsed time: \(elapsed)."
     }
 }
 
@@ -620,7 +620,7 @@ public struct MediumReadingTimerWidgetView: View {
         let title = snapshot.state == .idle ? "No active session" : snapshot.bookTitle
         let state = snapshot.state.label
         let today = Formatters.formatDuration(seconds: snapshot.todaySeconds, style: .short)
-        return "Bookstride reading timer for \(title). Status: \(state). Today's reading total: \(today)."
+        return "BookStride reading timer for \(title). Status: \(state). Today's reading total: \(today)."
     }
 }
 

@@ -90,7 +90,7 @@ public struct ImportBookReviewSheet: View {
                                 .foregroundColor(BookStrideTheme.mutedSlate)
                                 .lineLimit(2)
                             
-                            Text("Extracted locally. Bookstride does not duplicate large files into system storage.")
+                            Text("Extracted locally. BookStride does not duplicate large files into system storage.")
                                 .font(.caption2)
                                 .foregroundColor(BookStrideTheme.mutedSlate)
                                 .padding(.top, 4)

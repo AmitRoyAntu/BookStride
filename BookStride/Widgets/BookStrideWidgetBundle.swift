@@ -2,7 +2,7 @@
 //  BookStrideWidgetBundle.swift
 //  BookStride
 //
-//  WidgetKit bundle entry point for the Bookstride Widget extension.
+//  WidgetKit bundle entry point for the BookStride Widget extension.
 //
 
 import SwiftUI

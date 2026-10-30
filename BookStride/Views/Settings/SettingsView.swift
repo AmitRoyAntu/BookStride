@@ -225,7 +225,7 @@ public struct SettingsView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Save your complete Bookstride library, reading history, and journal notes to a JSON file.")
+                Text("Save your complete BookStride library, reading history, and journal notes to a JSON file.")
             }
             .confirmationDialog("Export Spreadsheets", isPresented: $showingCSVExportDialog, titleVisibility: .visible) {
                 Button("Save to Files (iCloud / Local)") {
@@ -306,12 +306,12 @@ public struct SettingsView: View {
                 }
             }
             
-            // Section 6: About Bookstride
-            Section(header: Text("About Bookstride")) {
+            // Section 6: About BookStride
+            Section(header: Text("About BookStride")) {
                 HStack {
                     Text("App Name")
                     Spacer()
-                    Text("Bookstride")
+                    Text("BookStride")
                         .foregroundColor(BookStrideTheme.mutedSlate)
                 }
                 

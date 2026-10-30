@@ -11,7 +11,7 @@ import Foundation
 struct TestRunner {
     static func main() {
         print("==================================================")
-        print("📖 Bookstride Core Engine Unit Test Suite")
+        print("📖 BookStride Core Engine Unit Test Suite")
         print("==================================================\n")
         
         let startTime = Date()

@@ -67,7 +67,40 @@
 		A1000059 /* BookStrideTimerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000059 /* BookStrideTimerWidget.swift */; };
 		A1000060 /* BookImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000060 /* BookImportService.swift */; };
 		A1000061 /* ImportBookReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000061 /* ImportBookReviewSheet.swift */; };
+		A1000070 /* BookStrideWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000062 /* BookStrideWidgetBundle.swift */; };
+		A1000071 /* BookStrideTimerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000059 /* BookStrideTimerWidget.swift */; };
+		A1000072 /* BookStrideWidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000058 /* BookStrideWidgetIntents.swift */; };
+		A1000073 /* WidgetSharedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000053 /* WidgetSharedModels.swift */; };
+		A1000074 /* ReadingTimerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000008 /* ReadingTimerService.swift */; };
+		A1000075 /* ColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000015 /* ColorTheme.swift */; };
+		A1000076 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000017 /* Formatters.swift */; };
+		A1000077 /* DateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000016 /* DateUtilities.swift */; };
+		A1000080 /* BookStrideWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C1000002 /* BookStrideWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		L1000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = I1000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F1000002;
+			remoteInfo = BookStrideWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C1000003 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A1000080 /* BookStrideWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		B1000001 /* BookStrideApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideApp.swift; sourceTree = "<group>"; };
@@ -132,10 +165,20 @@
 		B1000059 /* BookStrideTimerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideTimerWidget.swift; sourceTree = "<group>"; };
 		B1000060 /* BookImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImportService.swift; sourceTree = "<group>"; };
 		B1000061 /* ImportBookReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportBookReviewSheet.swift; sourceTree = "<group>"; };
+		B1000062 /* BookStrideWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideWidgetBundle.swift; sourceTree = "<group>"; };
+		B1000063 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C1000002 /* BookStrideWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = BookStrideWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		D1000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1000002 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -171,6 +214,7 @@
 			isa = PBXGroup;
 			children = (
 				C1000001 /* BookStride.app */,
+				C1000002 /* BookStrideWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -351,8 +395,10 @@
 		E1000019 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				B1000058 /* BookStrideWidgetIntents.swift */,
+				B1000062 /* BookStrideWidgetBundle.swift */,
 				B1000059 /* BookStrideTimerWidget.swift */,
+				B1000058 /* BookStrideWidgetIntents.swift */,
+				B1000063 /* Info.plist */,
 			);
 			path = Widgets;
 			sourceTree = "<group>";
@@ -367,15 +413,34 @@
 				D1000001 /* Frameworks */,
 				H1000001 /* Sources */,
 				H1000002 /* Resources */,
+				C1000003 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				K1000001 /* PBXTargetDependency */,
 			);
 			name = BookStride;
 			productName = BookStride;
 			productReference = C1000001 /* BookStride.app */;
 			productType = "com.apple.product-type.application";
+		};
+		F1000002 /* BookStrideWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = G1000003 /* Build configuration list for PBXNativeTarget "BookStrideWidgetExtension" */;
+			buildPhases = (
+				D1000002 /* Frameworks */,
+				H1000003 /* Sources */,
+				H1000004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = BookStrideWidgetExtension;
+			productName = BookStrideWidgetExtension;
+			productReference = C1000002 /* BookStrideWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -388,6 +453,9 @@
 				LastUpgradeCheck = 2710;
 				TargetAttributes = {
 					F1000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					F1000002 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
@@ -406,6 +474,7 @@
 			projectRoot = "";
 			targets = (
 				F1000001 /* BookStride */,
+				F1000002 /* BookStrideWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -416,6 +485,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000048 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		H1000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -488,7 +564,30 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		H1000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000070 /* BookStrideWidgetBundle.swift in Sources */,
+				A1000071 /* BookStrideTimerWidget.swift in Sources */,
+				A1000072 /* BookStrideWidgetIntents.swift in Sources */,
+				A1000073 /* WidgetSharedModels.swift in Sources */,
+				A1000074 /* ReadingTimerService.swift in Sources */,
+				A1000075 /* ColorTheme.swift in Sources */,
+				A1000076 /* Formatters.swift in Sources */,
+				A1000077 /* DateUtilities.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		K1000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F1000002 /* BookStrideWidgetExtension */;
+			targetProxy = L1000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		J1000001 /* Debug */ = {
@@ -665,6 +764,76 @@
 			};
 			name = Release;
 		};
+		J1000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7GCZYFC62V;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BookStride/Widgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride.BookStrideWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG WIDGET_EXTENSION";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		J1000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7GCZYFC62V;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = BookStride/Widgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride.BookStrideWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = WIDGET_EXTENSION;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -682,6 +851,15 @@
 			buildConfigurations = (
 				J1000003 /* Debug */,
 				J1000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		G1000003 /* Build configuration list for PBXNativeTarget "BookStrideWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				J1000005 /* Debug */,
+				J1000006 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

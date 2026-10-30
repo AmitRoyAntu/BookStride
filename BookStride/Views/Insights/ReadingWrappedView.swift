@@ -525,9 +525,9 @@ public struct ReadingWrappedView: View {
     private var descriptiveFilename: String {
         if selectedScope == .monthly {
             let mName = monthName(selectedMonth)
-            return "Bookstride-Monthly-Wrapped-\(mName)-\(selectedYear).png"
+            return "BookStride-Monthly-Wrapped-\(mName)-\(selectedYear).png"
         } else {
-            return "Bookstride-Annual-Wrapped-\(selectedYear).png"
+            return "BookStride-Annual-Wrapped-\(selectedYear).png"
         }
     }
     

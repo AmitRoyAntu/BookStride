@@ -1,4 +1,4 @@
-# Bookstride
+# BookStride
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-iPadOS%2017.0%2B-blue?logo=apple&style=flat-square" alt="Platform: iPadOS 17.0+" />
@@ -14,9 +14,9 @@
 
 ---
 
-**Bookstride** is a native, offline-first reading companion designed specifically for iPadOS to complement **Apple Books** and physical book reading.
+**BookStride** is a native, offline-first reading companion designed specifically for iPadOS to complement **Apple Books** and physical book reading.
 
-Instead of forcing you into a proprietary reader, Bookstride lets you read wherever you prefer—in Apple Books, Kindle, or physical books—while serving as an ambient focus timer, habit tracker, and literary journal.
+Instead of forcing you into a proprietary reader, BookStride lets you read wherever you prefer—in Apple Books, Kindle, or physical books—while serving as an ambient focus timer, habit tracker, and literary journal.
 
 ---
 
@@ -89,4 +89,4 @@ The repository includes a standalone Swift test runner covering timer state, hab
 
 ## License
 
-Bookstride is available under the [MIT License](LICENSE).
+BookStride is available under the [MIT License](LICENSE).

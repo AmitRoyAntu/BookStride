@@ -48,7 +48,7 @@ public final class NotificationService: ObservableObject {
         
         let content = UNMutableNotificationContent()
         content.title = "Time for your reading ritual"
-        content.body = "A few quiet pages with Bookstride keep your streak flowing."
+        content.body = "A few quiet pages with BookStride keep your streak flowing."
         content.sound = .default
         
         var dateComponents = DateComponents()

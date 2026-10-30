@@ -37,14 +37,14 @@ public struct AppNavigationSplitView: View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             // Sidebar
             List(selection: $selectedSection) {
-                // Bookstride App Branding Header
+                // BookStride App Branding Header
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
                         Image(systemName: "book.pages")
                             .font(.title2)
                             .foregroundColor(BookStrideTheme.forestGreen)
                         
-                        Text("Bookstride")
+                        Text("BookStride")
                             .font(.system(.title2, design: .serif, weight: .bold))
                             .foregroundColor(BookStrideTheme.deepCharcoal)
                     }
@@ -78,7 +78,7 @@ public struct AppNavigationSplitView: View {
                 }
             }
             .listStyle(.sidebar)
-            .navigationTitle("Bookstride")
+            .navigationTitle("BookStride")
             .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 320)
             .navigationDestination(for: NavigationSection.self) { section in
                 detailContent(for: section)

@@ -177,7 +177,7 @@ public struct AddEditBookSheet: View {
                 // Section: Apple Books Link
                 Section(
                     header: Text("Apple Books Link (Optional)"),
-                    footer: Text("Store link (https://books.apple.com/...) or scheme (ibooks://...) to launch directly from Bookstride.")
+                    footer: Text("Store link (https://books.apple.com/...) or scheme (ibooks://...) to launch directly from BookStride.")
                 ) {
                     TextField("https://books.apple.com/...", text: $appleBooksLink)
                         .keyboardType(.URL)

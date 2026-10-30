@@ -31,7 +31,7 @@ public enum BookImportError: LocalizedError, Equatable {
         case .corruptedFile(let reason):
             return "Unable to parse book: \(reason)"
         case .drmProtected(let details):
-            return "This file is protected by Digital Rights Management (DRM). Bookstride cannot read DRM-protected files: \(details)"
+            return "This file is protected by Digital Rights Management (DRM). BookStride cannot read DRM-protected files: \(details)"
         case .unreadableFile:
             return "The selected file could not be read."
         }
