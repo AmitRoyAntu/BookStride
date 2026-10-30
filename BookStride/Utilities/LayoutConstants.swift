@@ -34,3 +34,39 @@ public enum LayoutConstants {
     ]
 }
 
+// MARK: - Multiplatform SwiftUI Compatibility
+
+#if os(macOS)
+public enum NavigationBarTitleDisplayModeCompat {
+    case automatic
+    case inline
+    case large
+}
+
+public enum UIKeyboardTypeCompat {
+    case `default`
+    case asciiCapable
+    case numbersAndPunctuation
+    case URL
+    case numberPad
+    case phonePad
+    case namePhonePad
+    case emailAddress
+    case decimalPad
+    case twitter
+    case webSearch
+    case asciiCapableNumberPad
+}
+
+extension View {
+    @ViewBuilder
+    public func navigationBarTitleDisplayMode(_ mode: NavigationBarTitleDisplayModeCompat) -> some View {
+        self
+    }
+    
+    @ViewBuilder
+    public func keyboardType(_ type: UIKeyboardTypeCompat) -> some View {
+        self
+    }
+}
+#endif
