@@ -43,8 +43,6 @@
 		<string>itms-books</string>
 		<string>itms-bookss</string>
 	</array>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>BookStride uses notifications to send your optional daily reading habit reminder.</string>
 	<key>UIApplicationSceneManifest</key>
