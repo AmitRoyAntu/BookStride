@@ -3,70 +3,96 @@
 //  BookStride
 //
 //  Adaptive design system for the BookStride reading journal aesthetic.
-//  Fully supports Light and Dark modes with high-contrast, comfortable typography.
+//  Fully supports Light and Dark modes with high-contrast, comfortable typography
+//  across both iPadOS and macOS.
 //
 
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+
+private func dynamicAdaptiveColor(
+    lightRed: Double, lightGreen: Double, lightBlue: Double,
+    darkRed: Double, darkGreen: Double, darkBlue: Double
+) -> Color {
+    Color(uiColor: UIColor { trait in
+        trait.userInterfaceStyle == .dark
+            ? UIColor(red: darkRed/255, green: darkGreen/255, blue: darkBlue/255, alpha: 1.0)
+            : UIColor(red: lightRed/255, green: lightGreen/255, blue: lightBlue/255, alpha: 1.0)
+    })
+}
+#elseif canImport(AppKit)
+import AppKit
+
+private func dynamicAdaptiveColor(
+    lightRed: Double, lightGreen: Double, lightBlue: Double,
+    darkRed: Double, darkGreen: Double, darkBlue: Double
+) -> Color {
+    Color(nsColor: NSColor(name: nil, dynamicProvider: { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(red: darkRed/255, green: darkGreen/255, blue: darkBlue/255, alpha: 1.0)
+            : NSColor(red: lightRed/255, green: lightGreen/255, blue: lightBlue/255, alpha: 1.0)
+    }))
+}
+#else
+private func dynamicAdaptiveColor(
+    lightRed: Double, lightGreen: Double, lightBlue: Double,
+    darkRed: Double, darkGreen: Double, darkBlue: Double
+) -> Color {
+    Color(red: lightRed/255, green: lightGreen/255, blue: lightBlue/255)
+}
+#endif
 
 public enum BookStrideTheme {
     // Dynamic Primary Text: deep charcoal in light mode, crisp warm cream-white in dark mode
-    public static let deepCharcoal = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark
-            ? UIColor(red: 245/255, green: 243/255, blue: 238/255, alpha: 1.0)
-            : UIColor(red: 35/255, green: 33/255, blue: 30/255, alpha: 1.0)
-    })
+    public static let deepCharcoal = dynamicAdaptiveColor(
+        lightRed: 35, lightGreen: 33, lightBlue: 30,
+        darkRed: 245, darkGreen: 243, darkBlue: 238
+    )
     
     // Dynamic Secondary Text: muted slate in light mode, soft readable warm gray in dark mode
-    public static let mutedSlate = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark
-            ? UIColor(red: 185/255, green: 180/255, blue: 172/255, alpha: 1.0)
-            : UIColor(red: 110/255, green: 106/255, blue: 98/255, alpha: 1.0)
-    })
+    public static let mutedSlate = dynamicAdaptiveColor(
+        lightRed: 110, lightGreen: 106, lightBlue: 98,
+        darkRed: 185, darkGreen: 180, darkBlue: 172
+    )
     
     // Dynamic Card Surface: pure white in light mode, warm charcoal surface in dark mode
-    public static let cardLight = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark
-            ? UIColor(red: 38/255, green: 36/255, blue: 33/255, alpha: 1.0)
-            : UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 1.0)
-    })
+    public static let cardLight = dynamicAdaptiveColor(
+        lightRed: 255, lightGreen: 255, lightBlue: 255,
+        darkRed: 38, darkGreen: 36, darkBlue: 33
+    )
     public static let cardDark = Color(red: 38/255, green: 36/255, blue: 33/255)
     
     // Dynamic Card Border: soft warm sand in light mode, subtle dark border in dark mode
-    public static let borderLight = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark
-            ? UIColor(red: 58/255, green: 55/255, blue: 50/255, alpha: 1.0)
-            : UIColor(red: 232/255, green: 228/255, blue: 220/255, alpha: 1.0)
-    })
+    public static let borderLight = dynamicAdaptiveColor(
+        lightRed: 232, lightGreen: 228, lightBlue: 220,
+        darkRed: 58, darkGreen: 55, darkBlue: 50
+    )
     public static let borderDark = Color(red: 58/255, green: 55/255, blue: 50/255)
     
     // Dynamic Background: warm ivory in light mode, deep obsidian/charcoal in dark mode
-    public static let warmIvory = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark
-            ? UIColor(red: 24/255, green: 23/255, blue: 21/255, alpha: 1.0)
-            : UIColor(red: 249/255, green: 248/255, blue: 245/255, alpha: 1.0)
-    })
+    public static let warmIvory = dynamicAdaptiveColor(
+        lightRed: 249, lightGreen: 248, lightBlue: 245,
+        darkRed: 24, darkGreen: 23, darkBlue: 21
+    )
     public static let darkCharcoal = Color(red: 24/255, green: 23/255, blue: 21/255)
     
     // Dynamic Accent: muted forest green in light mode, vibrant sage/forest green in dark mode
-    public static let forestGreen = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark
-            ? UIColor(red: 88/255, green: 158/255, blue: 118/255, alpha: 1.0)
-            : UIColor(red: 45/255, green: 90/255, blue: 67/255, alpha: 1.0)
-    })
+    public static let forestGreen = dynamicAdaptiveColor(
+        lightRed: 45, lightGreen: 90, lightBlue: 67,
+        darkRed: 88, darkGreen: 158, darkBlue: 118
+    )
     
-    public static let forestGreenLight = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark
-            ? UIColor(red: 115/255, green: 185/255, blue: 145/255, alpha: 1.0)
-            : UIColor(red: 75/255, green: 130/255, blue: 100/255, alpha: 1.0)
-    })
+    public static let forestGreenLight = dynamicAdaptiveColor(
+        lightRed: 75, lightGreen: 130, lightBlue: 100,
+        darkRed: 115, darkGreen: 185, darkBlue: 145
+    )
     
     // Secondary accent: warm beige / sand
-    public static let warmBeige = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark
-            ? UIColor(red: 75/255, green: 70/255, blue: 62/255, alpha: 1.0)
-            : UIColor(red: 216/255, green: 206/255, blue: 191/255, alpha: 1.0)
-    })
+    public static let warmBeige = dynamicAdaptiveColor(
+        lightRed: 216, lightGreen: 206, lightBlue: 191,
+        darkRed: 75, darkGreen: 70, darkBlue: 62
+    )
     public static let sandDark = Color(red: 70/255, green: 65/255, blue: 57/255)
     
     // High-contrast text helpers
@@ -74,11 +100,10 @@ public enum BookStrideTheme {
     public static let lightMutedText = Color(red: 185/255, green: 180/255, blue: 172/255)
     
     // Streak amber
-    public static let streakAmber = Color(uiColor: UIColor { trait in
-        trait.userInterfaceStyle == .dark
-            ? UIColor(red: 240/255, green: 155/255, blue: 65/255, alpha: 1.0)
-            : UIColor(red: 217/255, green: 130/255, blue: 43/255, alpha: 1.0)
-    })
+    public static let streakAmber = dynamicAdaptiveColor(
+        lightRed: 217, lightGreen: 130, lightBlue: 43,
+        darkRed: 240, darkGreen: 155, darkBlue: 65
+    )
     
     // Book cover palette presets
     public static let bookCoverColors: [String: Color] = [

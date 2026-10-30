@@ -470,11 +470,7 @@ public struct ReadingCalendarHeatmap: View {
     private func intensityColor(_ level: Int) -> Color {
         switch level {
         case 0:
-            return Color(uiColor: UIColor { trait in
-                trait.userInterfaceStyle == .dark
-                    ? UIColor(white: 0.22, alpha: 1.0)
-                    : UIColor(red: 234/255, green: 230/255, blue: 222/255, alpha: 1.0)
-            })
+            return BookStrideTheme.borderLight
         case 1:
             return BookStrideTheme.forestGreenLight.opacity(0.40)
         case 2:
@@ -484,11 +480,7 @@ public struct ReadingCalendarHeatmap: View {
         case 4:
             return BookStrideTheme.forestGreen
         default:
-            return Color(uiColor: UIColor { trait in
-                trait.userInterfaceStyle == .dark
-                    ? UIColor(white: 0.22, alpha: 1.0)
-                    : UIColor(red: 234/255, green: 230/255, blue: 222/255, alpha: 1.0)
-            })
+            return BookStrideTheme.borderLight
         }
     }
 }

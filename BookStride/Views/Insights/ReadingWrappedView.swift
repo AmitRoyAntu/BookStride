@@ -33,7 +33,7 @@ public struct ReadingWrappedView: View {
     @State private var showingCustomizationSheet: Bool = false
     
     // Export state
-    @State private var renderedCardImage: UIImage? = nil
+    @State private var renderedCardImage: PlatformImage? = nil
     @State private var exportedFileURL: URL? = nil
     @State private var showingShareSheet: Bool = false
     @State private var showingDocumentPicker: Bool = false
@@ -162,6 +162,7 @@ public struct ReadingWrappedView: View {
         .sheet(isPresented: $showingCustomizationSheet) {
             customizationOptionsSheet
         }
+        #if canImport(UIKit)
         .sheet(isPresented: $showingShareSheet) {
             if let url = exportedFileURL {
                 ActivityViewSheet(activityItems: [url])
@@ -172,6 +173,7 @@ public struct ReadingWrappedView: View {
                 DocumentExportPickerSheet(fileURL: url)
             }
         }
+        #endif
         .alert("Saved to Photos", isPresented: $showingPhotosSuccessAlert) {
             Button("Done", role: .cancel) {}
         } message: {
@@ -532,7 +534,7 @@ public struct ReadingWrappedView: View {
     }
     
     @MainActor
-    private func generateCardUIImage() -> UIImage? {
+    private func generateCardUIImage() -> PlatformImage? {
         let card = ReadingWrappedCardView(
             monthlyData: selectedScope == .monthly ? currentMonthlyData : nil,
             yearlyData: selectedScope == .yearly ? currentYearlyData : nil,
@@ -570,6 +572,7 @@ public struct ReadingWrappedView: View {
             return
         }
         
+        #if canImport(UIKit)
         PhotoLibrarySaver.saveToPhotos(image: image) { result in
             switch result {
             case .success:
@@ -579,6 +582,12 @@ public struct ReadingWrappedView: View {
                 showingErrorAlert = true
             }
         }
+        #elseif canImport(AppKit)
+        if let fileURL = WrappedCardRenderer.saveTemporaryPNG(image: image, filename: descriptiveFilename) {
+            NSWorkspace.shared.activateFileViewerSelecting([fileURL])
+            showingPhotosSuccessAlert = true
+        }
+        #endif
     }
     
     private func triggerSaveToFiles() {

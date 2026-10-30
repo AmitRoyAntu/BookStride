@@ -2,34 +2,43 @@
 //  ShareSheetPresenter.swift
 //  BookStride
 //
-//  Native iPadOS share sheet, Photos library saver, Document Picker file exporter,
+//  Cross-platform sharing, Photos library saving, Document Picker file exporter,
 //  and SwiftUI ImageRenderer wrapper for Reading Wrapped cards.
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
+#if canImport(UIKit)
 import UIKit
 import Photos
-import UniformTypeIdentifiers
 import LinkPresentation
+public typealias PlatformImage = UIImage
+#elseif canImport(AppKit)
+import AppKit
+public typealias PlatformImage = NSImage
+#endif
 
 @MainActor
 public enum WrappedCardRenderer {
     
-    /// Renders a SwiftUI view to a pixel-crisp UIImage at the requested display scale.
+    /// Renders a SwiftUI view to a pixel-crisp image at the requested display scale.
     public static func renderImage<V: View>(
         view: V,
         size: CGSize,
-        scale: CGFloat = 3.0
-    ) -> UIImage? {
+        scale: CGFloat = 2.0
+    ) -> PlatformImage? {
         let renderer = ImageRenderer(content: view.frame(width: size.width, height: size.height))
         renderer.scale = scale
         renderer.proposedSize = ProposedViewSize(size)
+        #if canImport(UIKit)
         return renderer.uiImage
+        #elseif canImport(AppKit)
+        return renderer.nsImage
+        #endif
     }
     
-    /// Saves a UIImage to the temporary directory with a clean, descriptive filename.
-    public static func saveTemporaryPNG(image: UIImage, filename: String) -> URL? {
-        // Sanitize filename
+    /// Saves an image to the temporary directory with a clean, descriptive filename.
+    public static func saveTemporaryPNG(image: PlatformImage, filename: String) -> URL? {
         let safeName = filename
             .replacingOccurrences(of: "/", with: "-")
             .replacingOccurrences(of: ":", with: "-")
@@ -38,7 +47,14 @@ public enum WrappedCardRenderer {
         let fullFilename = safeName.hasSuffix(".png") ? safeName : "\(safeName).png"
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fullFilename)
         
+        #if canImport(UIKit)
         guard let data = image.pngData() else { return nil }
+        #elseif canImport(AppKit)
+        guard let tiffData = image.tiffRepresentation,
+              let bitmap = NSBitmapImageRep(data: tiffData),
+              let data = bitmap.representation(using: .png, properties: [:]) else { return nil }
+        #endif
+        
         do {
             try data.write(to: tempURL, options: .atomic)
             return tempURL
@@ -48,6 +64,7 @@ public enum WrappedCardRenderer {
     }
 }
 
+#if canImport(UIKit)
 public enum PhotoLibrarySaver {
     
     /// Saves a UIImage into the user's Photos library, properly handling iPadOS permissions.
@@ -87,9 +104,6 @@ public enum PhotoLibrarySaver {
 
 // MARK: - Activity Item Source with Link Metadata
 
-/// An item source providing rich title, icon, and file metadata to UIActivityViewController.
-/// Explicitly identifies the item as a local file download, preventing OSStatus -10814
-/// collaboration / CloudKit share evaluation errors from LaunchServices.
 public final class ShareActivityItemSource: NSObject, UIActivityItemSource {
     public let fileURL: URL
     public let itemTitle: String
@@ -113,10 +127,6 @@ public final class ShareActivityItemSource: NSObject, UIActivityItemSource {
     public func activityViewControllerLinkMetadata(_ activityViewController: UIActivityViewController) -> LPLinkMetadata? {
         let metadata = LPLinkMetadata()
         metadata.title = itemTitle
-        // Do NOT assign metadata.originalURL to a local sandbox file URL!
-        // When originalURL is set to a local file URL in /tmp or sandbox,
-        // LaunchServices triggers LSBindingEvaluator to inspect CloudKit / SWY collaboration,
-        // which emits OSStatus error -10814 and LaunchServices permission denials on iPadOS.
         if let image = previewImage {
             metadata.imageProvider = NSItemProvider(object: image)
         } else {
@@ -149,82 +159,77 @@ public struct ActivityViewSheet: UIViewControllerRepresentable {
     }
     
     public func makeUIViewController(context: Context) -> UIActivityViewController {
-        let preparedItems = activityItems.map { item -> Any in
-            if let url = item as? URL {
-                return ShareActivityItemSource(fileURL: url, itemTitle: url.lastPathComponent)
-            }
-            return item
+        let items: [Any]
+        if let first = activityItems.first as? URL {
+            let itemTitle = first.deletingPathExtension().lastPathComponent
+            let source = ShareActivityItemSource(fileURL: first, itemTitle: itemTitle)
+            items = [source]
+        } else {
+            items = activityItems
         }
+        
         let controller = UIActivityViewController(
-            activityItems: preparedItems,
+            activityItems: items,
             applicationActivities: applicationActivities
         )
-        // iPadOS popover presentation safeguard
+        
         if let popover = controller.popoverPresentationController {
-            popover.permittedArrowDirections = []
             if let windowScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene ?? UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let root = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController ?? windowScene.windows.first?.rootViewController {
-                let safeBounds = root.view.bounds
-                let width = max(safeBounds.width, 320)
-                let height = max(safeBounds.height, 320)
-                let anchorSize: CGFloat = 32
-                popover.sourceView = root.view
-                popover.sourceRect = CGRect(
-                    x: max(0, (width - anchorSize) / 2),
-                    y: max(0, (height - anchorSize) / 2),
-                    width: anchorSize,
-                    height: anchorSize
-                )
+               let rootVC = windowScene.windows.first?.rootViewController {
+                popover.sourceView = rootVC.view
+                let bounds = rootVC.view.bounds
+                popover.sourceRect = CGRect(x: bounds.midX - 10, y: bounds.midY - 10, width: 20, height: 20)
+                popover.permittedArrowDirections = []
             }
         }
+        
+        controller.excludedActivityTypes = [
+            .assignToContact,
+            .addToReadingList
+        ]
+        
         return controller
     }
     
     public func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
-// MARK: - iPadOS Document Picker (Save to Files)
-
 public struct DocumentExportPickerSheet: UIViewControllerRepresentable {
-    public let urls: [URL]
-    public var onCompletion: ((Bool) -> Void)?
-    
-    public init(urls: [URL], onCompletion: ((Bool) -> Void)? = nil) {
-        self.urls = urls
-        self.onCompletion = onCompletion
-    }
+    public let fileURL: URL
+    public let onCompletion: ((Bool) -> Void)?
     
     public init(fileURL: URL, onCompletion: ((Bool) -> Void)? = nil) {
-        self.urls = [fileURL]
+        self.fileURL = fileURL
         self.onCompletion = onCompletion
     }
     
     public func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+        Coordinator(onCompletion: onCompletion)
     }
     
     public func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forExporting: urls, asCopy: true)
+        let picker = UIDocumentPickerViewController(forExporting: [fileURL], asCopy: true)
         picker.delegate = context.coordinator
+        picker.shouldShowFileExtensions = true
         return picker
     }
     
     public func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
     
     public class Coordinator: NSObject, UIDocumentPickerDelegate {
-        let parent: DocumentExportPickerSheet
+        let onCompletion: ((Bool) -> Void)?
         
-        init(_ parent: DocumentExportPickerSheet) {
-            self.parent = parent
+        init(onCompletion: ((Bool) -> Void)?) {
+            self.onCompletion = onCompletion
         }
         
         public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            parent.onCompletion?(true)
+            onCompletion?(true)
         }
         
         public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-            parent.onCompletion?(false)
+            onCompletion?(false)
         }
     }
 }
-
+#endif

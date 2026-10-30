@@ -43,6 +43,7 @@ public struct BookCoverThumbnail: View {
     
     public var body: some View {
         Group {
+            #if canImport(UIKit)
             if let data = imageData, let uiImage = UIImage(data: data) {
                 Image(uiImage: uiImage)
                     .resizable()
@@ -50,65 +51,21 @@ public struct BookCoverThumbnail: View {
                     .frame(width: width, height: height)
                     .clipped()
             } else {
-                // Procedural stylized hardcover book aesthetic
-                ZStack {
-                    baseColor
-                    
-                    // Subtle embossed linen overlay
-                    LinearGradient(
-                        colors: [Color.white.opacity(0.12), Color.black.opacity(0.18)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    
-                    // Book spine highlight on the left edge
-                    HStack {
-                        Rectangle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        Color.white.opacity(0.2),
-                                        Color.black.opacity(0.25),
-                                        Color.white.opacity(0.08)
-                                    ],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .frame(width: max(4, width * 0.06))
-                        Spacer()
-                    }
-                    
-                    // Book typography & ornament
-                    VStack(spacing: 6) {
-                        Spacer()
-                        
-                        Image(systemName: iconName)
-                            .font(.system(size: width * 0.2, weight: .light))
-                            .foregroundColor(Color.white.opacity(0.85))
-                            .padding(.bottom, 4)
-                        
-                        Text(title)
-                            .font(.system(size: max(11, width * 0.11), weight: .bold, design: .serif))
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(3)
-                            .padding(.horizontal, 8)
-                        
-                        if !author.isEmpty {
-                            Text(author)
-                                .font(.system(size: max(9, width * 0.085), weight: .medium, design: .serif))
-                                .foregroundColor(Color.white.opacity(0.8))
-                                .lineLimit(1)
-                                .padding(.horizontal, 6)
-                        }
-                        
-                        Spacer()
-                    }
-                    .padding(4)
-                }
-                .frame(width: width, height: height)
+                coverPlaceholder
             }
+            #elseif canImport(AppKit)
+            if let data = imageData, let nsImage = NSImage(data: data) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: width, height: height)
+                    .clipped()
+            } else {
+                coverPlaceholder
+            }
+            #else
+            coverPlaceholder
+            #endif
         }
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .overlay(
@@ -116,6 +73,67 @@ public struct BookCoverThumbnail: View {
                 .stroke(Color.black.opacity(0.15), lineWidth: 0.5)
         )
         .shadow(color: Color.black.opacity(0.18), radius: 5, x: 2, y: 3)
+    }
+    
+    private var coverPlaceholder: some View {
+        // Procedural stylized hardcover book aesthetic
+        ZStack {
+            baseColor
+            
+            // Subtle embossed linen overlay
+            LinearGradient(
+                colors: [Color.white.opacity(0.12), Color.black.opacity(0.18)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            // Book spine highlight on the left edge
+            HStack {
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.2),
+                                Color.black.opacity(0.25),
+                                Color.white.opacity(0.08)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(width: max(4, width * 0.06))
+                Spacer()
+            }
+            
+            // Book typography & ornament
+            VStack(spacing: 6) {
+                Spacer()
+                
+                Image(systemName: iconName)
+                    .font(.system(size: width * 0.2, weight: .light))
+                    .foregroundColor(Color.white.opacity(0.85))
+                    .padding(.bottom, 4)
+                
+                Text(title)
+                    .font(.system(size: max(11, width * 0.11), weight: .bold, design: .serif))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .padding(.horizontal, 8)
+                
+                if !author.isEmpty {
+                    Text(author)
+                        .font(.system(size: max(9, width * 0.085), weight: .medium, design: .serif))
+                        .foregroundColor(Color.white.opacity(0.8))
+                        .lineLimit(1)
+                        .padding(.horizontal, 6)
+                }
+                
+                Spacer()
+            }
+            .padding(4)
+        }
+        .frame(width: width, height: height)
     }
 }
 
