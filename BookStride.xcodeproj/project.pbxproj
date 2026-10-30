@@ -76,6 +76,15 @@
 		A1000076 /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000017 /* Formatters.swift */; };
 		A1000077 /* DateUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000016 /* DateUtilities.swift */; };
 		A1000080 /* BookStrideWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C1000002 /* BookStrideWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1000091 /* ReadingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000081 /* ReadingActivityAttributes.swift */; };
+		A1000092 /* ReadingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000081 /* ReadingActivityAttributes.swift */; };
+		A1000093 /* ReadingLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000082 /* ReadingLiveActivityManager.swift */; };
+		A1000094 /* ReadingLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000083 /* ReadingLiveActivityView.swift */; };
+		A1000095 /* BookStrideEntities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000084 /* BookStrideEntities.swift */; };
+		A1000096 /* BookStrideEntities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000084 /* BookStrideEntities.swift */; };
+		A1000097 /* BookStrideShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000085 /* BookStrideShortcuts.swift */; };
+		A1000098 /* IncomingShareQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000086 /* IncomingShareQueue.swift */; };
+		A1000099 /* IncomingShareProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000087 /* IncomingShareProcessor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -167,6 +176,13 @@
 		B1000061 /* ImportBookReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportBookReviewSheet.swift; sourceTree = "<group>"; };
 		B1000062 /* BookStrideWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideWidgetBundle.swift; sourceTree = "<group>"; };
 		B1000063 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B1000081 /* ReadingActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingActivityAttributes.swift; sourceTree = "<group>"; };
+		B1000082 /* ReadingLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingLiveActivityManager.swift; sourceTree = "<group>"; };
+		B1000083 /* ReadingLiveActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingLiveActivityView.swift; sourceTree = "<group>"; };
+		B1000084 /* BookStrideEntities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideEntities.swift; sourceTree = "<group>"; };
+		B1000085 /* BookStrideShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideShortcuts.swift; sourceTree = "<group>"; };
+		B1000086 /* IncomingShareQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingShareQueue.swift; sourceTree = "<group>"; };
+		B1000087 /* IncomingShareProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingShareProcessor.swift; sourceTree = "<group>"; };
 		C1000002 /* BookStrideWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = wrapper.app-extension; includeInIndex = 0; path = BookStrideWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -254,6 +270,12 @@
 				B1000053 /* WidgetSharedModels.swift */,
 				B1000054 /* ReadingWrappedService.swift */,
 				B1000060 /* BookImportService.swift */,
+				B1000081 /* ReadingActivityAttributes.swift */,
+				B1000082 /* ReadingLiveActivityManager.swift */,
+				B1000084 /* BookStrideEntities.swift */,
+				B1000085 /* BookStrideShortcuts.swift */,
+				B1000086 /* IncomingShareQueue.swift */,
+				B1000087 /* IncomingShareProcessor.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -398,6 +420,7 @@
 				B1000062 /* BookStrideWidgetBundle.swift */,
 				B1000059 /* BookStrideTimerWidget.swift */,
 				B1000058 /* BookStrideWidgetIntents.swift */,
+				B1000083 /* ReadingLiveActivityView.swift */,
 				B1000063 /* Info.plist */,
 			);
 			path = Widgets;
@@ -561,6 +584,12 @@
 				A1000059 /* BookStrideTimerWidget.swift in Sources */,
 				A1000060 /* BookImportService.swift in Sources */,
 				A1000061 /* ImportBookReviewSheet.swift in Sources */,
+				A1000091 /* ReadingActivityAttributes.swift in Sources */,
+				A1000093 /* ReadingLiveActivityManager.swift in Sources */,
+				A1000095 /* BookStrideEntities.swift in Sources */,
+				A1000097 /* BookStrideShortcuts.swift in Sources */,
+				A1000098 /* IncomingShareQueue.swift in Sources */,
+				A1000099 /* IncomingShareProcessor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -576,6 +605,9 @@
 				A1000075 /* ColorTheme.swift in Sources */,
 				A1000076 /* Formatters.swift in Sources */,
 				A1000077 /* DateUtilities.swift in Sources */,
+				A1000092 /* ReadingActivityAttributes.swift in Sources */,
+				A1000094 /* ReadingLiveActivityView.swift in Sources */,
+				A1000096 /* BookStrideEntities.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -600,6 +632,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = BookStride/Resources/BookStride.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -635,6 +668,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = BookStride/Resources/BookStride.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -772,6 +806,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = BookStride/Resources/BookStride.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7GCZYFC62V;
@@ -791,6 +826,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride.BookStrideWidgetExtension;
+				CODE_SIGN_ENTITLEMENTS = BookStride/Widgets/BookStrideWidgetExtension.entitlements;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG WIDGET_EXTENSION";
@@ -808,6 +844,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = BookStride/Resources/BookStride.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 7GCZYFC62V;
@@ -824,6 +861,7 @@
 				MARKETING_VERSION = 1.0.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride.BookStrideWidgetExtension;
+				CODE_SIGN_ENTITLEMENTS = BookStride/Widgets/BookStrideWidgetExtension.entitlements;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = WIDGET_EXTENSION;

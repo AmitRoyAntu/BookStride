@@ -111,6 +111,9 @@ public final class ReadingTimerService: ObservableObject {
         if isRunning {
             startTicker()
         }
+        #if !WIDGET_EXTENSION
+        ReadingLiveActivityManager.shared.reconcile(with: self.activeState)
+        #endif
     }
     
     private func persistActiveState() {
@@ -216,6 +219,13 @@ public final class ReadingTimerService: ObservableObject {
         }
     }
     
+    /// Safely finishes the active session from WidgetKit or Live Activity intent.
+    public func finishSessionFromWidget(now: Date = Date()) {
+        restoreActiveSession(now: now)
+        _ = finishSession(now: now)
+        updateWidgetSnapshot()
+    }
+    
     // MARK: - Actions
     
     /// Starts a new reading session. Only allows one active session at a time.
@@ -250,6 +260,22 @@ public final class ReadingTimerService: ObservableObject {
         self.currentElapsedSeconds = 0
         persistActiveState()
         startTicker()
+        
+        // Start Live Activity
+        #if !WIDGET_EXTENSION
+        let todayData = userDefaults.data(forKey: AppGroupConfig.todayProgressKey)
+        let todayProgress = (todayData != nil) ? (try? JSONDecoder().decode(TodayProgressSnapshot.self, from: todayData!)) : nil
+        ReadingLiveActivityManager.shared.startActivity(
+            sessionId: state.sessionId,
+            bookId: state.bookId,
+            bookTitle: state.bookTitle,
+            accumulatedSeconds: 0,
+            isPaused: false,
+            lastResumedAt: now,
+            todaySeconds: todayProgress?.todaySeconds ?? 0,
+            dailyGoalSeconds: todayProgress?.dailyGoalSeconds ?? 1800
+        )
+        #endif
         return true
     }
     
@@ -273,6 +299,19 @@ public final class ReadingTimerService: ObservableObject {
         
         persistActiveState()
         stopTicker()
+        
+        #if !WIDGET_EXTENSION
+        let todayData = userDefaults.data(forKey: AppGroupConfig.todayProgressKey)
+        let todayProgress = (todayData != nil) ? (try? JSONDecoder().decode(TodayProgressSnapshot.self, from: todayData!)) : nil
+        ReadingLiveActivityManager.shared.updateActivity(
+            bookTitle: state.bookTitle,
+            isPaused: true,
+            accumulatedSeconds: state.accumulatedActiveSeconds,
+            lastResumedAt: nil,
+            todaySeconds: todayProgress?.todaySeconds ?? 0,
+            dailyGoalSeconds: todayProgress?.dailyGoalSeconds ?? 1800
+        )
+        #endif
     }
     
     /// Resumes the paused reading session.
@@ -294,6 +333,19 @@ public final class ReadingTimerService: ObservableObject {
         persistActiveState()
         recalculateElapsed(now: now)
         startTicker()
+        
+        #if !WIDGET_EXTENSION
+        let todayData = userDefaults.data(forKey: AppGroupConfig.todayProgressKey)
+        let todayProgress = (todayData != nil) ? (try? JSONDecoder().decode(TodayProgressSnapshot.self, from: todayData!)) : nil
+        ReadingLiveActivityManager.shared.updateActivity(
+            bookTitle: state.bookTitle,
+            isPaused: false,
+            accumulatedSeconds: state.accumulatedActiveSeconds,
+            lastResumedAt: now,
+            todaySeconds: todayProgress?.todaySeconds ?? 0,
+            dailyGoalSeconds: todayProgress?.dailyGoalSeconds ?? 1800
+        )
+        #endif
     }
     
     /// Resolves a stale session with user-chosen adjustment.
@@ -374,6 +426,9 @@ public final class ReadingTimerService: ObservableObject {
         self.isPaused = false
         self.currentElapsedSeconds = 0
         persistActiveState()
+        #if !WIDGET_EXTENSION
+        ReadingLiveActivityManager.shared.endActivity()
+        #endif
     }
     
     // MARK: - Elapsed Time Calculation

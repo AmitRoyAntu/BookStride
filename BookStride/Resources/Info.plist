@@ -35,6 +35,8 @@
 	</array>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>BookStride needs permission to save your Reading Wrapped cards to your Photo Library.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>ibooks</string>

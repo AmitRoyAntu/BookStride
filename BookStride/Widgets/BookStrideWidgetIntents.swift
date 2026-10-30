@@ -32,5 +32,23 @@ public struct ToggleReadingTimerIntent: AppIntent {
         return .result()
     }
 }
+
+@available(iOS 17.0, macOS 14.0, watchOS 10.0, *)
+public struct FinishReadingActivityIntent: AppIntent {
+    public static var title: LocalizedStringResource = "Finish Reading Session"
+    public static var description = IntentDescription("Finish the active reading session in BookStride.")
+    
+    public init() {}
+    
+    public func perform() async throws -> some IntentResult {
+        ReadingTimerService.shared.finishSessionFromWidget()
+        
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadAllTimelines()
+        #endif
+        
+        return .result()
+    }
+}
 #endif
 

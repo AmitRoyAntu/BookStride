@@ -37,6 +37,7 @@ struct BookStrideApp: App {
                     switch newPhase {
                     case .active:
                         ReadingTimerService.shared.restoreActiveSession()
+                        IncomingShareProcessor.processPendingShares(modelContext: container.mainContext)
                     case .background, .inactive:
                         ReadingTimerService.shared.recalculateElapsed()
                     @unknown default:
@@ -51,6 +52,7 @@ struct BookStrideApp: App {
     }
     
     private func handleIncomingURL(_ url: URL) {
+        IncomingShareProcessor.processPendingShares(modelContext: container.mainContext)
         guard url.scheme == "bookstride" else { return }
         switch url.host {
         case "timer", "session":

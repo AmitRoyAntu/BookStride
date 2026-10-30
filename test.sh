@@ -18,6 +18,10 @@ swiftc -module-cache-path /tmp/clang-cache \
   BookStride/Services/DataExportService.swift \
   BookStride/Services/AppleBooksService.swift \
   BookStride/Services/BookImportService.swift \
+  BookStride/Services/ReadingActivityAttributes.swift \
+  BookStride/Services/ReadingLiveActivityManager.swift \
+  BookStride/Services/BookStrideEntities.swift \
+  BookStride/Services/IncomingShareQueue.swift \
   BookStrideTests/ReadingTimerServiceTests.swift \
   BookStrideTests/StreakCalculationServiceTests.swift \
   BookStrideTests/ReadingStatisticsServiceTests.swift \
@@ -28,6 +32,7 @@ swiftc -module-cache-path /tmp/clang-cache \
   BookStrideTests/ReadingWrappedServiceTests.swift \
   BookStrideTests/WidgetTimerServiceTests.swift \
   BookStrideTests/AppleBooksAndImportTests.swift \
+  BookStrideTests/AppleEcosystemIntegrationTests.swift \
   BookStrideTests/TestRunner.swift \
   -o /tmp/BookStride_runner
 

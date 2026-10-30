@@ -14,6 +14,11 @@ import WidgetKit
 struct BookStrideWidgetBundle: WidgetBundle {
     var body: some Widget {
         BookStrideTimerWidget()
+        #if canImport(ActivityKit)
+        if #available(iOS 16.1, macOS 13.0, *) {
+            ReadingLiveActivityWidget()
+        }
+        #endif
     }
 }
 #endif
