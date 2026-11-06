@@ -94,6 +94,8 @@
 		A1000106 /* ScanQuoteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000093 /* ScanQuoteSheet.swift */; };
 		A1000107 /* BookSpineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000094 /* BookSpineView.swift */; };
 		A1000108 /* WoodenBookshelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000095 /* WoodenBookshelfView.swift */; };
+		A1000109 /* AestheticQuoteCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000096 /* AestheticQuoteCardView.swift */; };
+		A1000110 /* QuoteCardSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000097 /* QuoteCardSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -207,6 +209,8 @@
 		B1000093 /* ScanQuoteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanQuoteSheet.swift; sourceTree = "<group>"; };
 		B1000094 /* BookSpineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookSpineView.swift; sourceTree = "<group>"; };
 		B1000095 /* WoodenBookshelfView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WoodenBookshelfView.swift; sourceTree = "<group>"; };
+		B1000096 /* AestheticQuoteCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AestheticQuoteCardView.swift; sourceTree = "<group>"; };
+		B1000097 /* QuoteCardSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteCardSheet.swift; sourceTree = "<group>"; };
 		C1000001 /* BookStride.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookStride.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1000002 /* BookStrideWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BookStrideWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1000004 /* BookStrideShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BookStrideShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -429,6 +433,8 @@
 				B1000051 /* JournalDetailView.swift */,
 				B1000092 /* DocumentCameraScannerView.swift */,
 				B1000093 /* ScanQuoteSheet.swift */,
+				B1000096 /* AestheticQuoteCardView.swift */,
+				B1000097 /* QuoteCardSheet.swift */,
 			);
 			path = Journal;
 			sourceTree = "<group>";
@@ -674,6 +680,8 @@
 				A1000106 /* ScanQuoteSheet.swift in Sources */,
 				A1000107 /* BookSpineView.swift in Sources */,
 				A1000108 /* WoodenBookshelfView.swift in Sources */,
+				A1000109 /* AestheticQuoteCardView.swift in Sources */,
+				A1000110 /* QuoteCardSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

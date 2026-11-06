@@ -24,6 +24,7 @@ struct BookStrideApp: App {
             ])
             let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
             container = try ModelContainer(for: schema, configurations: [config])
+            Self.ensureDocumentsDirectoryInitialized()
         } catch {
             fatalError("Failed to initialize SwiftData container: \(error.localizedDescription)")
         }
@@ -183,6 +184,29 @@ struct BookStrideApp: App {
             DataExportService.performAutomaticLocalBackup(package: package)
         } catch {
             print("Auto backup encountered error: \(error.localizedDescription)")
+        }
+    }
+    
+    private static func ensureDocumentsDirectoryInitialized() {
+        let fileManager = FileManager.default
+        guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        
+        let readmeURL = docsURL.appendingPathComponent("About BookStride Backups.txt")
+        if !fileManager.fileExists(atPath: readmeURL.path) {
+            let readme = """
+            BookStride Documents & Backups
+            ==============================
+            This folder stores your offline BookStride reading journal, backups, and exports.
+            
+            All data is saved locally on this iPad.
+            You can copy the files in the 'Backups' subfolder to iCloud Drive or your computer at any time.
+            """
+            try? readme.write(to: readmeURL, atomically: true, encoding: .utf8)
+        }
+        
+        let backupsDir = docsURL.appendingPathComponent("Backups", isDirectory: true)
+        if !fileManager.fileExists(atPath: backupsDir.path) {
+            try? fileManager.createDirectory(at: backupsDir, withIntermediateDirectories: true)
         }
     }
 }

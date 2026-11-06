@@ -15,6 +15,7 @@ public struct JournalCardView: View {
     
     @State private var showingEditSheet: Bool = false
     @State private var showingDeleteAlert: Bool = false
+    @State private var showingQuoteCardSheet: Bool = false
     
     public init(entry: JournalEntry, onDelete: @escaping () -> Void) {
         self.entry = entry
@@ -60,6 +61,16 @@ public struct JournalCardView: View {
                 }
                 
                 Spacer()
+                
+                // Quote Card Share Action
+                Button {
+                    showingQuoteCardSheet = true
+                } label: {
+                    Image(systemName: "sparkles.rectangle.stack")
+                        .foregroundColor(BookStrideTheme.forestGreen.opacity(0.85))
+                        .font(.caption)
+                }
+                .buttonStyle(.borderless)
                 
                 // Favorite Button
                 Button {
@@ -140,6 +151,12 @@ public struct JournalCardView: View {
         .BookStrideCardStyle()
         .contextMenu {
             Button {
+                showingQuoteCardSheet = true
+            } label: {
+                Label("Create Quote Card", systemImage: "sparkles.rectangle.stack")
+            }
+            
+            Button {
                 showingEditSheet = true
             } label: {
                 Label("Edit Entry", systemImage: "pencil")
@@ -161,6 +178,9 @@ public struct JournalCardView: View {
         }
         .sheet(isPresented: $showingEditSheet) {
             AddEditJournalEntrySheet(entryToEdit: entry, associatedBook: entry.book)
+        }
+        .sheet(isPresented: $showingQuoteCardSheet) {
+            QuoteCardSheet(entry: entry)
         }
         .confirmationDialog("Delete Journal Entry?", isPresented: $showingDeleteAlert, titleVisibility: .visible) {
             Button("Delete Entry", role: .destructive) {

@@ -29,6 +29,7 @@ public struct ScanQuoteSheet: View {
     @State private var isScanning: Bool = false
     @State private var errorMessage: String?
     @State private var showingCamera: Bool = false
+    @State private var showingQuoteCardSheet: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var scannedImage: UIImage?
     
@@ -87,6 +88,14 @@ public struct ScanQuoteSheet: View {
                 } onCancel: {
                     // Do nothing on cancel
                 }
+            }
+            .sheet(isPresented: $showingQuoteCardSheet) {
+                QuoteCardSheet(
+                    quote: extractedText,
+                    bookTitle: allBooks.first(where: { $0.id == selectedBookId })?.title,
+                    author: allBooks.first(where: { $0.id == selectedBookId })?.author,
+                    pageNumber: Int(pageNumberString.trimmingCharacters(in: .whitespacesAndNewlines))
+                )
             }
             .onChange(of: selectedPhotoItem) { _, newItem in
                 guard let newItem else { return }
@@ -334,6 +343,28 @@ public struct ScanQuoteSheet: View {
                     RoundedRectangle(cornerRadius: 12)
                         .stroke(BookStrideTheme.borderLight, lineWidth: 1)
                 )
+                
+                // Quote Card Preview Button
+                Button {
+                    showingQuoteCardSheet = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles.rectangle.stack")
+                        Text("Create Aesthetic Quote Card")
+                            .fontWeight(.medium)
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(BookStrideTheme.forestGreen)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(BookStrideTheme.forestGreen.opacity(0.08))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(BookStrideTheme.forestGreen.opacity(0.2), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
             }
             .padding(20)
         }

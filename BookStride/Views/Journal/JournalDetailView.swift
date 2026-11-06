@@ -16,6 +16,7 @@ public struct JournalDetailView: View {
     
     @State private var showingEditSheet: Bool = false
     @State private var showingDeleteAlert: Bool = false
+    @State private var showingQuoteCardSheet: Bool = false
     
     public init(entry: JournalEntry) {
         self.entry = entry
@@ -198,6 +199,28 @@ public struct JournalDetailView: View {
                     }
                 }
                 
+                // Aesthetic Quote Card Generator Button
+                Button {
+                    showingQuoteCardSheet = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles.rectangle.stack")
+                        Text("Create Aesthetic Quote Card")
+                            .fontWeight(.medium)
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(BookStrideTheme.forestGreen)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(BookStrideTheme.forestGreen.opacity(0.08))
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(BookStrideTheme.forestGreen.opacity(0.2), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
+                
                 // Timestamps & Metadata Card
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
@@ -234,34 +257,46 @@ public struct JournalDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Menu {
+                HStack(spacing: 12) {
                     Button {
-                        showingEditSheet = true
+                        showingQuoteCardSheet = true
                     } label: {
-                        Label("Edit Entry", systemImage: "pencil")
+                        Label("Quote Card", systemImage: "sparkles.rectangle.stack")
+                            .foregroundColor(BookStrideTheme.forestGreen)
                     }
                     
-                    Button {
-                        entry.isFavorite.toggle()
-                        entry.updatedAt = Date()
-                        try? modelContext.save()
+                    Menu {
+                        Button {
+                            showingEditSheet = true
+                        } label: {
+                            Label("Edit Entry", systemImage: "pencil")
+                        }
+                        
+                        Button {
+                            entry.isFavorite.toggle()
+                            entry.updatedAt = Date()
+                            try? modelContext.save()
+                        } label: {
+                            Label(entry.isFavorite ? "Remove from Favorites" : "Add to Favorites", systemImage: entry.isFavorite ? "star.slash" : "star")
+                        }
+                        
+                        Button(role: .destructive) {
+                            showingDeleteAlert = true
+                        } label: {
+                            Label("Delete Entry", systemImage: "trash")
+                        }
                     } label: {
-                        Label(entry.isFavorite ? "Remove from Favorites" : "Add to Favorites", systemImage: entry.isFavorite ? "star.slash" : "star")
+                        Image(systemName: "ellipsis.circle")
+                            .foregroundColor(BookStrideTheme.forestGreen)
                     }
-                    
-                    Button(role: .destructive) {
-                        showingDeleteAlert = true
-                    } label: {
-                        Label("Delete Entry", systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                        .foregroundColor(BookStrideTheme.forestGreen)
                 }
             }
         }
         .sheet(isPresented: $showingEditSheet) {
             AddEditJournalEntrySheet(entryToEdit: entry, associatedBook: entry.book)
+        }
+        .sheet(isPresented: $showingQuoteCardSheet) {
+            QuoteCardSheet(entry: entry)
         }
         .confirmationDialog(
             "Delete Journal Entry?",

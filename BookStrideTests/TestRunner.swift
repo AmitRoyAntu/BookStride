@@ -28,6 +28,7 @@ struct TestRunner {
         AppleBooksAndImportTests.runAllTests()
         AppleEcosystemIntegrationTests.runAllTests()
         QuoteScannerTests.runAll()
+        QuoteCardTests.runAllTests()
         
         let elapsed = Date().timeIntervalSince(startTime)
         let formattedTime = String(format: "%.3f", elapsed)

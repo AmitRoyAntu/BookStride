@@ -23,6 +23,7 @@ swiftc -module-cache-path /tmp/clang-cache \
   BookStride/Services/BookStrideEntities.swift \
   BookStride/Services/IncomingShareQueue.swift \
   BookStride/Services/QuoteScannerService.swift \
+  BookStride/Views/Journal/AestheticQuoteCardView.swift \
   BookStrideTests/ReadingTimerServiceTests.swift \
   BookStrideTests/StreakCalculationServiceTests.swift \
   BookStrideTests/ReadingStatisticsServiceTests.swift \
@@ -35,6 +36,7 @@ swiftc -module-cache-path /tmp/clang-cache \
   BookStrideTests/AppleBooksAndImportTests.swift \
   BookStrideTests/AppleEcosystemIntegrationTests.swift \
   BookStrideTests/QuoteScannerTests.swift \
+  BookStrideTests/QuoteCardTests.swift \
   BookStrideTests/TestRunner.swift \
   -o /tmp/BookStride_runner
 
