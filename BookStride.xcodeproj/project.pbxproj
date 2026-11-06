@@ -88,7 +88,12 @@
 		A1000100 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000088 /* ShareViewController.swift */; };
 		A1000101 /* IncomingShareQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000086 /* IncomingShareQueue.swift */; };
 		A1000102 /* ColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000015 /* ColorTheme.swift */; };
-		A1000103 /* BookStrideShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C1000004 /* BookStrideShareExtension.appex */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1000103 /* BookStrideShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C1000004 /* BookStrideShareExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A1000104 /* QuoteScannerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000091 /* QuoteScannerService.swift */; };
+		A1000105 /* DocumentCameraScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000092 /* DocumentCameraScannerView.swift */; };
+		A1000106 /* ScanQuoteSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000093 /* ScanQuoteSheet.swift */; };
+		A1000107 /* BookSpineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000094 /* BookSpineView.swift */; };
+		A1000108 /* WoodenBookshelfView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000095 /* WoodenBookshelfView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -194,12 +199,17 @@
 		B1000085 /* BookStrideShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookStrideShortcuts.swift; sourceTree = "<group>"; };
 		B1000086 /* IncomingShareQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingShareQueue.swift; sourceTree = "<group>"; };
 		B1000087 /* IncomingShareProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingShareProcessor.swift; sourceTree = "<group>"; };
-		C1000001 /* BookStride.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookStride.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		C1000002 /* BookStrideWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BookStrideWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		C1000004 /* BookStrideShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BookStrideShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1000088 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		B1000089 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1000090 /* BookStrideShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BookStrideShareExtension.entitlements; sourceTree = "<group>"; };
+		B1000091 /* QuoteScannerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteScannerService.swift; sourceTree = "<group>"; };
+		B1000092 /* DocumentCameraScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCameraScannerView.swift; sourceTree = "<group>"; };
+		B1000093 /* ScanQuoteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanQuoteSheet.swift; sourceTree = "<group>"; };
+		B1000094 /* BookSpineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookSpineView.swift; sourceTree = "<group>"; };
+		B1000095 /* WoodenBookshelfView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WoodenBookshelfView.swift; sourceTree = "<group>"; };
+		C1000001 /* BookStride.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BookStride.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1000002 /* BookStrideWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BookStrideWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1000004 /* BookStrideShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BookStrideShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -301,6 +311,7 @@
 				B1000085 /* BookStrideShortcuts.swift */,
 				B1000086 /* IncomingShareQueue.swift */,
 				B1000087 /* IncomingShareProcessor.swift */,
+				B1000091 /* QuoteScannerService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -368,6 +379,8 @@
 				B1000025 /* BookCardView.swift */,
 				B1000026 /* AddEditBookSheet.swift */,
 				B1000061 /* ImportBookReviewSheet.swift */,
+				B1000094 /* BookSpineView.swift */,
+				B1000095 /* WoodenBookshelfView.swift */,
 			);
 			path = Library;
 			sourceTree = "<group>";
@@ -414,6 +427,8 @@
 				B1000039 /* AddEditJournalEntrySheet.swift */,
 				B1000040 /* JournalCardView.swift */,
 				B1000051 /* JournalDetailView.swift */,
+				B1000092 /* DocumentCameraScannerView.swift */,
+				B1000093 /* ScanQuoteSheet.swift */,
 			);
 			path = Journal;
 			sourceTree = "<group>";
@@ -654,6 +669,11 @@
 				A1000097 /* BookStrideShortcuts.swift in Sources */,
 				A1000098 /* IncomingShareQueue.swift in Sources */,
 				A1000099 /* IncomingShareProcessor.swift in Sources */,
+				A1000104 /* QuoteScannerService.swift in Sources */,
+				A1000105 /* DocumentCameraScannerView.swift in Sources */,
+				A1000106 /* ScanQuoteSheet.swift in Sources */,
+				A1000107 /* BookSpineView.swift in Sources */,
+				A1000108 /* WoodenBookshelfView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -695,9 +715,7 @@
 		};
 		K1000002 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilters = (
-				ios,
-			);
+			platformFilter = ios;
 			target = F1000003 /* BookStrideShareExtension */;
 			targetProxy = L1000002 /* PBXContainerItemProxy */;
 		};
@@ -728,11 +746,11 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -768,9 +786,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0.0;
 				MTL_FAST_MATH = YES;
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.amitroy.BookStride;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";

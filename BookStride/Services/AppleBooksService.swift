@@ -57,7 +57,7 @@ public enum AppleBooksService {
     public static func openBook(
         urlString: String?,
         fallbackToApp: Bool = true,
-        completion: ((Bool) -> Void)? = nil
+        completion: (@Sendable (Bool) -> Void)? = nil
     ) -> Bool {
         if let link = urlString?.trimmingCharacters(in: .whitespacesAndNewlines),
            !link.isEmpty,
@@ -94,7 +94,7 @@ public enum AppleBooksService {
     
     /// Opens the Apple Books application via documented URL schemes.
     @MainActor
-    public static func openAppleBooks(completion: ((Bool) -> Void)? = nil) {
+    public static func openAppleBooks(completion: (@Sendable (Bool) -> Void)? = nil) {
         #if canImport(UIKit)
         // Primary URL scheme for Apple Books on iPadOS
         if let url = URL(string: "ibooks://"), UIApplication.shared.canOpenURL(url) {

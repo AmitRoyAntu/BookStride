@@ -35,6 +35,7 @@ public struct AddEditJournalEntrySheet: View {
     @State private var showingEmptyContentError: Bool = false
     @State private var showingPageNumberError: Bool = false
     @State private var showingDiscardConfirmation: Bool = false
+    @State private var showingScanSheet: Bool = false
     
     public init(
         entryToEdit: JournalEntry? = nil,
@@ -90,7 +91,21 @@ public struct AddEditJournalEntrySheet: View {
                 }
                 
                 // Section 3: Content
-                Section(header: Text(contentSectionHeader)) {
+                Section(header: HStack {
+                    Text(contentSectionHeader)
+                    Spacer()
+                    Button {
+                        showingScanSheet = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "camera.viewfinder")
+                            Text("Scan Page")
+                        }
+                        .font(.caption.weight(.medium))
+                        .foregroundColor(BookStrideTheme.forestGreen)
+                    }
+                    .buttonStyle(.plain)
+                }) {
                     TextField(
                         placeholderPrompt,
                         text: $content,
@@ -148,6 +163,21 @@ public struct AddEditJournalEntrySheet: View {
                 Button("Keep Editing", role: .cancel) {}
             } message: {
                 Text("You have unsaved changes in this journal entry. Are you sure you want to discard them?")
+            }
+            .sheet(isPresented: $showingScanSheet) {
+                ScanQuoteSheet(
+                    preselectedBook: allBooks.first(where: { $0.id == selectedBookId }),
+                    onTextRecognized: { scannedText, scannedPage in
+                        if self.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            self.content = scannedText
+                        } else {
+                            self.content += "\n\n" + scannedText
+                        }
+                        if let page = scannedPage, self.pageNumberString.isEmpty {
+                            self.pageNumberString = "\(page)"
+                        }
+                    }
+                )
             }
         }
     }

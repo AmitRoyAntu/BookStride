@@ -40,6 +40,7 @@ public struct JournalView: View {
     @State private var sortAscending: Bool = false
     @State private var searchText: String = ""
     @State private var showingAddSheet: Bool = false
+    @State private var showingScanQuoteSheet: Bool = false
     
     public init() {}
     
@@ -302,16 +303,28 @@ public struct JournalView: View {
         .searchable(text: $searchText, prompt: "Search notes, quotes, or books")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingAddSheet = true
-                } label: {
-                    Label("Add Entry", systemImage: "plus")
-                        .foregroundColor(BookStrideTheme.forestGreen)
+                HStack(spacing: 12) {
+                    Button {
+                        showingScanQuoteSheet = true
+                    } label: {
+                        Label("Scan Quote", systemImage: "camera.viewfinder")
+                            .foregroundColor(BookStrideTheme.forestGreen)
+                    }
+                    
+                    Button {
+                        showingAddSheet = true
+                    } label: {
+                        Label("Add Entry", systemImage: "plus")
+                            .foregroundColor(BookStrideTheme.forestGreen)
+                    }
                 }
             }
         }
         .sheet(isPresented: $showingAddSheet) {
             AddEditJournalEntrySheet()
+        }
+        .sheet(isPresented: $showingScanQuoteSheet) {
+            ScanQuoteSheet()
         }
     }
 }

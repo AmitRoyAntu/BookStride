@@ -18,6 +18,7 @@ public struct ActiveSessionView: View {
     
     @State private var showingFinishConfirmation: Bool = false
     @State private var showingCancelConfirmation: Bool = false
+    @State private var showingScanQuoteSheet: Bool = false
     @State private var endPageString: String = ""
     @State private var sessionNotes: String = ""
     @State private var showingPageValidationError: Bool = false
@@ -184,10 +185,19 @@ public struct ActiveSessionView: View {
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Minimize") {
-                        dismiss()
+                    HStack(spacing: 16) {
+                        Button {
+                            showingScanQuoteSheet = true
+                        } label: {
+                            Label("Scan Quote", systemImage: "camera.viewfinder")
+                                .foregroundColor(BookStrideTheme.forestGreen)
+                        }
+                        
+                        Button("Minimize") {
+                            dismiss()
+                        }
+                        .foregroundColor(BookStrideTheme.forestGreen)
                     }
-                    .foregroundColor(BookStrideTheme.forestGreen)
                 }
             }
             .confirmationDialog(
@@ -281,6 +291,9 @@ public struct ActiveSessionView: View {
                 }
             }
             .frame(minWidth: 500, idealWidth: 560, minHeight: 520, idealHeight: 620)
+            .sheet(isPresented: $showingScanQuoteSheet) {
+                ScanQuoteSheet(preselectedBook: associatedBook)
+            }
         }
     }
 }

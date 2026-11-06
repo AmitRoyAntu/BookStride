@@ -41,8 +41,12 @@ struct BookStrideApp: App {
                     case .active:
                         ReadingTimerService.shared.restoreActiveSession()
                         IncomingShareProcessor.processPendingShares(modelContext: container.mainContext)
+                        performAutoBackup()
                     case .background, .inactive:
                         ReadingTimerService.shared.recalculateElapsed()
+                        if newPhase == .background {
+                            performAutoBackup()
+                        }
                     @unknown default:
                         break
                     }
@@ -90,6 +94,95 @@ struct BookStrideApp: App {
             break
         default:
             ReadingTimerService.shared.shouldOpenTimerModal = true
+        }
+    }
+    
+    @MainActor
+    private func performAutoBackup() {
+        let context = container.mainContext
+        do {
+            let books = try context.fetch(FetchDescriptor<Book>())
+            guard !books.isEmpty else { return }
+            let sessions = try context.fetch(FetchDescriptor<ReadingSession>())
+            let goals = try context.fetch(FetchDescriptor<ReadingGoal>())
+            let journal = try context.fetch(FetchDescriptor<JournalEntry>())
+            
+            let bookDTOs = books.map { b in
+                BookDTO(
+                    id: b.id,
+                    title: b.title,
+                    author: b.author,
+                    coverColorHex: b.coverColorHex,
+                    coverIcon: b.coverIcon,
+                    totalPages: b.totalPages,
+                    currentPage: b.currentPage,
+                    status: b.statusRawValue,
+                    startDate: b.startDate,
+                    finishDate: b.finishDate,
+                    rating: b.rating,
+                    bookDescription: b.bookDescription,
+                    appleBooksURL: b.appleBooksURL,
+                    importedFileName: b.importedFileName,
+                    sourceFormat: b.sourceFormatRawValue,
+                    createdAt: b.createdAt,
+                    updatedAt: b.updatedAt
+                )
+            }
+            
+            let sessionDTOs = sessions.map { s in
+                ReadingSessionDTO(
+                    id: s.id,
+                    bookId: s.book?.id,
+                    startedAt: s.startedAt,
+                    endedAt: s.endedAt,
+                    status: s.statusRawValue,
+                    accumulatedActiveSeconds: s.accumulatedActiveSeconds,
+                    pausedDurationSeconds: s.pausedDurationSeconds,
+                    startPage: s.startPage,
+                    endPage: s.endPage,
+                    notes: s.notes,
+                    createdAt: s.createdAt,
+                    updatedAt: s.updatedAt
+                )
+            }
+            
+            let goalDTO: ReadingGoalDTO
+            if let activeG = goals.first {
+                goalDTO = ReadingGoalDTO(
+                    dailyMinutes: activeG.dailyMinutes,
+                    dailyPages: activeG.dailyPages,
+                    yearlyBookTarget: activeG.yearlyBookTarget
+                )
+            } else {
+                goalDTO = ReadingGoalDTO(dailyMinutes: 20, dailyPages: nil, yearlyBookTarget: nil)
+            }
+            
+            let journalDTOs = journal.map { j in
+                JournalEntryDTO(
+                    id: j.id,
+                    bookId: j.book?.id,
+                    content: j.content,
+                    entryType: j.entryTypeRawValue,
+                    pageNumber: j.pageNumber,
+                    isFavorite: j.isFavorite,
+                    createdAt: j.createdAt,
+                    updatedAt: j.updatedAt
+                )
+            }
+            
+            let package = BookStrideBackupPackage(
+                schemaVersion: DataExportService.currentSchemaVersion,
+                appVersion: "1.0.0",
+                exportedAt: Date(),
+                books: bookDTOs,
+                sessions: sessionDTOs,
+                goals: goalDTO,
+                journalEntries: journalDTOs
+            )
+            
+            DataExportService.performAutomaticLocalBackup(package: package)
+        } catch {
+            print("Auto backup encountered error: \(error.localizedDescription)")
         }
     }
 }

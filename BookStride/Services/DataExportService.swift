@@ -261,4 +261,72 @@ public enum DataExportService {
         
         return [booksURL, sessionsURL, journalURL]
     }
+    
+    // MARK: - Automated Local Backups
+    
+    /// Directory in Documents accessible via the native iOS/iPadOS Files app (On My iPad > BookStride > Backups).
+    public static var localBackupsDirectory: URL {
+        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        return docs.appendingPathComponent("Backups", isDirectory: true)
+    }
+    
+    /// Writes an atomic, dated backup and a "BookStride_Latest_Backup.json" to the target directory
+    /// (defaults to Documents/Backups). Retains the latest 7 dated snapshots to prevent unnecessary storage growth.
+    @discardableResult
+    public static func performAutomaticLocalBackup(
+        package: BookStrideBackupPackage,
+        targetDirectory: URL? = nil
+    ) -> URL? {
+        do {
+            let fileManager = FileManager.default
+            let dir = targetDirectory ?? localBackupsDirectory
+            if !fileManager.fileExists(atPath: dir.path) {
+                try fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+            }
+            
+            let data = try exportBackupToData(package)
+            
+            // 1. Write the latest snapshot (always current)
+            let latestURL = dir.appendingPathComponent("BookStride_Latest_Backup.json")
+            try data.write(to: latestURL, options: .atomic)
+            
+            // 2. Write a dated daily snapshot
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            let dateStr = df.string(from: package.exportedAt)
+            let datedURL = dir.appendingPathComponent("BookStride_Backup_\(dateStr).json")
+            try data.write(to: datedURL, options: .atomic)
+            
+            // 3. Prune old backups, keeping the most recent 7 dated files
+            pruneOldBackups(in: dir, keepCount: 7)
+            
+            return latestURL
+        } catch {
+            print("Automatic backup failed: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    private static func pruneOldBackups(in directory: URL, keepCount: Int) {
+        let fileManager = FileManager.default
+        guard let files = try? fileManager.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.contentModificationDateKey],
+            options: .skipsHiddenFiles
+        ) else { return }
+        
+        let datedBackups = files.filter {
+            $0.lastPathComponent.hasPrefix("BookStride_Backup_") && $0.pathExtension == "json"
+        }.sorted { url1, url2 in
+            let date1 = (try? url1.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? Date.distantPast
+            let date2 = (try? url2.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? Date.distantPast
+            return date1 > date2
+        }
+        
+        if datedBackups.count > keepCount {
+            for oldFile in datedBackups[keepCount...] {
+                try? fileManager.removeItem(at: oldFile)
+            }
+        }
+    }
 }

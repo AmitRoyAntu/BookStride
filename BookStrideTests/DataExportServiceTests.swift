@@ -16,6 +16,7 @@ public enum DataExportServiceTests {
         testTolerantDateDecoding()
         testMissingFieldsResilience()
         testCSVExportFormatting()
+        testAutomaticLocalBackup()
         print("✅ DataExportServiceTests passed successfully.\n")
     }
     
@@ -190,6 +191,27 @@ public enum DataExportServiceTests {
         
         let journalCSV = DataExportService.exportJournalToCSV(journalDTOs: [j1], bookTitles: [b1.id: b1.title])
         assert(journalCSV.contains("\"Quote: \"\"To be, or not to be, that is the question.\"\"\""), "Quotes in note content must be escaped")
+    }
+    
+    private static func testAutomaticLocalBackup() {
+        let b1 = BookDTO(id: UUID(), title: "Automatic Backup Book", author: "Author", totalPages: 250, currentPage: 50)
+        let package = BookStrideBackupPackage(
+            schemaVersion: 1,
+            appVersion: "1.0.0",
+            exportedAt: Date(),
+            books: [b1],
+            sessions: [],
+            goals: nil,
+            journalEntries: []
+        )
+        
+        let tempBackups = FileManager.default.temporaryDirectory.appendingPathComponent("TestBackups_\(UUID().uuidString)")
+        let fileURL = DataExportService.performAutomaticLocalBackup(package: package, targetDirectory: tempBackups)
+        assert(fileURL != nil, "performAutomaticLocalBackup should return a file URL")
+        assert(FileManager.default.fileExists(atPath: fileURL!.path), "Backup file should exist on disk")
+        
+        // Clean up test directory
+        try? FileManager.default.removeItem(at: tempBackups)
     }
 }
 

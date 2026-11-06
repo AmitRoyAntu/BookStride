@@ -18,10 +18,26 @@ public enum LibrarySortOption: String, CaseIterable, Identifiable {
     public var id: String { rawValue }
 }
 
+public enum LibraryLayoutMode: String, CaseIterable, Identifiable {
+    case grid = "Grid"
+    case bookshelf = "Bookshelf"
+    
+    public var id: String { rawValue }
+    
+    public var iconName: String {
+        switch self {
+        case .grid: return "square.grid.2x2"
+        case .bookshelf: return "books.vertical.fill"
+        }
+    }
+}
+
 public struct LibraryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var allBooks: [Book]
     
+    @AppStorage("libraryLayoutMode") private var layoutMode: LibraryLayoutMode = .grid
+    @State private var selectedDetailBook: Book? = nil
     @State private var selectedStatusFilter: ReadingStatus? = nil
     @State private var sortOption: LibrarySortOption = .recentlyAdded
     @State private var searchText: String = ""
@@ -68,66 +84,82 @@ public struct LibraryView: View {
     }
     
     public var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                // Filter Pills & Sort Menu (Responsive with smooth horizontal scrolling)
-                HStack(spacing: 12) {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            allFilterButton
-                            filterButton(title: "Currently Reading", status: .currentlyReading)
-                            filterButton(title: "Want to Read", status: .wantToRead)
-                            filterButton(title: "Finished", status: .finished)
+        GeometryReader { outerGeo in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Filter Pills & Sort Menu (Responsive with smooth horizontal scrolling)
+                    HStack(spacing: 12) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                allFilterButton
+                                filterButton(title: "Currently Reading", status: .currentlyReading)
+                                filterButton(title: "Want to Read", status: .wantToRead)
+                                filterButton(title: "Finished", status: .finished)
+                            }
+                            .padding(.leading, 24)
+                            .padding(.trailing, 8)
                         }
-                        .padding(.leading, 24)
-                        .padding(.trailing, 8)
+                        
+                        // View Mode Switcher (Grid vs Bookshelf)
+                        viewModeSwitcher
+                        
+                        // Trailing Sort Menu
+                        sortMenuButton
+                            .padding(.trailing, 24)
                     }
                     
-                    // Trailing Sort Menu
-                    sortMenuButton
-                        .padding(.trailing, 24)
-                }
-                
-                // Book Grid or Empty State
-                if filteredAndSortedBooks.isEmpty {
-                    VStack {
-                        Spacer(minLength: 40)
-                        EmptyStateCard(
-                            iconName: "books.vertical",
-                            title: emptyStateTitle,
-                            message: emptyStateMessage,
-                            buttonTitle: "Add Book",
-                            action: { showingAddBookSheet = true }
-                        )
-                        .padding(.horizontal, 24)
-                        Spacer(minLength: 40)
-                    }
-                } else {
-                    LazyVGrid(columns: LayoutConstants.libraryColumns, spacing: 28) {
-                        ForEach(filteredAndSortedBooks) { book in
-                            NavigationLink {
-                                BookDetailView(book: book)
-                            } label: {
-                                BookCardView(
-                                    book: book,
-                                    onMarkFinished: { markBookAsFinished(book) },
-                                    onDelete: {
-                                        bookToDelete = book
-                                        showingDeleteConfirmation = true
-                                    }
-                                )
-                            }
-                            .buttonStyle(.plain)
+                    // Book Content (Grid vs Bookshelf) or Empty State
+                    if filteredAndSortedBooks.isEmpty {
+                        VStack {
+                            Spacer(minLength: 40)
+                            EmptyStateCard(
+                                iconName: "books.vertical",
+                                title: emptyStateTitle,
+                                message: emptyStateMessage,
+                                buttonTitle: "Add Book",
+                                action: { showingAddBookSheet = true }
+                            )
+                            .padding(.horizontal, 24)
+                            Spacer(minLength: 40)
                         }
+                    } else if layoutMode == .bookshelf {
+                        WoodenBookshelfView(
+                            books: filteredAndSortedBooks,
+                            availableWidth: outerGeo.size.width
+                        ) { book in
+                            selectedDetailBook = book
+                        }
+                    } else {
+                        LazyVGrid(columns: LayoutConstants.libraryColumns, spacing: 28) {
+                            ForEach(filteredAndSortedBooks) { book in
+                                NavigationLink {
+                                    BookDetailView(book: book)
+                                } label: {
+                                    BookCardView(
+                                        book: book,
+                                        onMarkFinished: { markBookAsFinished(book) },
+                                        onDelete: {
+                                            bookToDelete = book
+                                            showingDeleteConfirmation = true
+                                        }
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 32)
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 32)
                 }
+                .frame(minWidth: outerGeo.size.width)
+                .padding(.top, 16)
             }
-            .padding(.top, 16)
         }
         .BookStrideBackground()
         .navigationTitle("Library")
+        .navigationDestination(item: $selectedDetailBook) { book in
+            BookDetailView(book: book)
+        }
         .searchable(text: $searchText, prompt: "Search by title or author")
         .onAppear {
             IncomingShareProcessor.processPendingShares(modelContext: modelContext)
@@ -280,6 +312,47 @@ public struct LibraryView: View {
             )
         }
         .fixedSize(horizontal: true, vertical: false)
+    }
+    
+    private var viewModeSwitcher: some View {
+        HStack(spacing: 2) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    layoutMode = .grid
+                }
+            } label: {
+                Image(systemName: "square.grid.2x2")
+                    .font(.subheadline)
+                    .foregroundColor(layoutMode == .grid ? BookStrideTheme.forestGreen : BookStrideTheme.mutedSlate)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+                    .background(layoutMode == .grid ? BookStrideTheme.forestGreen.opacity(0.12) : Color.clear)
+                    .cornerRadius(8)
+            }
+            .buttonStyle(.plain)
+            
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    layoutMode = .bookshelf
+                }
+            } label: {
+                Image(systemName: "books.vertical.fill")
+                    .font(.subheadline)
+                    .foregroundColor(layoutMode == .bookshelf ? BookStrideTheme.forestGreen : BookStrideTheme.mutedSlate)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+                    .background(layoutMode == .bookshelf ? BookStrideTheme.forestGreen.opacity(0.12) : Color.clear)
+                    .cornerRadius(8)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(3)
+        .background(BookStrideTheme.cardLight)
+        .cornerRadius(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(BookStrideTheme.borderLight, lineWidth: 1)
+        )
     }
     
     private var emptyStateTitle: String {
